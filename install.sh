@@ -219,7 +219,13 @@ if ! command -v stow &>/dev/null; then
 fi
 
 print_info "Linking dotfiles with stow..."
-stow --dir="${DOTFILES_DIR}" --target="${HOME}" .
+# --adopt moves existing files into the repo and replaces them with symlinks.
+# We then restore the repo versions with git checkout, so the symlinked files
+# end up with the content we actually want. This avoids needing to manually
+# back up existing dotfiles before running the script.
+stow --adopt --dir="${DOTFILES_DIR}" --target="${HOME}" .
+print_info "Restoring repo versions..."
+git -C "${DOTFILES_DIR}" checkout .
 print_success "Dotfiles linked"
 
 # --- VS Code / Cursor extensions ---
