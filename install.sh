@@ -263,9 +263,9 @@ ${yellow}Manual steps remaining:${reset}
      Install Berkeley Mono (TX-02) from https://usgraphics.com/products/berkeley-mono
 
   4. ${blue}rclone (optional):${reset}
-     # Configure rclone remotes for encrypted storage
-     rclone config
+     # Restore ~/.config/rclone/rclone.conf from 1Password
+     # Or run: rclone config
 
-  6. ${blue}Restart your terminal${reset} to apply all changes.
+  5. ${blue}Restart your terminal${reset} to apply all changes.
 
 EOF
