@@ -41,7 +41,6 @@ The install script handles everything in order:
 | `.ssh/config` | SSH hosts and settings |
 | `.config/git/ignore` | Per-user git ignore patterns |
 | `.config/gh/config.yml` | GitHub CLI settings |
-| `.local/bin/mount-encrypted-storage` | rclone NFS mount helper script |
 
 ### CLI Tools (via Brewfile)
 
@@ -94,11 +93,7 @@ Install [Berkeley Mono](https://usgraphics.com/products/berkeley-mono) (TX-02).
 
 ### 4. rclone (optional)
 
-For encrypted cloud storage mounts:
-```sh
-rclone config
-# Set up b2-storage-general, b2-storage-brightly, b2-storage-titan remotes
-```
+Restore `~/.config/rclone/rclone.conf` from 1Password, or run `rclone config` to set up remotes fresh.
 
 ## What I Use
 

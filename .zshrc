@@ -49,13 +49,6 @@ command -v bat &>/dev/null && alias cat='bat'
 command -v prettyping &>/dev/null && alias ping='prettyping --nolegend'
 command -v htop &>/dev/null && alias top='sudo htop'
 
-# rclone mount aliases (conditional)
-if command -v rclone &>/dev/null; then
-  alias mount-general="mount-encrypted-storage general"
-  alias mount-brightly="mount-encrypted-storage brightly"
-  alias mount-titan="mount-encrypted-storage titan"
-fi
-
 # --- fzf (fuzzy finder) ---
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_DEFAULT_OPTS='--height 40% --reverse --border --preview "bat --style=numbers --color=always --line-range :500 {} 2>/dev/null || ls -la {}" --bind="ctrl-o:execute(code {})+abort"'
