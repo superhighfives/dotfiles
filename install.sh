@@ -262,11 +262,7 @@ ${yellow}Manual steps remaining:${reset}
   3. ${blue}Font:${reset}
      Install Berkeley Mono (TX-02) from https://usgraphics.com/products/berkeley-mono
 
-  4. ${blue}Sparkle / Pika (optional):${reset}
-     git clone <sparkle-repo> ~/Development/sparkle
-     # Set up SSH deploy keys as needed
-
-  5. ${blue}rclone (optional):${reset}
+  4. ${blue}rclone (optional):${reset}
      # Configure rclone remotes for encrypted storage
      rclone config
 

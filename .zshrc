@@ -93,9 +93,6 @@ export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 # --- PATH ---
 export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 
-# Sparkle / Pika (conditional)
-[[ -d "$HOME/Development/sparkle/bin" ]] && export PATH="$HOME/Development/sparkle/bin:$PATH"
-
 # LM Studio (conditional)
 [[ -d "$HOME/.lmstudio/bin" ]] && export PATH="$PATH:$HOME/.lmstudio/bin"
 
