@@ -93,7 +93,7 @@ Install [Berkeley Mono](https://usgraphics.com/products/berkeley-mono) (TX-02).
 
 ### 4. rclone (optional)
 
-Restore `~/.config/rclone/rclone.conf` from 1Password, or run `rclone config` to set up remotes fresh.
+Store the entire `rclone.conf` as a secure note or document in 1Password. On the new machine, pull it out and drop it into `~/.config/rclone/`. Since 1Password is already in the Brewfile, this is the easiest path. Alternatively, run `rclone config` to set up remotes fresh.
 
 ## What I Use
 
