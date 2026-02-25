@@ -60,13 +60,9 @@ Edit `~/.secrets` and fill in:
 cp ~/Development/dotfiles/.npmrc.example ~/.npmrc
 ```
 
-### 2d. Font
+### 2d. Restart Terminal
 
-Install **Berkeley Mono (TX-02)** from https://usgraphics.com/products/berkeley-mono
-
-### 2e. Restart Terminal
-
-Close and reopen Terminal. Powerlevel10k will run its configuration wizard if the font isn't detected.
+Close and reopen Terminal.
 
 ## Step 3: Verify
 

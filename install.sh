@@ -259,13 +259,10 @@ ${yellow}Manual steps remaining:${reset}
   2. ${blue}GitHub CLI:${reset}
      gh auth login
 
-  3. ${blue}Font:${reset}
-     Install Berkeley Mono (TX-02) from https://usgraphics.com/products/berkeley-mono
-
-  4. ${blue}rclone (optional):${reset}
+  3. ${blue}rclone (optional):${reset}
      # Restore ~/.config/rclone/rclone.conf from 1Password
      # Or run: rclone config
 
-  5. ${blue}Restart your terminal${reset} to apply all changes.
+  4. ${blue}Restart your terminal${reset} to apply all changes.
 
 EOF
