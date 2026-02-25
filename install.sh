@@ -130,8 +130,11 @@ fi
 
 if [[ -f "${DOTFILES_DIR}/.tool-versions" ]]; then
   print_info "Installing runtimes from .tool-versions..."
-  "$HOME/.local/bin/mise" install --yes 2>/dev/null || mise install --yes 2>/dev/null || true
-  print_success "Runtimes installed"
+  if "$HOME/.local/bin/mise" install --yes 2>/dev/null || mise install --yes 2>/dev/null; then
+    print_success "Runtimes installed"
+  else
+    print_error "Failed to install some runtimes — check mise configuration"
+  fi
 fi
 
 # --- oh-my-zsh ---

@@ -45,9 +45,9 @@ fi
 ssh-add -A 2>/dev/null
 
 # --- Aliases ---
-alias cat='bat'
-alias ping='prettyping --nolegend'
-alias top='sudo htop'
+command -v bat &>/dev/null && alias cat='bat'
+command -v prettyping &>/dev/null && alias ping='prettyping --nolegend'
+command -v htop &>/dev/null && alias top='sudo htop'
 
 # rclone mount aliases (conditional)
 if command -v rclone &>/dev/null; then
