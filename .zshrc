@@ -92,6 +92,13 @@ export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 # --- OrbStack (conditional) ---
 [[ -f ~/.orbstack/shell/init.zsh ]] && source ~/.orbstack/shell/init.zsh 2>/dev/null
 
+# --- rclone mount aliases (conditional) ---
+if command -v rclone &>/dev/null; then
+  alias mount-brightly='mount-encrypted-storage brightly'
+  alias mount-general='mount-encrypted-storage general'
+  alias mount-media='mount-encrypted-storage media'
+fi
+
 # --- Secrets (conditional) ---
 [[ -f "$HOME/.secrets" ]] && source "$HOME/.secrets"
 

@@ -1,0 +1,28 @@
+#!/bin/bash
+echo "Script started at $(date)"
+
+if ! command -v rclone &> /dev/null; then
+    echo "rclone could not be found. Please install it."
+    exit 1
+fi
+
+if ! rclone lsd b2-storage-$1: &> /dev/null; then
+    echo "The specified remote b2-storage-$1 does not exist or is not accessible."
+    exit 1
+fi
+
+if ! ping -c 1 8.8.8.8 &> /dev/null; then
+    echo "No network connectivity."
+    exit 1
+fi
+
+exec rclone nfsmount \
+    --rc \
+    --transfers 8 \
+    --volname b2-storage-$1 \
+    --allow-other \
+    --buffer-size 32M \
+    --vfs-cache-mode writes \
+    --vfs-cache-max-size 16G \
+    --log-level ${RCLONE_LOG_LEVEL:-NOTICE} \
+    b2-storage-$1:/ ~/.mount/$1
