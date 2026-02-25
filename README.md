@@ -88,11 +88,7 @@ cp ~/Development/dotfiles/.npmrc.example ~/.npmrc
 gh auth login
 ```
 
-### 3. Font
-
-Install [Berkeley Mono](https://usgraphics.com/products/berkeley-mono) (TX-02).
-
-### 4. rclone (optional)
+### 3. rclone (optional)
 
 Store the entire `rclone.conf` as a secure note or document in 1Password. On the new machine, pull it out and drop it into `~/.config/rclone/`. Since 1Password is already in the Brewfile, this is the easiest path. Alternatively, run `rclone config` to set up remotes fresh.
 
@@ -101,7 +97,6 @@ Store the entire `rclone.conf` as a secure note or document in 1Password. On the
 - **Terminal**: macOS Terminal / [OrbStack](https://orbstack.dev/) for containers
 - **Shell**: zsh + [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) + [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
 - **Editor**: [Cursor](https://cursor.sh/) (VS Code fork)
-- **Font**: [Berkeley Mono](https://usgraphics.com/products/berkeley-mono) (TX-02)
 - **Version manager**: [mise](https://mise.jdx.dev/)
 
 ## Updating
