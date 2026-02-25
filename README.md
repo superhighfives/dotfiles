@@ -41,6 +41,7 @@ The install script handles everything in order:
 | `.ssh/config` | SSH hosts and settings |
 | `.config/git/ignore` | Per-user git ignore patterns |
 | `.config/gh/config.yml` | GitHub CLI settings |
+| `.local/bin/mount-encrypted-storage` | rclone NFS mount helper script |
 
 ### CLI Tools (via Brewfile)
 
