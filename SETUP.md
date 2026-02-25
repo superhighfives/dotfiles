@@ -159,14 +159,6 @@ Source machine had these in `~/Library/LaunchAgents/`:
 
 These are app-specific and will be recreated when those apps are installed.
 
-### Sparkle / Pika
-
-The source machine had `~/Development/sparkle/bin` in PATH. This is for [Pika](https://superhighfives.com/pika). The `.zshrc` conditionally adds it to PATH if the directory exists. To set up:
-
-1. Clone the Sparkle repo to `~/Development/sparkle`
-2. Set up SSH deploy keys for the project
-3. Add any required env vars to `~/.secrets`
-
 ### Things Changed From Source Machine
 
 These modernizations were made during the dotfiles overhaul — the new machine will get the modern versions:

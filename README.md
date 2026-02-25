@@ -92,14 +92,7 @@ gh auth login
 
 Install [Berkeley Mono](https://usgraphics.com/products/berkeley-mono) (TX-02).
 
-### 4. Sparkle / Pika (optional)
-
-[Pika](https://superhighfives.com/pika) requires:
-1. Clone the Sparkle repo to `~/Development/sparkle`
-2. Set up SSH deploy keys
-3. Add any required env vars to `~/.secrets`
-
-### 5. rclone (optional)
+### 4. rclone (optional)
 
 For encrypted cloud storage mounts:
 ```sh
