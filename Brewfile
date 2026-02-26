@@ -2,7 +2,7 @@
 tap "amiaopensource/amiaos"
 tap "anomalyco/tap"
 tap "homebrew-ffmpeg/ffmpeg"
-tap "lescanauxdiscrets/tap"
+tap "lescanauxdiscrets/tap"  # provides zvbi for ffmpeg
 
 # --- Core CLI Tools ---
 brew "bat"              # cat replacement with syntax highlighting
@@ -22,7 +22,7 @@ brew "openssl@3"        # TLS/SSL toolkit
 brew "opencode"         # AI coding assistant
 
 # --- Media ---
-brew "ffmpeg"           # video/audio processing
+brew "homebrew-ffmpeg/ffmpeg/ffmpeg"  # full ffmpeg (tap version, skip chromaprint to avoid circular dep)
 brew "tesseract"        # OCR engine
 brew "whisper-cpp"      # speech-to-text
 
