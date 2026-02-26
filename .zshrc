@@ -96,7 +96,7 @@ export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 if command -v rclone &>/dev/null; then
   alias mount-brightly='mount-encrypted-storage brightly'
   alias mount-general='mount-encrypted-storage general'
-  alias mount-media='mount-encrypted-storage media'
+  alias mount-titan='mount-encrypted-storage titan'
 fi
 
 # --- Secrets (conditional) ---

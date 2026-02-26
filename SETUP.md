@@ -53,12 +53,8 @@ cp ~/Development/dotfiles/.secrets.example ~/.secrets
 ```
 
 Edit `~/.secrets` and fill in:
-- `NPM_TOKEN` — your npm auth token
+- `NPM_TOKEN` — your npm auth token (used by `.npmrc` which is symlinked by stow)
 - Cloudflare credentials (if needed)
-
-```sh
-cp ~/Development/dotfiles/.npmrc.example ~/.npmrc
-```
 
 ### 2d. Restart Terminal
 
