@@ -110,6 +110,10 @@ git push
 
 Since stow creates symlinks, changes to `~/.zshrc` etc. are already reflected in the repo.
 
+## Credit
+
+Originally forked from [elithrar/dotfiles](https://github.com/elithrar/dotfiles) by Matt Silverlock.
+
 ## License
 
 MIT. See [LICENSE](LICENSE) for details.
