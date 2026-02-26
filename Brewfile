@@ -14,6 +14,7 @@ brew "git"              # version control
 brew "htop"             # interactive process viewer
 brew "prettyping"       # prettier ping output
 brew "ripgrep"          # grep replacement, very fast
+brew "tmux"             # terminal multiplexer
 brew "zoxide"           # smart cd replacement (z/zi)
 
 # --- Development ---
