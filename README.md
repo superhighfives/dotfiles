@@ -23,7 +23,8 @@ The install script handles everything in order:
 5. **Plugins** — zsh-autosuggestions, zsh-syntax-highlighting
 6. **SSH** — generates an Ed25519 key and configures commit signing
 7. **Dotfiles** — symlinks configs to `~` using [GNU Stow](https://www.gnu.org/software/stow/)
-8. **Extensions** — installs VS Code / Cursor extensions
+8. **Secrets** — creates `~/.secrets` and prompts for your npm token
+9. **Extensions** — installs VS Code / Cursor extensions
 
 ## What's Included
 
@@ -72,24 +73,26 @@ The install script handles everything in order:
 
 ## Post-Install (Manual Steps)
 
-### 1. Secrets
-
-```sh
-cp ~/Development/dotfiles/.secrets.example ~/.secrets
-# Edit ~/.secrets and add your NPM_TOKEN, Cloudflare keys, etc.
-
-# .npmrc is symlinked automatically by stow — it reads NPM_TOKEN from .secrets
-```
-
-### 2. GitHub CLI
+### 1. GitHub CLI
 
 ```sh
 gh auth login
 ```
 
-### 3. rclone (optional)
+### 2. rclone (optional)
 
 Store the entire `rclone.conf` as a secure note or document in 1Password. On the new machine, pull it out and drop it into `~/.config/rclone/`. Since 1Password is already in the Brewfile, this is the easiest path. Alternatively, run `rclone config` to set up remotes fresh.
+
+### Secrets
+
+The install script creates `~/.secrets` from `.secrets.example` and prompts for your npm token interactively. If you skip the prompt (or run non-interactively), you can fill it in later:
+
+```sh
+# ~/.secrets — sourced by .zshrc, never committed
+export NPM_TOKEN="your-token-here"
+```
+
+`.npmrc` is symlinked by stow and reads `NPM_TOKEN` at runtime via `${NPM_TOKEN}`. Generate a token at [npmjs.com/settings/tokens](https://www.npmjs.com/settings/tokens).
 
 ## What I Use
 
