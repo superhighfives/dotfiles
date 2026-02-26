@@ -231,6 +231,32 @@ print_info "Restoring repo versions..."
 git -C "${DOTFILES_DIR}" checkout .
 print_success "Dotfiles linked"
 
+# --- Secrets ---
+print_step "Setting up secrets"
+if [[ ! -f "${HOME}/.secrets" ]]; then
+  cp "${DOTFILES_DIR}/.secrets.example" "${HOME}/.secrets"
+  print_success "Created ~/.secrets from template"
+
+  if [[ "${INTERACTIVE}" == true ]]; then
+    echo ""
+    print_info "npm uses an auth token for publishing packages."
+    print_info "You can generate one at: https://www.npmjs.com/settings/tokens"
+    echo ""
+    printf "  Enter your NPM_TOKEN (or press Enter to skip): "
+    read -r npm_token
+    if [[ -n "${npm_token}" ]]; then
+      sed -i '' 's|# export NPM_TOKEN=""|export NPM_TOKEN="'"${npm_token}"'"|' "${HOME}/.secrets"
+      print_success "NPM_TOKEN saved to ~/.secrets"
+    else
+      print_info "Skipped — you can add it later in ~/.secrets"
+    fi
+  else
+    print_info "Non-interactive mode — edit ~/.secrets manually to add tokens"
+  fi
+else
+  print_success "~/.secrets already exists"
+fi
+
 # --- VS Code / Cursor extensions ---
 print_step "Installing editor extensions"
 for ext_cmd in "code" "cursor"; do
@@ -250,17 +276,13 @@ ${green}✔ All done!${reset}
 
 ${yellow}Manual steps remaining:${reset}
 
-  1. ${blue}Secrets:${reset}
-     cp ${DOTFILES_DIR}/.secrets.example ~/.secrets
-     # Edit ~/.secrets and fill in your tokens (NPM_TOKEN, etc.)
-
-  2. ${blue}GitHub CLI:${reset}
+  1. ${blue}GitHub CLI:${reset}
      gh auth login
 
-  3. ${blue}rclone (optional):${reset}
+  2. ${blue}rclone (optional):${reset}
      # Restore ~/.config/rclone/rclone.conf from 1Password
      # Or run: rclone config
 
-  4. ${blue}Restart your terminal${reset} to apply all changes.
+  3. ${blue}Restart your terminal${reset} to apply all changes.
 
 EOF
