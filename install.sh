@@ -252,9 +252,7 @@ ${yellow}Manual steps remaining:${reset}
 
   1. ${blue}Secrets:${reset}
      cp ${DOTFILES_DIR}/.secrets.example ~/.secrets
-     # Edit ~/.secrets and fill in your tokens
-     cp ${DOTFILES_DIR}/.npmrc.example ~/.npmrc
-     # Edit ~/.npmrc or set NPM_TOKEN in ~/.secrets
+     # Edit ~/.secrets and fill in your tokens (NPM_TOKEN, etc.)
 
   2. ${blue}GitHub CLI:${reset}
      gh auth login

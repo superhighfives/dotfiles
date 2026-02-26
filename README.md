@@ -78,8 +78,7 @@ The install script handles everything in order:
 cp ~/Development/dotfiles/.secrets.example ~/.secrets
 # Edit ~/.secrets and add your NPM_TOKEN, Cloudflare keys, etc.
 
-cp ~/Development/dotfiles/.npmrc.example ~/.npmrc
-# Or rely on NPM_TOKEN from .secrets
+# .npmrc is symlinked automatically by stow — it reads NPM_TOKEN from .secrets
 ```
 
 ### 2. GitHub CLI

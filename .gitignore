@@ -13,7 +13,6 @@ Icon
 
 # Secrets - NEVER commit these
 .secrets
-.npmrc
 
 # Claude Code local settings
 .claude/settings.local.json
