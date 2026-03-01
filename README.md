@@ -16,15 +16,17 @@ The script is idempotent — safe to run multiple times. It will skip anything a
 
 The install script handles everything in order:
 
-1. **Homebrew** — installs the package manager if missing
-2. **Packages** — installs CLI tools and apps from `Brewfile`
-3. **mise** — sets up runtime version management (Node, Bun, pnpm, uv)
-4. **oh-my-zsh** — installs zsh framework with Powerlevel10k theme
-5. **Plugins** — zsh-autosuggestions, zsh-syntax-highlighting
-6. **SSH** — generates an Ed25519 key and configures commit signing
-7. **Dotfiles** — symlinks configs to `~` using [GNU Stow](https://www.gnu.org/software/stow/)
-8. **Secrets** — creates `~/.secrets` and prompts for your npm token
-9. **Extensions** — installs VS Code / Cursor extensions
+1. **Xcode CLT** — ensures Command Line Tools are installed
+2. **Homebrew** — installs the package manager if missing
+3. **Packages** — installs CLI tools and apps from `Brewfile`
+4. **mise** — sets up runtime version management (Node, Bun, pnpm, uv)
+5. **oh-my-zsh** — installs zsh framework with Powerlevel10k theme
+6. **Plugins** — zsh-autosuggestions, zsh-syntax-highlighting
+7. **SSH** — generates an Ed25519 key and configures commit signing
+8. **Dotfiles** — symlinks configs to `~` using [GNU Stow](https://www.gnu.org/software/stow/)
+9. **Secrets** — creates `~/.secrets` and prompts for your npm token
+10. **Extensions** — installs VS Code / Cursor extensions
+11. **Raycast** — imports settings from `Raycast.rayconfig` if present
 
 ## What's Included
 
@@ -42,6 +44,8 @@ The install script handles everything in order:
 | `.ssh/config` | SSH hosts and settings |
 | `.config/git/ignore` | Per-user git ignore patterns |
 | `.config/gh/config.yml` | GitHub CLI settings |
+| `.config/ghostty/config` | Ghostty terminal settings |
+| `.config/opencode/opencode.json` | OpenCode AI assistant config |
 | `.local/bin/mount-encrypted-storage` | rclone NFS mount helper script |
 
 ### CLI Tools (via Brewfile)
@@ -59,7 +63,7 @@ The install script handles everything in order:
 
 ### Casks (macOS Apps)
 
-1Password, ChatGPT, Claude, Conductor, Cursor, Discord, Figma, Fork, Google Chrome, LM Studio, Obsidian, Ollama, OpenCode Desktop, OrbStack, Plex, Postman, Raycast, Transmit, WhatsApp
+1Password, ChatGPT, Claude, Conductor, Cursor, Discord, Figma, Fork, Ghostty, GitHub Desktop, Google Chrome, LM Studio, Obsidian, Ollama, OpenCode Desktop, OrbStack, Plex, Postman, Raycast, Tailscale, Transmit, WhatsApp, Windows App
 
 ### VS Code / Cursor Extensions
 
@@ -83,6 +87,10 @@ gh auth login
 
 Store the entire `rclone.conf` as a secure note or document in 1Password. On the new machine, pull it out and drop it into `~/.config/rclone/`. Since 1Password is already in the Brewfile, this is the easiest path. Alternatively, run `rclone config` to set up remotes fresh.
 
+### 3. Raycast
+
+Export your Raycast settings and save to `Raycast.rayconfig` in the dotfiles repo. On a new machine, the install script will import them automatically. To export: Raycast > Settings > Advanced > Export.
+
 ### Secrets
 
 The install script creates `~/.secrets` from `.secrets.example` and prompts for your npm token interactively. If you skip the prompt (or run non-interactively), you can fill it in later:
@@ -96,7 +104,7 @@ export NPM_TOKEN="your-token-here"
 
 ## What I Use
 
-- **Terminal**: macOS Terminal / [OrbStack](https://orbstack.dev/) for containers
+- **Terminal**: [Ghostty](https://ghostty.org/) / [OrbStack](https://orbstack.dev/) for containers
 - **Shell**: zsh + [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) + [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
 - **Editor**: [Cursor](https://cursor.sh/) (VS Code fork)
 - **Version manager**: [mise](https://mise.jdx.dev/)

@@ -8,3 +8,4 @@ Brewfile
 \.secrets\.example
 SETUP\.md
 \.claude
+Raycast\.rayconfig
