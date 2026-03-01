@@ -81,6 +81,18 @@ if ! ping -q -t1 -c1 google.com &>/dev/null; then
 fi
 print_success "Internet reachable"
 
+# --- Xcode Command Line Tools ---
+print_step "Checking Xcode Command Line Tools"
+if ! xcode-select -p &>/dev/null; then
+  print_info "Installing Xcode Command Line Tools..."
+  xcode-select --install
+  print_info "Waiting for installation to complete..."
+  until xcode-select -p &>/dev/null; do sleep 5; done
+  print_success "Xcode Command Line Tools installed"
+else
+  print_success "Xcode Command Line Tools already installed"
+fi
+
 # --- Homebrew ---
 print_step "Setting up Homebrew"
 if ! command -v brew &>/dev/null; then
@@ -268,6 +280,17 @@ for ext_cmd in "code" "cursor"; do
     print_success "${ext_cmd} extensions installed"
   fi
 done
+
+# --- Raycast settings ---
+print_step "Setting up Raycast"
+RAYCAST_CONFIG="${DOTFILES_DIR}/Raycast.rayconfig"
+if [[ -f "${RAYCAST_CONFIG}" ]]; then
+  print_info "Importing Raycast settings..."
+  open "${RAYCAST_CONFIG}"
+  print_success "Raycast settings import triggered"
+else
+  print_info "No Raycast.rayconfig found — export your settings via Raycast > Settings > Advanced > Export"
+fi
 
 # --- Done ---
 cat <<EOF
