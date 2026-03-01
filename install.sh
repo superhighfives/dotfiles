@@ -73,6 +73,15 @@ if [[ "${OS}" != "Darwin" ]]; then
   exit 1
 fi
 
+# --- Sudo credentials ---
+print_step "Requesting administrator access"
+if sudo -v; then
+  print_success "Administrator access granted"
+else
+  print_error "This script requires administrator access (needed by Homebrew and Xcode CLT)."
+  exit 1
+fi
+
 # --- Check connectivity ---
 print_step "Checking internet connectivity"
 if ! ping -q -t1 -c1 google.com &>/dev/null; then
