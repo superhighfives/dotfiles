@@ -42,7 +42,10 @@ else
 fi
 
 # --- SSH ---
-ssh-add -A 2>/dev/null
+# Load SSH keys from macOS Keychain (adds key if passphrase is cached in Keychain)
+if [[ -f ~/.ssh/id_ed25519 ]]; then
+  ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null
+fi
 
 # --- Aliases ---
 command -v bat &>/dev/null && alias cat='bat'
