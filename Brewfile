@@ -6,6 +6,7 @@ tap "lescanauxdiscrets/tap"          # provides zvbi for ffmpeg
 
 # --- Core CLI Tools ---
 brew "bat"                           # cat replacement with syntax highlighting
+brew "git-filter-repo"               # rewrite git history (filter-branch alternative)
 brew "delta"                         # git diff viewer with syntax highlighting
 brew "fd"                            # find replacement, fast and user-friendly
 brew "fzf"                           # fuzzy finder for files, history, etc.
