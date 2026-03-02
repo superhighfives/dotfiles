@@ -13,6 +13,9 @@
 set -euo pipefail
 
 # --- Configuration ---
+DOTFILES_REPO="https://github.com/superhighfives/dotfiles"
+DOTFILES_DIR="${HOME}/Development/dotfiles"
+SSH_EMAIL="hi@charliegleason.com"
 WORK_MODE=false
 
 # Parse arguments
