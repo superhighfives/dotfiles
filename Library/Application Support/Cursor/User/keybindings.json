@@ -27,5 +27,29 @@
             "text": "\\\r\n"
         },
         "when": "terminalFocus"
+    },
+    {
+        "key": "cmd+left",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": { "text": "\u001bOH" },
+        "when": "terminalFocus"
+    },
+    {
+        "key": "cmd+right",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": { "text": "\u001bOF" },
+        "when": "terminalFocus"
+    },
+    {
+        "key": "cmd+shift+left",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": { "text": "\u001b[1;2H" },
+        "when": "terminalFocus"
+    },
+    {
+        "key": "cmd+shift+right",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": { "text": "\u001b[1;2F" },
+        "when": "terminalFocus"
     }
 ]
