@@ -1,0 +1,27 @@
+# Personal/non-work casks and formulae
+# These are skipped when running with --work flag
+
+# --- Cloud storage sync ---
+brew "rclone"                          # cloud storage sync
+
+# --- Personal AI/LLM tools ---
+cask "chatgpt"                         # OpenAI chat client
+cask "claude"                          # Anthropic chat client
+cask "lm-studio"                       # local LLM runner
+cask "ollama-app"                      # local LLM server (menu bar)
+
+# --- Personal communication ---
+cask "discord"                         # chat and communities
+cask "whatsapp"                        # messaging
+
+# --- Media server ---
+cask "plex"                            # media server client
+
+# --- VPN ---
+cask "private-internet-access"         # VPN
+
+# --- Additional personal tools ---
+cask "conductor"                       # web server manager
+cask "cursor"                          # AI-powered code editor
+cask "transmit"                        # file transfer (FTP/SFTP/S3)
+cask "windows-app"                     # remote desktop (formerly Microsoft Remote Desktop)

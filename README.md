@@ -12,13 +12,35 @@ sh install.sh 2>&1 | tee ~/install.log
 
 The script is idempotent — safe to run multiple times. It will skip anything already installed.
 
+### Work Mode
+
+For a work machine, skip personal apps and tools:
+
+```sh
+sh install.sh --work 2>&1 | tee ~/install.log
+```
+
+**Skipped in work mode:**
+- rclone and cloud storage sync tools
+- Personal AI apps: ChatGPT, Claude desktop, LM Studio, Ollama
+- Personal communication: Discord, WhatsApp
+- Plex media server client
+- Private Internet Access VPN
+- Conductor (web server manager)
+- Cursor (AI editor - you likely have your own)
+- Transmit (file transfer)
+- Windows App (remote desktop)
+
+**Installed only in work mode:**
+- Windsurf (AI code editor by Codeium)
+
 ## What It Does
 
 The install script handles everything in order:
 
 1. **Xcode CLT** — ensures Command Line Tools are installed
 2. **Homebrew** — installs the package manager if missing
-3. **Packages** — installs CLI tools and apps from `Brewfile`
+3. **Packages** — installs from `Brewfile` (always), `Brewfile.work` (with `--work`), or `Brewfile.personal` (without `--work`)
 4. **mise** — sets up runtime version management (Node, Bun, pnpm, uv)
 5. **oh-my-zsh** — installs zsh framework with Powerlevel10k theme
 6. **Plugins** — zsh-autosuggestions, zsh-syntax-highlighting
@@ -66,7 +88,11 @@ The install script handles everything in order:
 
 ### Casks (macOS Apps)
 
-1Password, ChatGPT, Claude, Conductor, Cursor, Discord, Figma, Fork, Ghostty, GitHub Desktop, Google Chrome, Handy, LM Studio, Obsidian, Ollama, OpenCode Desktop, OrbStack, Plex, Postman, Private Internet Access, Raycast, Tailscale, Transmit, WhatsApp, Windows App
+**Always installed:** 1Password, Figma, Fork, Ghostty, GitHub Desktop, Google Chrome, Handy, Obsidian, OpenCode Desktop, OrbStack, Postman, Raycast, Tailscale
+
+**Work-only:** Windsurf
+
+**Personal-only:** ChatGPT, Claude, Conductor, Cursor, Discord, LM Studio, Ollama, Plex, Private Internet Access, Transmit, WhatsApp, Windows App
 
 ### VS Code / Cursor Extensions
 
@@ -86,9 +112,11 @@ The install script handles everything in order:
 gh auth login
 ```
 
-### 2. rclone (optional)
+### 2. rclone (optional, skipped with --work)
 
 Store the entire `rclone.conf` as a secure note or document in 1Password. On the new machine, pull it out and drop it into `~/.config/rclone/`. Since 1Password is already in the Brewfile, this is the easiest path. Alternatively, run `rclone config` to set up remotes fresh.
+
+Note: rclone is considered a personal tool and is skipped when using `--work` mode. If needed for work, install it manually: `brew install rclone`
 
 ### 3. Raycast
 

@@ -5,14 +5,25 @@
 # Safe to run repeatedly (idempotent - checks before installing).
 #
 # Usage:
-#   sh install.sh 2>&1 | tee ~/install.log
+#   sh install.sh [--work] 2>&1 | tee ~/install.log
+#
+# Options:
+#   --work    Skip personal/non-work apps and tools
 
 set -euo pipefail
 
 # --- Configuration ---
-DOTFILES_REPO="https://github.com/superhighfives/dotfiles"
-DOTFILES_DIR="${HOME}/Development/dotfiles"
-SSH_EMAIL="hi@charliegleason.com"
+WORK_MODE=false
+
+# Parse arguments
+for arg in "$@"; do
+  case "$arg" in
+    --work)
+      WORK_MODE=true
+      shift
+      ;;
+  esac
+done
 
 VSCODE_EXTENSIONS=(
   anthropic.claude-code
@@ -66,7 +77,7 @@ if [[ -t 0 ]] && [[ -t 1 ]]; then
   INTERACTIVE=true
 fi
 
-print_info "OS: ${OS} | Interactive: ${INTERACTIVE}"
+print_info "OS: ${OS} | Interactive: ${INTERACTIVE} | Work mode: ${WORK_MODE}"
 
 if [[ "${OS}" != "Darwin" ]]; then
   print_error "This script is designed for macOS. Exiting."
@@ -136,6 +147,28 @@ if [[ -f "${DOTFILES_DIR}/Brewfile" ]]; then
   print_success "Homebrew packages installed"
 else
   print_error "Brewfile not found at ${DOTFILES_DIR}/Brewfile"
+fi
+
+# Install personal apps unless in work mode
+if [[ "${WORK_MODE}" == false ]]; then
+  if [[ -f "${DOTFILES_DIR}/Brewfile.personal" ]]; then
+    print_info "Installing personal apps..."
+    brew bundle --file="${DOTFILES_DIR}/Brewfile.personal"
+    print_success "Personal apps installed"
+  fi
+else
+  print_info "Skipping personal apps (work mode)"
+fi
+
+# Install work-only apps when in work mode
+if [[ "${WORK_MODE}" == true ]]; then
+  if [[ -f "${DOTFILES_DIR}/Brewfile.work" ]]; then
+    print_info "Installing work-only apps..."
+    brew bundle --file="${DOTFILES_DIR}/Brewfile.work"
+    print_success "Work-only apps installed"
+  fi
+else
+  print_info "Skipping work-only apps (personal mode)"
 fi
 
 # --- mise (runtime version manager) ---
