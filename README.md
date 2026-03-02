@@ -48,6 +48,7 @@ The install script handles everything in order:
 | `.config/opencode/opencode.json` | OpenCode AI assistant config |
 | `Library/Application Support/Cursor/User/settings.json` | Cursor editor settings |
 | `Library/Application Support/Cursor/User/keybindings.json` | Cursor key bindings |
+| `Library/Application Support/com.pais.handy/settings_store.json` | Handy speech-to-text settings |
 | `.local/bin/mount-encrypted-storage` | rclone NFS mount helper script |
 
 ### CLI Tools (via Brewfile)
@@ -65,7 +66,7 @@ The install script handles everything in order:
 
 ### Casks (macOS Apps)
 
-1Password, ChatGPT, Claude, Conductor, Cursor, Discord, Figma, Fork, Ghostty, GitHub Desktop, Google Chrome, LM Studio, Obsidian, Ollama, OpenCode Desktop, OrbStack, Plex, Postman, Private Internet Access, Raycast, Tailscale, Transmit, WhatsApp, Windows App
+1Password, ChatGPT, Claude, Conductor, Cursor, Discord, Figma, Fork, Ghostty, GitHub Desktop, Google Chrome, Handy, LM Studio, Obsidian, Ollama, OpenCode Desktop, OrbStack, Plex, Postman, Private Internet Access, Raycast, Tailscale, Transmit, WhatsApp, Windows App
 
 ### VS Code / Cursor Extensions
 
