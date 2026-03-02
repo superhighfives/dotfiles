@@ -46,6 +46,8 @@ The install script handles everything in order:
 | `.config/gh/config.yml` | GitHub CLI settings |
 | `.config/ghostty/config` | Ghostty terminal settings |
 | `.config/opencode/opencode.json` | OpenCode AI assistant config |
+| `Library/Application Support/Cursor/User/settings.json` | Cursor editor settings |
+| `Library/Application Support/Cursor/User/keybindings.json` | Cursor key bindings |
 | `.local/bin/mount-encrypted-storage` | rclone NFS mount helper script |
 
 ### CLI Tools (via Brewfile)
