@@ -65,7 +65,7 @@ The install script handles everything in order:
 
 ### Casks (macOS Apps)
 
-1Password, ChatGPT, Claude, Conductor, Cursor, Discord, Figma, Fork, Ghostty, GitHub Desktop, Google Chrome, LM Studio, Obsidian, Ollama, OpenCode Desktop, OrbStack, Plex, Postman, Raycast, Tailscale, Transmit, WhatsApp, Windows App
+1Password, ChatGPT, Claude, Conductor, Cursor, Discord, Figma, Fork, Ghostty, GitHub Desktop, Google Chrome, LM Studio, Obsidian, Ollama, OpenCode Desktop, OrbStack, Plex, Postman, Private Internet Access, Raycast, Tailscale, Transmit, WhatsApp, Windows App
 
 ### VS Code / Cursor Extensions
 
