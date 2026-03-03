@@ -5,7 +5,8 @@ LICENSE
 README\.md
 install\.sh
 Brewfile
+Brewfile\.personal
+Brewfile\.work
 \.secrets\.example
-SETUP\.md
 \.claude
 Raycast\.rayconfig
