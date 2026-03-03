@@ -34,14 +34,11 @@ brew "mint"                          # Swift package manager
 # --- Casks (macOS Applications) ---
 cask "1password"                     # password manager
 cask "figma"                         # design tool
-cask "fork"                          # git GUI client
 cask "ghostty"                       # terminal emulator
 cask "github"                        # GitHub Desktop
 cask "google-chrome"                 # web browser
 cask "handy"                         # speech-to-text (handy.computer)
 cask "obsidian"                      # markdown knowledge base
 cask "opencode-desktop"              # AI coding assistant
-cask "orbstack"                      # Docker and Linux VMs
 cask "postman"                       # API testing
 cask "raycast"                       # launcher and productivity
-cask "tailscale-app"                 # mesh VPN

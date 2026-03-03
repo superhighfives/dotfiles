@@ -29,7 +29,6 @@ for arg in "$@"; do
 done
 
 VSCODE_EXTENSIONS=(
-  anthropic.claude-code
   astro-build.astro-vscode
   biomejs.biome
   bradlc.vscode-tailwindcss
