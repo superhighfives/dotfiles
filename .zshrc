@@ -35,6 +35,15 @@ if command -v brew &>/dev/null; then
 fi
 
 # --- Editor ---
+# Use windsurf if installed, otherwise cursor
+code() {
+  if command -v windsurf &>/dev/null; then
+    windsurf "$@"
+  else
+    cursor "$@"
+  fi
+}
+
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='nano'
 else
