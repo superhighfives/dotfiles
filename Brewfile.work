@@ -3,3 +3,6 @@
 
 # --- AI/Editor tools ---
 cask "windsurf"                        # AI code editor by Codeium
+
+# --- CLI tools ---
+brew "glab"                             # GitLab CLI
