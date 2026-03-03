@@ -58,7 +58,7 @@ The install script handles everything in order:
 |------|---------|
 | `.zshrc` | Shell config — Powerlevel10k, plugins, aliases, fzf, zoxide, mise |
 | `.p10k.zsh` | Powerlevel10k prompt theme |
-| `.zprofile` | Shell profile (OrbStack integration) |
+| `.zprofile` | Shell profile (login shell setup) |
 | `.gitconfig` | Git settings — delta diffs, SSH signing, color, aliases |
 | `.gitignore_global` | Global git ignores (macOS artifacts) |
 | `.tool-versions` | Runtime versions for mise (Node, Bun, pnpm, uv) |
@@ -88,7 +88,7 @@ The install script handles everything in order:
 
 ### Casks (macOS Apps)
 
-**Always installed:** 1Password, Figma, Fork, Ghostty, GitHub Desktop, Google Chrome, Handy, Obsidian, OpenCode Desktop, OrbStack, Postman, Raycast, Tailscale
+**Always installed:** 1Password, Figma, Ghostty, GitHub Desktop, Google Chrome, Handy, Obsidian, OpenCode Desktop, Postman, Raycast
 
 **Work-only:** Windsurf
 
@@ -135,7 +135,7 @@ export NPM_TOKEN="your-token-here"
 
 ## What I Use
 
-- **Terminal**: [Ghostty](https://ghostty.org/) / [OrbStack](https://orbstack.dev/) for containers
+- **Terminal**: [Ghostty](https://ghostty.org/)
 - **Shell**: zsh + [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) + [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
 - **Editor**: [Cursor](https://cursor.sh/) (VS Code fork)
 - **Version manager**: [mise](https://mise.jdx.dev/)
