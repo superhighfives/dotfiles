@@ -24,7 +24,6 @@ cask "private-internet-access"         # VPN
 cask "conductor"                       # web server manager
 cask "cursor"                          # AI-powered code editor
 cask "fork"                            # git GUI client
-cask "orbstack"                        # Docker and Linux VMs
 cask "tailscale-app"                   # mesh VPN
 cask "transmit"                        # file transfer (FTP/SFTP/S3)
 cask "windows-app"                     # remote desktop (formerly Microsoft Remote Desktop)

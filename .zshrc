@@ -92,9 +92,6 @@ export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 # LM Studio (conditional)
 [[ -d "$HOME/.lmstudio/bin" ]] && export PATH="$PATH:$HOME/.lmstudio/bin"
 
-# --- OrbStack (conditional) ---
-[[ -f ~/.orbstack/shell/init.zsh ]] && source ~/.orbstack/shell/init.zsh 2>/dev/null
-
 # --- rclone mount aliases (conditional) ---
 if command -v rclone &>/dev/null; then
   alias mount-brightly='mount-encrypted-storage brightly'
