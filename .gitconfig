@@ -2,6 +2,8 @@
 	name = Charlie Gleason
 	email = hi@charliegleason.com
 	signingkey = ~/.ssh/id_ed25519.pub
+[includeIf "gitdir:~/Development/cloudflare/"]
+	path = ~/.gitconfig-work
 [github]
 	user = superhighfives
 [core]
