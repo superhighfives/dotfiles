@@ -8,7 +8,6 @@
 	user = superhighfives
 [core]
 	excludesfile = ~/.gitignore_global
-	editor = code --wait
 	pager = delta --dark 2>/dev/null || cat
 	fileMode = false
 [gpg]

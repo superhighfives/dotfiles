@@ -46,8 +46,12 @@ code() {
 
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='nano'
+elif command -v windsurf &>/dev/null; then
+  export EDITOR='windsurf --wait'
+elif command -v cursor &>/dev/null; then
+  export EDITOR='cursor --wait'
 else
-  export EDITOR='code --wait'
+  export EDITOR='nano'
 fi
 
 # --- SSH ---
