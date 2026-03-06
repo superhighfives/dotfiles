@@ -19,6 +19,7 @@ brew "tmux"                          # terminal multiplexer
 brew "zoxide"                        # smart cd replacement (z/zi)
 
 # --- Development ---
+brew "biome"                         # JavaScript/TypeScript formatter and linter
 brew "gcc"                           # GNU compiler collection
 brew "openssl@3"                     # TLS/SSL toolkit
 brew "opencode"                      # AI coding assistant
