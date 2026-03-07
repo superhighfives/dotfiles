@@ -314,7 +314,7 @@ else
   print_success "~/.secrets already exists"
 fi
 
-# --- VS Code / Cursor / Windsurf extensions ---
+# --- VS Code / Windsurf extensions ---
 print_step "Installing editor extensions"
 for ext_cmd in "code"; do
   if command -v "${ext_cmd}" &>/dev/null; then

@@ -43,3 +43,4 @@ cask "obsidian"                      # markdown knowledge base
 cask "opencode-desktop"              # AI coding assistant
 cask "postman"                       # API testing
 cask "raycast"                       # launcher and productivity
+cask "windsurf"                      # AI code editor
