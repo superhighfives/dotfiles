@@ -1,4 +1,6 @@
 {
     "window.commandCenter": true,
-    "workbench.colorTheme": "Ayu Dark Bordered"
+    "workbench.colorTheme": "Ayu Dark Bordered",
+    "terminal.integrated.showCommandHint": false,
+    "claudeCode.preferredLocation": "panel"
 }
