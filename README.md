@@ -27,12 +27,11 @@ sh install.sh --work 2>&1 | tee ~/install.log
 - Plex media server client
 - Private Internet Access VPN
 - Conductor (web server manager)
-- Cursor (AI editor - you likely have your own)
+
 - Transmit (file transfer)
 - Windows App (remote desktop)
 
-**Installed only in work mode:**
-- Windsurf (AI code editor by Codeium)
+
 
 ## What It Does
 
@@ -47,7 +46,7 @@ The install script handles everything in order:
 7. **SSH** — generates an Ed25519 key and configures commit signing
 8. **Dotfiles** — symlinks configs to `~` using [GNU Stow](https://www.gnu.org/software/stow/)
 9. **Secrets** — creates `~/.secrets` and prompts for your npm token
-10. **Extensions** — installs VS Code / Cursor extensions
+10. **Extensions** — installs VS Code / Windsurf extensions
 11. **Raycast** — imports settings from `Raycast.rayconfig` if present
 
 ## What's Included
@@ -68,8 +67,7 @@ The install script handles everything in order:
 | `.config/gh/config.yml` | GitHub CLI settings |
 | `.config/ghostty/config` | Ghostty terminal settings |
 | `.config/opencode/opencode.json` | OpenCode AI assistant config |
-| `Library/Application Support/Cursor/User/settings.json` | Cursor editor settings |
-| `Library/Application Support/Cursor/User/keybindings.json` | Cursor key bindings |
+
 | `Library/Application Support/com.pais.handy/settings_store.json` | Handy speech-to-text settings |
 | `.local/bin/mount-encrypted-storage` | rclone NFS mount helper script |
 
@@ -90,11 +88,9 @@ The install script handles everything in order:
 
 **Always installed:** 1Password, Figma, Ghostty, GitHub Desktop, Google Chrome, Handy, Obsidian, OpenCode Desktop, Postman, Raycast
 
-**Work-only:** Windsurf
+**Personal-only:** ChatGPT, Claude, Conductor, Discord, LM Studio, Ollama, Plex, Private Internet Access, Transmit, WhatsApp, Windows App
 
-**Personal-only:** ChatGPT, Claude, Conductor, Cursor, Discord, LM Studio, Ollama, Plex, Private Internet Access, Transmit, WhatsApp, Windows App
-
-### VS Code / Cursor Extensions
+### Editor extensions
 
 - `anthropic.claude-code` — Claude Code
 - `astro-build.astro-vscode` — Astro
@@ -137,7 +133,7 @@ export NPM_TOKEN="your-token-here"
 
 - **Terminal**: [Ghostty](https://ghostty.org/)
 - **Shell**: zsh + [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) + [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
-- **Editor**: [Cursor](https://cursor.sh/) (VS Code fork)
+- **Editor**: [Windsurf](https://codeium.com/windsurf) (AI code editor)
 - **Version manager**: [mise](https://mise.jdx.dev/)
 
 ## Updating

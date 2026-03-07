@@ -35,12 +35,11 @@ if command -v brew &>/dev/null; then
 fi
 
 # --- Editor ---
-# Use windsurf if installed, otherwise cursor
 code() {
   if command -v windsurf &>/dev/null; then
     windsurf "$@"
   else
-    cursor "$@"
+    nano "$@"
   fi
 }
 
@@ -48,8 +47,6 @@ if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='nano'
 elif command -v windsurf &>/dev/null; then
   export EDITOR='windsurf --wait'
-elif command -v cursor &>/dev/null; then
-  export EDITOR='cursor --wait'
 else
   export EDITOR='nano'
 fi
