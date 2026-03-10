@@ -9,10 +9,6 @@
         "command": "workbench.action.showAllSymbols"
     },
     {
-        "key": "shift+cmd+l",
-        "command": "editor.action.selectHighlights"
-    },
-    {
         "key": "shift+enter",
         "command": "workbench.action.terminal.sendSequence",
         "args": {
@@ -47,5 +43,23 @@
     {
         "key": "shift+cmd+g",
         "command": "editor.action.previousMatchFindAction",
-    }
+    },
+    {
+        "key": "cmd+shift+l",
+        "command": "editor.action.selectAllMatches"
+    },
+    {
+        "key": "shift+cmd+l",
+        "command": "-windsurf.sendTerminalToChatNewConversation",
+        "when": "terminalFocus && !windsurf.deepwikiPanel.focused"
+    },
+    {
+        "key": "shift+cmd+l",
+        "command": "-windsurf.prioritized.chat.openNewConversation",
+        "when": "!terminalFocus && !windsurf.deepwikiPanel.focused"
+    },
+    {
+        "key": "shift+cmd+l",
+        "command": "editor.action.selectHighlights"
+    },
 ]
