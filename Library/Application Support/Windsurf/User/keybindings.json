@@ -43,5 +43,9 @@
         "command": "workbench.action.terminal.sendSequence",
         "args": { "text": "\u001b[1;2F" },
         "when": "terminalFocus"
+    },
+    {
+        "key": "shift+cmd+g",
+        "command": "editor.action.previousMatchFindAction",
     }
 ]
