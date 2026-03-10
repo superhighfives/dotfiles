@@ -66,3 +66,5 @@
 [alias]
 	pf = push --force-with-lease
 	co = checkout
+[include]
+	path = ~/.local/share/cloudflare-warp-certs/gitconfig
