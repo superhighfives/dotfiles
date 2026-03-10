@@ -5,6 +5,8 @@
     "append_trailing_space": false,
     "audio_feedback": false,
     "audio_feedback_volume": 1.0,
+    "auto_submit": false,
+    "auto_submit_key": "enter",
     "autostart_enabled": true,
     "bindings": {
       "cancel": {
@@ -20,17 +22,28 @@
         "description": "Converts your speech into text.",
         "id": "transcribe",
         "name": "Transcribe"
+      },
+      "transcribe_with_post_process": {
+        "current_binding": "option+shift+space",
+        "default_binding": "option+shift+space",
+        "description": "Converts your speech into text and applies AI post-processing.",
+        "id": "transcribe_with_post_process",
+        "name": "Transcribe with Post-Processing"
       }
     },
     "clamshell_microphone": null,
     "clipboard_handling": "dont_modify",
     "custom_words": [],
     "debug_mode": false,
+    "experimental_enabled": false,
+    "external_script_path": null,
     "history_limit": 5,
+    "keyboard_implementation": "handy_keys",
     "log_level": "debug",
     "model_unload_timeout": "never",
     "mute_while_recording": false,
     "overlay_position": "bottom",
+    "paste_delay_ms": 60,
     "paste_method": "ctrl_v",
     "post_process_api_keys": {
       "anthropic": "",
@@ -39,7 +52,8 @@
       "custom": "",
       "groq": "",
       "openai": "",
-      "openrouter": ""
+      "openrouter": "",
+      "zai": ""
     },
     "post_process_enabled": false,
     "post_process_models": {
@@ -49,7 +63,8 @@
       "custom": "",
       "groq": "",
       "openai": "",
-      "openrouter": ""
+      "openrouter": "",
+      "zai": ""
     },
     "post_process_prompts": [
       {
@@ -65,49 +80,64 @@
         "base_url": "https://api.openai.com/v1",
         "id": "openai",
         "label": "OpenAI",
-        "models_endpoint": "/models"
+        "models_endpoint": "/models",
+        "supports_structured_output": true
       },
       {
         "allow_base_url_edit": false,
         "base_url": "https://openrouter.ai/api/v1",
         "id": "openrouter",
         "label": "OpenRouter",
-        "models_endpoint": "/models"
+        "models_endpoint": "/models",
+        "supports_structured_output": true
       },
       {
         "allow_base_url_edit": false,
         "base_url": "https://api.anthropic.com/v1",
         "id": "anthropic",
         "label": "Anthropic",
-        "models_endpoint": "/models"
+        "models_endpoint": "/models",
+        "supports_structured_output": false
       },
       {
         "allow_base_url_edit": true,
         "base_url": "http://localhost:11434/v1",
         "id": "custom",
         "label": "Custom",
-        "models_endpoint": "/models"
+        "models_endpoint": "/models",
+        "supports_structured_output": false
       },
       {
         "allow_base_url_edit": false,
         "base_url": "apple-intelligence://local",
         "id": "apple_intelligence",
         "label": "Apple Intelligence",
-        "models_endpoint": null
+        "models_endpoint": null,
+        "supports_structured_output": true
       },
       {
         "allow_base_url_edit": false,
         "base_url": "https://api.groq.com/openai/v1",
         "id": "groq",
         "label": "Groq",
-        "models_endpoint": "/models"
+        "models_endpoint": "/models",
+        "supports_structured_output": false
       },
       {
         "allow_base_url_edit": false,
         "base_url": "https://api.cerebras.ai/v1",
         "id": "cerebras",
         "label": "Cerebras",
-        "models_endpoint": "/models"
+        "models_endpoint": "/models",
+        "supports_structured_output": true
+      },
+      {
+        "allow_base_url_edit": false,
+        "base_url": "https://api.z.ai/api/paas/v4",
+        "id": "zai",
+        "label": "Z.AI",
+        "models_endpoint": "/models",
+        "supports_structured_output": true
       }
     ],
     "post_process_selected_prompt_id": null,
@@ -117,9 +147,11 @@
     "selected_microphone": null,
     "selected_model": "parakeet-tdt-0.6b-v3",
     "selected_output_device": null,
+    "show_tray_icon": true,
     "sound_theme": "marimba",
     "start_hidden": true,
     "translate_to_english": false,
+    "typing_tool": "auto",
     "update_checks_enabled": true,
     "word_correction_threshold": 0.18
   }
