@@ -2,5 +2,7 @@
     "window.commandCenter": true,
     "workbench.colorTheme": "Ayu Dark Bordered",
     "terminal.integrated.showCommandHint": false,
-    "claudeCode.preferredLocation": "panel"
+    "claudeCode.preferredLocation": "panel",
+    "claudeCode.selectedModel": "claude-sonnet-4-6",
+    "claudeCode.environmentVariables": []
 }
