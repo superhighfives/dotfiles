@@ -7,6 +7,7 @@ brew "rclone"                          # cloud storage sync
 # --- Personal AI/LLM tools ---
 cask "chatgpt"                         # OpenAI chat client
 cask "claude"                          # Anthropic chat client
+cask "claude-code"                     # Anthropic CLI for Claude
 cask "lm-studio"                       # local LLM runner
 cask "ollama-app"                      # local LLM server (menu bar)
 
