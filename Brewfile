@@ -47,6 +47,3 @@ cask "postman"                       # API testing
 cask "raycast"                       # launcher and productivity
 cask "windsurf"                      # AI code editor
 
-# --- Mac App Store ---
-mas "Scrobbles for Last.fm", id: 1344679160
-mas "Xcode", id: 497799835
