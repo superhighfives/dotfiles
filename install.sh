@@ -18,6 +18,17 @@ DOTFILES_DIR="${HOME}/Development/dotfiles"
 SSH_EMAIL="hi@charliegleason.com"
 WORK_MODE=false
 
+# Mac App Store apps: "Name|ID"
+# These are installed interactively via mas, not brew bundle,
+# so a failed install doesn't break the whole setup.
+MAS_APPS=(
+  "Scrobbles for Last.fm|1344679160"
+  "Xcode|497799835"
+)
+MAS_APPS_WORK=(
+  "Keeper Password Manager|414781829"
+)
+
 # Parse arguments
 for arg in "$@"; do
   case "$arg" in
@@ -172,6 +183,44 @@ if [[ "${WORK_MODE}" == true ]]; then
   fi
 else
   print_info "Skipping work-only apps (personal mode)"
+fi
+
+# --- Mac App Store apps ---
+print_step "Installing Mac App Store apps"
+if ! command -v mas &>/dev/null; then
+  print_info "mas not found — skipping App Store installs"
+else
+  # Combine the base list with work apps if in work mode
+  all_mas_apps=("${MAS_APPS[@]}")
+  if [[ "${WORK_MODE}" == true ]]; then
+    all_mas_apps+=("${MAS_APPS_WORK[@]}")
+  fi
+
+  for entry in "${all_mas_apps[@]}"; do
+    app_name="${entry%%|*}"
+    app_id="${entry##*|}"
+
+    # Skip if already installed
+    if mas list | grep -q "^${app_id} "; then
+      print_success "${app_name} already installed"
+      continue
+    fi
+
+    if [[ "${INTERACTIVE}" == true ]]; then
+      printf "  Install %s from the App Store? [y/N] " "${app_name}"
+      read -r answer
+      if [[ "${answer}" != [yY]* ]]; then
+        print_info "Skipped ${app_name}"
+        continue
+      fi
+    fi
+
+    if mas install "${app_id}"; then
+      print_success "${app_name} installed"
+    else
+      print_error "Failed to install ${app_name} — skipping"
+    fi
+  done
 fi
 
 # --- mise (runtime version manager) ---

@@ -4,5 +4,3 @@
 # --- CLI tools ---
 brew "glab"                             # GitLab CLI
 
-# --- Mac App Store ---
-mas "Keeper Password Manager", id: 414781829
