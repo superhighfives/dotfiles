@@ -30,6 +30,7 @@ brew "tesseract"                     # OCR engine
 brew "whisper-cpp"                   # speech-to-text
 
 # --- Other Tools ---
+brew "mas"                           # Mac App Store CLI
 brew "mint"                          # Swift package manager
 
 # --- Casks (macOS Applications) ---
@@ -45,3 +46,7 @@ cask "opencode-desktop"              # AI coding assistant
 cask "postman"                       # API testing
 cask "raycast"                       # launcher and productivity
 cask "windsurf"                      # AI code editor
+
+# --- Mac App Store ---
+mas "Scrobbles for Last.fm", id: 1344679160
+mas "Xcode", id: 497799835
