@@ -34,6 +34,7 @@ brew "mint"                          # Swift package manager
 
 # --- Casks (macOS Applications) ---
 cask "1password"                     # password manager
+cask "caffeine"                      # prevent mac from sleeping
 cask "figma"                         # design tool
 cask "ghostty"                       # terminal emulator
 cask "github"                        # GitHub Desktop
