@@ -23,3 +23,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Mise
+.tool-versions
+mise.toml
