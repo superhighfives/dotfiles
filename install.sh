@@ -365,7 +365,7 @@ fi
 
 # --- VS Code / Windsurf extensions ---
 print_step "Installing editor extensions"
-for ext_cmd in "code"; do
+for ext_cmd in "windsurf"; do
   if command -v "${ext_cmd}" &>/dev/null; then
     print_info "Installing ${ext_cmd} extensions..."
     for ext in "${VSCODE_EXTENSIONS[@]}"; do
