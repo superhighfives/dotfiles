@@ -19,19 +19,7 @@
       <Maximized>false</Maximized>
     </FormState>
     <FormState>
-      <Name>AdvancedProfileForm</Name>
-      <Location>
-        <X>0</X>
-        <Y>0</Y>
-      </Location>
-      <Size>
-        <Width>398</Width>
-        <Height>468</Height>
-      </Size>
-      <Maximized>false</Maximized>
-    </FormState>
-    <FormState>
-      <Name>AutoSaveSettingsForm</Name>
+      <Name>MacDesktopForm</Name>
       <Location>
         <X>0</X>
         <Y>0</Y>
@@ -43,14 +31,26 @@
       <Maximized>false</Maximized>
     </FormState>
     <FormState>
-      <Name>EditProfileForm</Name>
+      <Name>MacPreviewForm</Name>
       <Location>
         <X>0</X>
         <Y>0</Y>
       </Location>
       <Size>
-        <Width>346</Width>
-        <Height>408</Height>
+        <Width>0</Width>
+        <Height>0</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
+      <Name>ProfilesForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>0</Width>
+        <Height>0</Height>
       </Size>
       <Maximized>false</Maximized>
     </FormState>
@@ -67,19 +67,7 @@
       <Maximized>false</Maximized>
     </FormState>
     <FormState>
-      <Name>BatchScanForm</Name>
-      <Location>
-        <X>0</X>
-        <Y>0</Y>
-      </Location>
-      <Size>
-        <Width>392</Width>
-        <Height>355</Height>
-      </Size>
-      <Maximized>false</Maximized>
-    </FormState>
-    <FormState>
-      <Name>MacDesktopForm</Name>
+      <Name>AutoSaveSettingsForm</Name>
       <Location>
         <X>0</X>
         <Y>0</Y>
@@ -90,6 +78,42 @@
       </Size>
       <Maximized>false</Maximized>
     </FormState>
+    <FormState>
+      <Name>BatchScanForm</Name>
+      <Location>
+        <X>1086</X>
+        <Y>291</Y>
+      </Location>
+      <Size>
+        <Width>392</Width>
+        <Height>355</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
+      <Name>AdvancedProfileForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>398</Width>
+        <Height>468</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
+      <Name>EditProfileForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>346</Width>
+        <Height>408</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
   </FormStates>
   <LastPdfOrImageExt>pdf</LastPdfOrImageExt>
   <BatchSettings>
@@ -97,6 +121,11 @@
     <ScanType>MultipleWithPrompt</ScanType>
     <OutputType>SingleFile</OutputType>
     <SaveSeparator>FilePerPage</SaveSeparator>
-    <SavePath>/Users/superhighfives/output.pdf</SavePath>
+    <SavePath>/Users/superhighfives/Documents/Scans/2026/Scan-$(YYYY)-$(MM)-$(DD)_$(hh)$(mm)$(ss).pdf</SavePath>
   </BatchSettings>
+  <PdfSettings>
+    <Metadata />
+    <Encryption />
+  </PdfSettings>
+  <ImageSettings />
 </UserConfig>

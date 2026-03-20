@@ -18,16 +18,16 @@
     <AfterScanScale>OneToOne</AfterScanScale>
     <Brightness>0</Brightness>
     <Contrast>0</Contrast>
-    <BitDepth>C24Bit</BitDepth>
+    <BitDepth>BlackWhite</BitDepth>
     <PageAlign>Right</PageAlign>
     <PageSize>Letter</PageSize>
     <CustomPageSizeName xsi:nil="true" />
     <CustomPageSize xsi:nil="true" />
     <Resolution>Dpi200</Resolution>
     <PaperSource>Glass</PaperSource>
-    <EnableAutoSave>true</EnableAutoSave>
+    <EnableAutoSave>false</EnableAutoSave>
     <AutoSaveSettings>
-      <FilePath>/Users/superhighfives/Documents/Life Admin/Scans/2026/Scan-${YYYY}-${MM}-${DD}_${hh}${mm}${ss}.pdf</FilePath>
+      <FilePath>/Users/superhighfives/Documents/Scans/2026/Scan-$(YYYY)-$(MM)-$(DD)_$(hh)$(mm)$(ss).pdf</FilePath>
       <PromptForFilePath>false</PromptForFilePath>
       <ClearImagesAfterSaving>false</ClearImagesAfterSaving>
       <Separator>FilePerScan</Separator>
