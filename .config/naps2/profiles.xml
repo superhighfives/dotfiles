@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfScanProfile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ScanProfile>
+    <Version>2</Version>
+    <Device>
+      <ID>5B42F2A8-34D4-436C-8AF4-2A66E81987D8</ID>
+      <Name>Brother ADS-1350W</Name>
+      <IconUri xsi:nil="true" />
+      <ConnectionUri xsi:nil="true" />
+    </Device>
+    <Caps xsi:nil="true" />
+    <DriverName>apple</DriverName>
+    <DisplayName>Brother Scanner</DisplayName>
+    <IconID>0</IconID>
+    <MaxQuality>false</MaxQuality>
+    <IsDefault>true</IsDefault>
+    <UseNativeUI>false</UseNativeUI>
+    <AfterScanScale>OneToOne</AfterScanScale>
+    <Brightness>0</Brightness>
+    <Contrast>0</Contrast>
+    <BitDepth>C24Bit</BitDepth>
+    <PageAlign>Right</PageAlign>
+    <PageSize>Letter</PageSize>
+    <CustomPageSizeName xsi:nil="true" />
+    <CustomPageSize xsi:nil="true" />
+    <Resolution>Dpi200</Resolution>
+    <PaperSource>Glass</PaperSource>
+    <EnableAutoSave>true</EnableAutoSave>
+    <AutoSaveSettings>
+      <FilePath>/Users/superhighfives/Documents/Life Admin/Scans/2026/Scan-${YYYY}-${MM}-${DD}_${hh}${mm}${ss}.pdf</FilePath>
+      <PromptForFilePath>false</PromptForFilePath>
+      <ClearImagesAfterSaving>false</ClearImagesAfterSaving>
+      <Separator>FilePerScan</Separator>
+    </AutoSaveSettings>
+    <Quality>75</Quality>
+    <AutoDeskew>false</AutoDeskew>
+    <RotateDegrees>0</RotateDegrees>
+    <BrightnessContrastAfterScan>false</BrightnessContrastAfterScan>
+    <ForcePageSize>false</ForcePageSize>
+    <ForcePageSizeCrop>false</ForcePageSizeCrop>
+    <TwainImpl>Default</TwainImpl>
+    <TwainProgress>false</TwainProgress>
+    <ExcludeBlankPages>false</ExcludeBlankPages>
+    <BlankPageWhiteThreshold>70</BlankPageWhiteThreshold>
+    <BlankPageCoverageThreshold>15</BlankPageCoverageThreshold>
+    <WiaOffsetWidth>false</WiaOffsetWidth>
+    <WiaRetryOnFailure>false</WiaRetryOnFailure>
+    <WiaDelayBetweenScans>false</WiaDelayBetweenScans>
+    <WiaDelayBetweenScansSeconds>2</WiaDelayBetweenScansSeconds>
+    <WiaVersion>Default</WiaVersion>
+    <FlipDuplexedPages>false</FlipDuplexedPages>
+    <KeyValueOptions xsi:nil="true" />
+  </ScanProfile>
+</ArrayOfScanProfile>
