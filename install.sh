@@ -251,7 +251,7 @@ if [[ ! -d "${HOME}/.oh-my-zsh" ]]; then
   if ! grep -q "$(command -v zsh)" /etc/shells; then
     command -v zsh | sudo tee -a /etc/shells
   fi
-  chsh -s "$(command -v zsh)"
+  sudo chsh -s "$(command -v zsh)" "${USER}"
   print_success "oh-my-zsh installed"
 else
   print_success "oh-my-zsh already installed"
