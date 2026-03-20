@@ -26,5 +26,6 @@ cask "conductor"                       # web server manager
 cask "fork"                            # git GUI client
 cask "tailscale-app"                   # mesh VPN
 cask "transmit"                        # file transfer (FTP/SFTP/S3)
+cask "naps2"                           # document scanning
 cask "windows-app"                     # remote desktop (formerly Microsoft Remote Desktop)
 
