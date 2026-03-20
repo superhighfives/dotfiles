@@ -20,3 +20,11 @@ Icon
 
 # GitHub CLI auth tokens (managed by `gh auth login`)
 .config/gh/hosts.yml
+
+# Windsurf - only track User settings, keybindings, and snippets
+Library/Application Support/Windsurf/*
+!Library/Application Support/Windsurf/User/
+Library/Application Support/Windsurf/User/*
+!Library/Application Support/Windsurf/User/settings.json
+!Library/Application Support/Windsurf/User/keybindings.json
+!Library/Application Support/Windsurf/User/snippets/
