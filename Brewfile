@@ -47,3 +47,6 @@ cask "postman"                       # API testing
 cask "raycast"                       # launcher and productivity
 cask "windsurf"                      # AI code editor
 
+# --- Mac App Store ---
+mas "Icon Slate", id: 439697913      # icon converter and exporter
+
