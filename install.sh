@@ -22,6 +22,7 @@ WORK_MODE=false
 # These are installed interactively via mas, not brew bundle,
 # so a failed install doesn't break the whole setup.
 MAS_APPS=(
+  "Icon Slate|439697913"
   "Scrobbles for Last.fm|1344679160"
   "Xcode|497799835"
 )
