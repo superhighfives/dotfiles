@@ -22,7 +22,7 @@ brew "zoxide"                        # smart cd replacement (z/zi)
 brew "biome"                         # JavaScript/TypeScript formatter and linter
 brew "gcc"                           # GNU compiler collection
 brew "openssl@3"                     # TLS/SSL toolkit
-brew "opencode"                      # AI coding assistant
+brew "anomalyco/tap/opencode"         # AI coding assistant (tap version, stays current)
 
 # --- Media ---
 brew "homebrew-ffmpeg/ffmpeg/ffmpeg" # full ffmpeg (tap version, skip chromaprint to avoid circular dep)
