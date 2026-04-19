@@ -18,12 +18,12 @@
     <AfterScanScale>OneToOne</AfterScanScale>
     <Brightness>0</Brightness>
     <Contrast>0</Contrast>
-    <BitDepth>BlackWhite</BitDepth>
+    <BitDepth>Grayscale</BitDepth>
     <PageAlign>Right</PageAlign>
     <PageSize>Letter</PageSize>
     <CustomPageSizeName xsi:nil="true" />
     <CustomPageSize xsi:nil="true" />
-    <Resolution>Dpi200</Resolution>
+    <Resolution>Dpi300</Resolution>
     <PaperSource>Glass</PaperSource>
     <EnableAutoSave>false</EnableAutoSave>
     <AutoSaveSettings>

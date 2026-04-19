@@ -19,18 +19,6 @@
       <Maximized>false</Maximized>
     </FormState>
     <FormState>
-      <Name>MacDesktopForm</Name>
-      <Location>
-        <X>0</X>
-        <Y>0</Y>
-      </Location>
-      <Size>
-        <Width>0</Width>
-        <Height>0</Height>
-      </Size>
-      <Maximized>false</Maximized>
-    </FormState>
-    <FormState>
       <Name>MacPreviewForm</Name>
       <Location>
         <X>0</X>
@@ -79,18 +67,6 @@
       <Maximized>false</Maximized>
     </FormState>
     <FormState>
-      <Name>BatchScanForm</Name>
-      <Location>
-        <X>1086</X>
-        <Y>291</Y>
-      </Location>
-      <Size>
-        <Width>392</Width>
-        <Height>355</Height>
-      </Size>
-      <Maximized>false</Maximized>
-    </FormState>
-    <FormState>
       <Name>AdvancedProfileForm</Name>
       <Location>
         <X>0</X>
@@ -114,13 +90,37 @@
       </Size>
       <Maximized>false</Maximized>
     </FormState>
+    <FormState>
+      <Name>BatchScanForm</Name>
+      <Location>
+        <X>1086</X>
+        <Y>291</Y>
+      </Location>
+      <Size>
+        <Width>392</Width>
+        <Height>443</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
+      <Name>MacDesktopForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>0</Width>
+        <Height>0</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
   </FormStates>
   <LastPdfOrImageExt>pdf</LastPdfOrImageExt>
   <BatchSettings>
     <ProfileDisplayName>Brother Scanner</ProfileDisplayName>
     <ScanType>MultipleWithPrompt</ScanType>
-    <OutputType>SingleFile</OutputType>
-    <SaveSeparator>FilePerPage</SaveSeparator>
+    <OutputType>MultipleFiles</OutputType>
+    <SaveSeparator>FilePerScan</SaveSeparator>
     <SavePath>/Users/superhighfives/Documents/Scans/2026/Scan-$(YYYY)-$(MM)-$(DD)_$(hh)$(mm)$(ss).pdf</SavePath>
   </BatchSettings>
   <PdfSettings>
