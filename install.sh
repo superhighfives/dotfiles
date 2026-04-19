@@ -157,6 +157,10 @@ fi
 
 # --- Install packages from Brewfile ---
 print_step "Installing Homebrew packages"
+# Force cask installs to overwrite apps previously installed outside Homebrew.
+# Without this, brew's auto-adopt fails when the existing app's version doesn't
+# match the cask (e.g. /Applications/calibre.app 9.5.0 vs cask 9.7.0).
+export HOMEBREW_CASK_OPTS="--force"
 if [[ -f "${DOTFILES_DIR}/Brewfile" ]]; then
   brew bundle --file="${DOTFILES_DIR}/Brewfile"
   print_success "Homebrew packages installed"
