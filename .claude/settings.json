@@ -193,29 +193,32 @@
       "/private/tmp/**"
     ]
   },
-  "spinnerVerbs": [
-    "Listing the keypairs",
-    "Filling up the buckets",
-    "Hibernating the objects",
-    "Querying",
-    "Bundling",
-    "Binding",
-    "Wrangling",
-    "Containerizing",
-    "Vectorizing",
-    "Propagating",
-    "Resolving",
-    "Tailing",
-    "Proxying",
-    "Inferring",
-    "Tracing",
-    "Invoking the agents",
-    "Ingesting",
-    "Consuming",
-    "Routing",
-    "Cold starting (just kidding!)",
-    "Spinning up a few isolates",
-    "Awaiting the Promises",
-    "Spawning the Workflows"
-  ]
+  "spinnerVerbs": {
+    "mode": "append",
+    "verbs": [
+      "Listing the keypairs",
+      "Filling up the buckets",
+      "Hibernating the objects",
+      "Querying",
+      "Bundling",
+      "Binding",
+      "Wrangling",
+      "Containerizing",
+      "Vectorizing",
+      "Propagating",
+      "Resolving",
+      "Tailing",
+      "Proxying",
+      "Inferring",
+      "Tracing",
+      "Invoking the agents",
+      "Ingesting",
+      "Consuming",
+      "Routing",
+      "Cold starting (just kidding!)",
+      "Spinning up a few isolates",
+      "Awaiting the Promises",
+      "Spawning the Workflows"
+    ]
+  }
 }
