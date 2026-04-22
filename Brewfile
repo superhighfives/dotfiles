@@ -8,6 +8,7 @@ tap "lescanauxdiscrets/tap"          # provides zvbi for ffmpeg
 brew "bat"                           # cat replacement with syntax highlighting
 brew "git-filter-repo"               # rewrite git history (filter-branch alternative)
 brew "delta"                         # git diff viewer with syntax highlighting
+brew "eza"                            # ls replacement with icons and git support
 brew "fd"                            # find replacement, fast and user-friendly
 brew "fzf"                           # fuzzy finder for files, history, etc.
 brew "gh"                            # GitHub CLI

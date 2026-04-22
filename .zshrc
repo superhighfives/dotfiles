@@ -62,6 +62,13 @@ command -v bat &>/dev/null && alias cat='bat'
 command -v prettyping &>/dev/null && alias ping='prettyping --nolegend'
 command -v htop &>/dev/null && alias top='sudo htop'
 
+command -v eza &>/dev/null && alias ls='eza --icons --group-directories-first'
+command -v eza &>/dev/null && alias ll='eza -l --header --icons --git'
+command -v eza &>/dev/null && alias la='eza -la --icons'
+command -v eza &>/dev/null && alias lt='eza --tree --level=2'
+
+command -v rg &>/dev/null && alias grep='rg'
+
 # --- fzf (fuzzy finder) ---
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_DEFAULT_OPTS='--height 40% --reverse --border --preview "bat --style=numbers --color=always --line-range :500 {} 2>/dev/null || ls -la {}" --bind="ctrl-o:execute(code {})+abort"'
