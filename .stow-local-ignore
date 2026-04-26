@@ -8,5 +8,6 @@ Brewfile
 Brewfile\.personal
 Brewfile\.work
 \.secrets\.example
+\.npmrc\.work
 \.claude
 Raycast\.rayconfig
