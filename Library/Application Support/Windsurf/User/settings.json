@@ -17,5 +17,6 @@
     },
     "windsurf.acp.enabledAgents": {
         "devin-cloud": false
-    }
+    },
+    "security.workspace.trust.untrustedFiles": "open"
 }

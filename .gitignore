@@ -21,6 +21,9 @@ Icon
 # GitHub CLI auth tokens (managed by `gh auth login`)
 .config/gh/hosts.yml
 
+# Devin - don't track the workspace
+.config/devin/
+
 # NAPS2 - only track config and profiles
 .config/naps2/*
 !.config/naps2/config.xml

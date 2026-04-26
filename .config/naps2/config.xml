@@ -128,4 +128,6 @@
     <Encryption />
   </PdfSettings>
   <ImageSettings />
+  <HasBeenPromptedForDonation>true</HasBeenPromptedForDonation>
+  <LastDonatePromptDate>2026-04-23T17:29:55.4025550-07:00</LastDonatePromptDate>
 </UserConfig>
