@@ -18,5 +18,8 @@
     "windsurf.acp.enabledAgents": {
         "devin-cloud": false
     },
-    "security.workspace.trust.untrustedFiles": "open"
+    "security.workspace.trust.untrustedFiles": "open",
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }

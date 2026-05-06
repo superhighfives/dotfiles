@@ -332,6 +332,12 @@ if ! command -v stow &>/dev/null; then
   brew install stow
 fi
 
+# Clean up legacy .gitconfig-work symlink so stow doesn't get confused.
+# Replaced by .gitconfig.work (loaded via includeIf in .gitconfig).
+if [[ -L "${HOME}/.gitconfig-work" ]]; then
+  rm "${HOME}/.gitconfig-work"
+fi
+
 print_info "Linking dotfiles with stow..."
 # --adopt moves existing files into the repo and replaces them with symlinks.
 # We then restore the repo versions with git checkout, so the symlinked files
@@ -341,6 +347,14 @@ stow --adopt --dir="${DOTFILES_DIR}" --target="${HOME}" .
 print_info "Restoring repo versions..."
 git -C "${DOTFILES_DIR}" checkout .
 print_success "Dotfiles linked"
+
+# In work mode, point ~/.npmrc at .npmrc.work so the @cloudflare registry
+# is used. Personal machines keep the default ~/.npmrc symlinked by stow.
+if [[ "${WORK_MODE}" == true ]]; then
+  print_info "Linking ~/.npmrc -> .npmrc.work (work mode)"
+  ln -sfn "${DOTFILES_DIR}/.npmrc.work" "${HOME}/.npmrc"
+  print_success "Work .npmrc linked"
+fi
 
 # --- Secrets ---
 print_step "Setting up secrets"

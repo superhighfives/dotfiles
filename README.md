@@ -31,6 +31,11 @@ sh install.sh --work 2>&1 | tee ~/install.log
 - Transmit (file transfer)
 - Windows App (remote desktop)
 
+**Added in work mode:**
+- Work-only apps from `Brewfile.work` (e.g. Keeper)
+- `~/.npmrc` is symlinked to `.npmrc.work`, which adds the `@cloudflare` registry
+- `.gitconfig.work` is loaded by `.gitconfig`'s `includeIf` whenever you're inside `~/Development/cloudflare/`. It overrides your email and adds the git-ai trace2 socket.
+
 
 
 ## What It Does
@@ -59,7 +64,10 @@ The install script handles everything in order:
 | `.p10k.zsh` | Powerlevel10k prompt theme |
 | `.zprofile` | Shell profile (login shell setup) |
 | `.gitconfig` | Git settings — delta diffs, SSH signing, color, aliases |
+| `.gitconfig.work` | Work-only git overrides, loaded via `includeIf` inside `~/Development/cloudflare/` |
 | `.gitignore_global` | Global git ignores (macOS artifacts) |
+| `.npmrc` | Public npm registry config (uses `${NPM_TOKEN}`) |
+| `.npmrc.work` | Work registry config; symlinked to `~/.npmrc` by `install.sh --work` |
 | `.tool-versions` | Runtime versions for mise (Node, Bun, pnpm, uv) |
 | `.ripgreprc` | Ripgrep config (smart-case, hidden files) |
 | `.ssh/config` | SSH hosts and settings |

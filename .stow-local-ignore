@@ -7,6 +7,7 @@ install\.sh
 Brewfile
 Brewfile\.personal
 Brewfile\.work
+\.npmrc\.work
 \.secrets\.example
 \.npmrc\.work
 \.claude
