@@ -338,6 +338,23 @@ if [[ -L "${HOME}/.gitconfig-work" ]]; then
   rm "${HOME}/.gitconfig-work"
 fi
 
+# Stow refuses to overwrite symlinks that aren't already relative-style stow
+# links. Earlier installs (or manual fixes) may have left absolute-path
+# symlinks pointing at files in the dotfiles repo - clear those so stow can
+# reclaim them. Only delete symlinks that resolve into DOTFILES_DIR; never
+# touch real files.
+for f in .gitconfig.work .npmrc; do
+  link="${HOME}/${f}"
+  if [[ -L "${link}" ]]; then
+    target="$(readlink "${link}")"
+    case "${target}" in
+      "${DOTFILES_DIR}"/*|*"/dotfiles/"*)
+        rm "${link}"
+        ;;
+    esac
+  fi
+done
+
 print_info "Linking dotfiles with stow..."
 # --adopt moves existing files into the repo and replaces them with symlinks.
 # We then restore the repo versions with git checkout, so the symlinked files
