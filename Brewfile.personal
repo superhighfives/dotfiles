@@ -25,6 +25,7 @@ cask "private-internet-access"         # VPN
 # --- Additional personal tools ---
 cask "conductor"                       # web server manager
 cask "fork"                            # git GUI client
+cask "logi-options+"                   # Logitech device customization
 cask "tailscale-app"                   # mesh VPN
 cask "transmit"                        # file transfer (FTP/SFTP/S3)
 cask "naps2"                           # document scanning
