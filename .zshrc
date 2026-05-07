@@ -23,6 +23,9 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+# --- Secrets (conditional) ---
+[[ -f "$HOME/.secrets" ]] && source "$HOME/.secrets"
+
 # --- Homebrew ---
 if [[ -x "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -115,9 +118,6 @@ if command -v rclone &>/dev/null; then
   alias mount-general='mount-encrypted-storage general'
   alias mount-titan='mount-encrypted-storage titan'
 fi
-
-# --- Secrets (conditional) ---
-[[ -f "$HOME/.secrets" ]] && source "$HOME/.secrets"
 
 # --- Powerlevel10k ---
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
