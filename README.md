@@ -66,8 +66,11 @@ The install script handles everything in order:
 | `.gitconfig` | Git settings — delta diffs, SSH signing, color, aliases |
 | `.gitconfig.work` | Work-only git overrides, loaded via `includeIf` inside `~/Development/cloudflare/` |
 | `.gitignore_global` | Global git ignores (macOS artifacts) |
-| `.npmrc` | Public npm registry config (uses `${NPM_TOKEN}`) |
+| `.npmrc` | Public npm registry config (uses `${NPM_TOKEN}`); also sets `min-release-age=7` |
 | `.npmrc.work` | Work registry config; symlinked to `~/.npmrc` by `install.sh --work` |
+| `.bunfig.toml` | Bun global config; sets `minimumReleaseAge = 604800` (7 days) |
+| `.config/pnpm/config.yaml` | pnpm global config; sets `minimumReleaseAge: 10080` (7 days) |
+| `.config/uv/uv.toml` | uv global config; sets `exclude-newer = "7d"` |
 | `.tool-versions` | Runtime versions for mise (Node, Bun, pnpm, uv) |
 | `.ripgreprc` | Ripgrep config (smart-case, hidden files) |
 | `.ssh/config` | SSH hosts and settings |
@@ -107,6 +110,32 @@ The install script handles everything in order:
 - `sst-dev.opencode` — OpenCode
 - `teabyii.ayu` — Ayu theme
 - `unifiedjs.vscode-mdx` — MDX support
+
+## Supply chain defense: minimum release age
+
+Most malicious package publishes get caught and yanked within hours. To dodge that window entirely, every JS and Python package manager here is configured to refuse versions less than 7 days old. Background: [Dani Akash, "Minimum Release Age is an Underrated Supply Chain Defense"](https://daniakash.com/posts/simplest-supply-chain-defense/).
+
+Same idea, four different config names and units, because of course:
+
+| Tool | File | Setting |
+|------|------|---------|
+| npm / pnpm (auth shared) | `.npmrc` | `min-release-age=7` |
+| Bun | `.bunfig.toml` | `minimumReleaseAge = 604800` (seconds) |
+| pnpm | `.config/pnpm/config.yaml` | `minimumReleaseAge: 10080` (minutes) |
+| uv | `.config/uv/uv.toml` | `exclude-newer = "7d"` |
+
+pnpm v11+ already defaults to 1 day; we bump it to 7. pnpm does **not** read `min-release-age` from `.npmrc` — only auth/registry settings — so its config lives in `~/.config/pnpm/config.yaml`.
+
+If you genuinely need a fresh release (security patch, urgent hotfix), bypass per-invocation:
+
+```sh
+npm install foo --min-release-age=0
+bun install foo --minimum-release-age=0
+pnpm install foo --config.minimumReleaseAge=0
+uv add foo --exclude-newer=""
+```
+
+This is not a substitute for lockfiles, `--ignore-scripts` in CI, or SHA-pinned actions. It's one cheap layer of defense-in-depth.
 
 ## Post-Install (Manual Steps)
 

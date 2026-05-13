@@ -1,5 +1,3 @@
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
-
 # Supply chain defense: refuse versions published less than 7 days ago.
 # https://daniakash.com/posts/simplest-supply-chain-defense/
-min-release-age=7
+exclude-newer = "7d"
