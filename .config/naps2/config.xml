@@ -103,6 +103,18 @@
       <Maximized>false</Maximized>
     </FormState>
     <FormState>
+      <Name>AboutForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>0</Width>
+        <Height>0</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
       <Name>MacDesktopForm</Name>
       <Location>
         <X>0</X>

@@ -62,4 +62,14 @@
         "key": "shift+cmd+l",
         "command": "editor.action.selectHighlights"
     },
+    {
+        "key": "cmd+g",
+        "command": "-workbench.action.toggleWindsurfAgentWindow",
+        "when": "!findInputFocussed && !findWidgetVisible && !isAgentSessionsWorkspace && !terminalFindVisible"
+    },
+    {
+        "key": "shift+cmd+g",
+        "command": "-windsurf.cascade.switchToHighestPrioritySession",
+        "when": "!isAgentSessionsWorkspace && workbenchMode == 'windsurf-agent-window'"
+    },
 ]
