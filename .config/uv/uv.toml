@@ -1,3 +1,3 @@
-# Supply chain defense: refuse versions published less than 7 days ago.
+# Supply chain defense: exclude-newer is set dynamically via UV_EXCLUDE_NEWER
+# in .zshrc (rolling 7-day window). uv.toml doesn't support relative durations.
 # https://daniakash.com/posts/simplest-supply-chain-defense/
-exclude-newer = "7d"

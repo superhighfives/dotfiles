@@ -33,6 +33,7 @@ brew "whisper-cpp"                   # speech-to-text
 # --- Other Tools ---
 brew "mas"                           # Mac App Store CLI
 brew "mint"                          # Swift package manager
+brew "unar"                          # universal archive extractor (rar, 7z, zip, etc.)
 
 # --- Casks (macOS Applications) ---
 cask "1password"                     # password manager
