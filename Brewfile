@@ -21,6 +21,7 @@ brew "zoxide"                        # smart cd replacement (z/zi)
 
 # --- Development ---
 brew "biome"                         # JavaScript/TypeScript formatter and linter
+brew "flyctl"                        # fly.io CLI for deploying apps
 brew "gcc"                           # GNU compiler collection
 brew "openssl@3"                     # TLS/SSL toolkit
 brew "anomalyco/tap/opencode"         # AI coding assistant (tap version, stays current)
