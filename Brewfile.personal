@@ -18,6 +18,7 @@ cask "whatsapp"                        # messaging
 # --- Media ---
 cask "calibre"                         # ebook manager
 cask "plex"                            # media server client
+mas "Reeder", id: 6475002485           # RSS reader
 
 # --- VPN ---
 cask "private-internet-access"         # VPN
