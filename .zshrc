@@ -130,5 +130,9 @@ fi
 # --- Powerlevel10k ---
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# opencode local overlay (auto-loads if present)
+[[ -f ~/.config/opencode/opencode.local.jsonc ]] && \
+  export OPENCODE_CONFIG="$HOME/.config/opencode/opencode.local.jsonc"
+
 # Local overlay (untracked, machine-specific)
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

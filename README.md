@@ -19,7 +19,7 @@ Files ending in `.local` are untracked machine-specific overlays. They live dire
 - `~/.zshrc.local` - sourced at the end of `.zshrc`.
 - `~/.gitconfig.local` - included from `.gitconfig`.
 - `~/.npmrc.local` - if present, `install.sh` overrides `~/.npmrc` to point at it (npm has no include mechanism).
-- `~/.config/opencode/opencode.local.jsonc` - loaded by opencode when `OPENCODE_CONFIG` points at it. Set the env var from `.zshrc.local`.
+- `~/.config/opencode/opencode.local.jsonc` - `.zshrc` exports `OPENCODE_CONFIG` pointing at it if present, so opencode merges it with the global config.
 - `~/Brewfile.local` - `install.sh` runs it after the main `Brewfile` if it exists.
 
 The public repo stays clean. Drop a file into place and it gets loaded.
