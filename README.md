@@ -12,31 +12,16 @@ sh install.sh 2>&1 | tee ~/install.log
 
 The script is idempotent — safe to run multiple times. It will skip anything already installed.
 
-### Work Mode
+### Local overlays
 
-For a work machine, skip personal apps and tools:
+Files ending in `.local` (e.g. `~/.zshrc.local`, `~/.gitconfig.local`, `Brewfile.local`) are untracked machine-specific overlays that the tracked dotfiles pick up automatically when present:
 
-```sh
-sh install.sh --work 2>&1 | tee ~/install.log
-```
+- `.zshrc` sources `~/.zshrc.local` at the end.
+- `.gitconfig` includes `~/.gitconfig.local`.
+- `install.sh` runs `Brewfile.local` if it exists.
+- `install.sh` symlinks `~/.npmrc` to `.npmrc.local` if it exists.
 
-**Skipped in work mode:**
-- rclone and cloud storage sync tools
-- Personal AI apps: ChatGPT, Claude desktop, LM Studio, Ollama
-- Personal communication: Discord, WhatsApp
-- Plex media server client
-- Private Internet Access VPN
-- Conductor (web server manager)
-
-- Transmit (file transfer)
-- Windows App (remote desktop)
-
-**Added in work mode:**
-- Work-only apps from `Brewfile.work` (e.g. Keeper)
-- `~/.npmrc` is symlinked to `.npmrc.work`, which adds the `@cloudflare` registry
-- `.gitconfig.work` is loaded by `.gitconfig`'s `includeIf` whenever you're inside `~/Development/cloudflare/`. It overrides your email and adds the git-ai trace2 socket.
-
-
+Drop a file into place and it gets loaded. The public repo stays clean.
 
 ## What It Does
 
@@ -44,7 +29,7 @@ The install script handles everything in order:
 
 1. **Xcode CLT** — ensures Command Line Tools are installed
 2. **Homebrew** — installs the package manager if missing
-3. **Packages** — installs from `Brewfile` (always), `Brewfile.work` (with `--work`), or `Brewfile.personal` (without `--work`)
+3. **Packages** — installs from `Brewfile` (always), `Brewfile.personal`, and `Brewfile.local` if present
 4. **mise** — sets up runtime version management (Node, Bun, pnpm, uv)
 5. **oh-my-zsh** — installs zsh framework with Powerlevel10k theme
 6. **Plugins** — zsh-autosuggestions, zsh-syntax-highlighting
@@ -63,11 +48,9 @@ The install script handles everything in order:
 | `.zshrc` | Shell config — Powerlevel10k, plugins, aliases, fzf, zoxide, mise |
 | `.p10k.zsh` | Powerlevel10k prompt theme |
 | `.zprofile` | Shell profile (login shell setup) |
-| `.gitconfig` | Git settings — delta diffs, SSH signing, color, aliases |
-| `.gitconfig.work` | Work-only git overrides, loaded via `includeIf` inside `~/Development/cloudflare/` |
+| `.gitconfig` | Git settings — delta diffs, SSH signing, color, aliases. Includes `~/.gitconfig.local` if present. |
 | `.gitignore_global` | Global git ignores (macOS artifacts) |
 | `.npmrc` | Public npm registry config (uses `${NPM_TOKEN}`); also sets `min-release-age=7` |
-| `.npmrc.work` | Work registry config; symlinked to `~/.npmrc` by `install.sh --work` |
 | `.bunfig.toml` | Bun global config; sets `minimumReleaseAge = 604800` (7 days) |
 | `.config/pnpm/config.yaml` | pnpm global config; sets `minimumReleaseAge: 10080` (7 days) |
 | `.config/uv/uv.toml` | uv global config; sets `exclude-newer = "7d"` |
@@ -145,11 +128,9 @@ This is not a substitute for lockfiles, `--ignore-scripts` in CI, or SHA-pinned 
 gh auth login
 ```
 
-### 2. rclone (optional, skipped with --work)
+### 2. rclone (optional)
 
 Store the entire `rclone.conf` as a secure note or document in 1Password. On the new machine, pull it out and drop it into `~/.config/rclone/`. Since 1Password is already in the Brewfile, this is the easiest path. Alternatively, run `rclone config` to set up remotes fresh.
-
-Note: rclone is considered a personal tool and is skipped when using `--work` mode. If needed for work, install it manually: `brew install rclone`
 
 ### 3. Raycast
 

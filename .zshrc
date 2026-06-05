@@ -115,6 +115,11 @@ export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 # LM Studio (conditional)
 [[ -d "$HOME/.lmstudio/bin" ]] && export PATH="$PATH:$HOME/.lmstudio/bin"
 
+# gs
+func gs() {
+  git switch $(git for-each-ref --sort=-committerdate --format='%(refname:short)' 'refs/heads/**' | fzf --preview='git log main..{}')
+}
+
 # --- rclone mount aliases (conditional) ---
 if command -v rclone &>/dev/null; then
   alias mount-brightly='mount-encrypted-storage brightly'
@@ -124,3 +129,6 @@ fi
 
 # --- Powerlevel10k ---
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Local overlay (untracked, machine-specific)
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

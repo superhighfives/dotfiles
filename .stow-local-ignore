@@ -6,9 +6,10 @@ README\.md
 install\.sh
 Brewfile
 Brewfile\.personal
-Brewfile\.work
-\.npmrc\.work
+Brewfile\.local
 \.secrets\.example
-\.npmrc\.work
 \.claude
 Raycast\.rayconfig
+docs
+.+\.local$
+.+\.local\..+

@@ -36,3 +36,15 @@ Library/Application Support/Windsurf/User/*
 !Library/Application Support/Windsurf/User/settings.json
 !Library/Application Support/Windsurf/User/keybindings.json
 !Library/Application Support/Windsurf/User/snippets/
+
+# Local machine overlays - never commit
+*.local
+*.local.*
+.*.local
+.*.local.*
+# But keep the tracked .local/ directory (XDG-style local binaries)
+!.local/
+!.local/**
+
+# Internal docs (specs, plans, scratch)
+docs/
