@@ -14,14 +14,15 @@ The script is idempotent — safe to run multiple times. It will skip anything a
 
 ### Local overlays
 
-Files ending in `.local` (e.g. `~/.zshrc.local`, `~/.gitconfig.local`, `Brewfile.local`) are untracked machine-specific overlays that the tracked dotfiles pick up automatically when present:
+Files ending in `.local` are untracked machine-specific overlays. They live directly in `~/` and the tracked dotfiles pick them up automatically:
 
-- `.zshrc` sources `~/.zshrc.local` at the end.
-- `.gitconfig` includes `~/.gitconfig.local`.
-- `install.sh` runs `Brewfile.local` if it exists.
-- `install.sh` symlinks `~/.npmrc` to `.npmrc.local` if it exists.
+- `~/.zshrc.local` - sourced at the end of `.zshrc`.
+- `~/.gitconfig.local` - included from `.gitconfig`.
+- `~/.npmrc.local` - if present, `install.sh` overrides `~/.npmrc` to point at it (npm has no include mechanism).
+- `~/.config/opencode/opencode.local.jsonc` - loaded by opencode when `OPENCODE_CONFIG` points at it. Set the env var from `.zshrc.local`.
+- `~/Brewfile.local` - `install.sh` runs it after the main `Brewfile` if it exists.
 
-Drop a file into place and it gets loaded. The public repo stays clean.
+The public repo stays clean. Drop a file into place and it gets loaded.
 
 ## What It Does
 
@@ -29,7 +30,7 @@ The install script handles everything in order:
 
 1. **Xcode CLT** — ensures Command Line Tools are installed
 2. **Homebrew** — installs the package manager if missing
-3. **Packages** — installs from `Brewfile` (always), `Brewfile.personal`, and `Brewfile.local` if present
+3. **Packages** — installs from `Brewfile` (always), `Brewfile.personal` (unless `--skip-personal`), and `Brewfile.local` if present
 4. **mise** — sets up runtime version management (Node, Bun, pnpm, uv)
 5. **oh-my-zsh** — installs zsh framework with Powerlevel10k theme
 6. **Plugins** — zsh-autosuggestions, zsh-syntax-highlighting

@@ -5,10 +5,13 @@
 # Safe to run repeatedly (idempotent - checks before installing).
 #
 # Usage:
-#   sh install.sh [--work] 2>&1 | tee ~/install.log
+#   sh install.sh [--skip-personal] 2>&1 | tee ~/install.log
 #
 # Options:
-#   --work    Skip personal/non-work apps and tools
+#   --skip-personal   Skip installing apps from Brewfile.personal
+#
+# Work-specific config (registries, work git identity, etc) is loaded
+# automatically when matching .local overlay files are present on the machine.
 
 set -euo pipefail
 
@@ -16,7 +19,7 @@ set -euo pipefail
 DOTFILES_REPO="https://github.com/superhighfives/dotfiles"
 DOTFILES_DIR="${HOME}/Development/dotfiles"
 SSH_EMAIL="hi@charliegleason.com"
-WORK_MODE=false
+SKIP_PERSONAL=false
 
 # Mac App Store apps: "Name|ID"
 # These are installed interactively via mas, not brew bundle,
@@ -26,15 +29,12 @@ MAS_APPS=(
   "Scrobbles for Last.fm|1344679160"
   "Xcode|497799835"
 )
-MAS_APPS_WORK=(
-  "Keeper Password Manager|414781829"
-)
 
 # Parse arguments
 for arg in "$@"; do
   case "$arg" in
-    --work)
-      WORK_MODE=true
+    --skip-personal)
+      SKIP_PERSONAL=true
       shift
       ;;
   esac
@@ -92,7 +92,7 @@ if [[ -t 0 ]] && [[ -t 1 ]]; then
   INTERACTIVE=true
 fi
 
-print_info "OS: ${OS} | Interactive: ${INTERACTIVE} | Work mode: ${WORK_MODE}"
+print_info "OS: ${OS} | Interactive: ${INTERACTIVE} | Skip personal: ${SKIP_PERSONAL}"
 
 if [[ "${OS}" != "Darwin" ]]; then
   print_error "This script is designed for macOS. Exiting."
@@ -168,26 +168,20 @@ else
   print_error "Brewfile not found at ${DOTFILES_DIR}/Brewfile"
 fi
 
-# Install personal apps unless in work mode
-if [[ "${WORK_MODE}" == false ]]; then
-  if [[ -f "${DOTFILES_DIR}/Brewfile.personal" ]]; then
-    print_info "Installing personal apps..."
-    brew bundle --file="${DOTFILES_DIR}/Brewfile.personal"
-    print_success "Personal apps installed"
-  fi
-else
-  print_info "Skipping personal apps (work mode)"
+# Install personal apps if Brewfile.personal is present (unless --skip-personal)
+if [[ "${SKIP_PERSONAL}" == true ]]; then
+  print_info "Skipping personal apps (--skip-personal)"
+elif [[ -f "${DOTFILES_DIR}/Brewfile.personal" ]]; then
+  print_info "Installing personal apps..."
+  brew bundle --file="${DOTFILES_DIR}/Brewfile.personal"
+  print_success "Personal apps installed"
 fi
 
-# Install work-only apps when in work mode
-if [[ "${WORK_MODE}" == true ]]; then
-  if [[ -f "${DOTFILES_DIR}/Brewfile.work" ]]; then
-    print_info "Installing work-only apps..."
-    brew bundle --file="${DOTFILES_DIR}/Brewfile.work"
-    print_success "Work-only apps installed"
-  fi
-else
-  print_info "Skipping work-only apps (personal mode)"
+# Install local-only apps if ~/Brewfile.local is present
+if [[ -f "${HOME}/Brewfile.local" ]]; then
+  print_info "Installing local-only apps from ~/Brewfile.local..."
+  brew bundle --file="${HOME}/Brewfile.local"
+  print_success "Local-only apps installed"
 fi
 
 # --- Mac App Store apps ---
@@ -195,13 +189,7 @@ print_step "Installing Mac App Store apps"
 if ! command -v mas &>/dev/null; then
   print_info "mas not found — skipping App Store installs"
 else
-  # Combine the base list with work apps if in work mode
-  all_mas_apps=("${MAS_APPS[@]}")
-  if [[ "${WORK_MODE}" == true ]]; then
-    all_mas_apps+=("${MAS_APPS_WORK[@]}")
-  fi
-
-  for entry in "${all_mas_apps[@]}"; do
+  for entry in "${MAS_APPS[@]}"; do
     app_name="${entry%%|*}"
     app_id="${entry##*|}"
 
@@ -332,18 +320,12 @@ if ! command -v stow &>/dev/null; then
   brew install stow
 fi
 
-# Clean up legacy .gitconfig-work symlink so stow doesn't get confused.
-# Replaced by .gitconfig.work (loaded via includeIf in .gitconfig).
-if [[ -L "${HOME}/.gitconfig-work" ]]; then
-  rm "${HOME}/.gitconfig-work"
-fi
-
 # Stow refuses to overwrite symlinks that aren't already relative-style stow
 # links. Earlier installs (or manual fixes) may have left absolute-path
 # symlinks pointing at files in the dotfiles repo - clear those so stow can
 # reclaim them. Only delete symlinks that resolve into DOTFILES_DIR; never
 # touch real files.
-for f in .gitconfig.work .npmrc; do
+for f in .npmrc; do
   link="${HOME}/${f}"
   if [[ -L "${link}" ]]; then
     target="$(readlink "${link}")"
@@ -365,12 +347,14 @@ print_info "Restoring repo versions..."
 git -C "${DOTFILES_DIR}" checkout .
 print_success "Dotfiles linked"
 
-# In work mode, point ~/.npmrc at .npmrc.work so the @cloudflare registry
-# is used. Personal machines keep the default ~/.npmrc symlinked by stow.
-if [[ "${WORK_MODE}" == true ]]; then
-  print_info "Linking ~/.npmrc -> .npmrc.work (work mode)"
-  ln -sfn "${DOTFILES_DIR}/.npmrc.work" "${HOME}/.npmrc"
-  print_success "Work .npmrc linked"
+# If ~/.npmrc.local exists, point ~/.npmrc at it. npm/pnpm/bun read ~/.npmrc
+# directly with no include mechanism, so we override the stow-managed symlink.
+# All other .local overlays (.zshrc.local, .gitconfig.local, opencode.local.jsonc)
+# live directly at their expected paths under ~/ - no machinery needed.
+if [[ -f "${HOME}/.npmrc.local" ]]; then
+  print_info "Linking ~/.npmrc -> ~/.npmrc.local"
+  ln -sfn "${HOME}/.npmrc.local" "${HOME}/.npmrc"
+  print_success "Local .npmrc linked"
 fi
 
 # --- Secrets ---
