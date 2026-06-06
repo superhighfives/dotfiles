@@ -357,6 +357,22 @@ if [[ -f "${HOME}/.npmrc.local" ]]; then
   print_success "Local .npmrc linked"
 fi
 
+# --- Agent skills ---
+# Skill content is committed in this repo under .agents/skills and stowed to
+# ~/.agents/skills (the portable agent-skills convention, shared across tools).
+# Claude Code looks for personal skills in ~/.claude/skills, which stow ignores,
+# so just point that at the shared dir. One symlink - no CLI, node or network -
+# and any `skills` CLI updates landing in ~/.agents flow through automatically.
+if [[ -d "${HOME}/.agents/skills" ]]; then
+  print_step "Linking agent skills into Claude Code"
+  mkdir -p "${HOME}/.claude"
+  # Migrate an existing real directory (e.g. one the skills CLI created) to a
+  # link; leave a correct symlink alone. ln -sfn then makes it authoritative.
+  [[ -L "${HOME}/.claude/skills" ]] || rm -rf "${HOME}/.claude/skills"
+  ln -sfn "../.agents/skills" "${HOME}/.claude/skills"
+  print_success "Linked ~/.claude/skills -> ~/.agents/skills"
+fi
+
 # --- Secrets ---
 print_step "Setting up secrets"
 if [[ ! -f "${HOME}/.secrets" ]]; then
