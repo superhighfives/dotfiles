@@ -322,15 +322,15 @@ fi
 
 # Stow refuses to overwrite symlinks that aren't already relative-style stow
 # links. Earlier installs (or manual fixes) may have left absolute-path
-# symlinks pointing at files in the dotfiles repo - clear those so stow can
-# reclaim them. Only delete symlinks that resolve into DOTFILES_DIR; never
-# touch real files.
+# symlinks pointing at files in the dotfiles repo, or at ~/.npmrc.local
+# (set up by this script's overlay block). Clear those so stow can reclaim
+# them. Only delete symlinks; never touch real files.
 for f in .npmrc; do
   link="${HOME}/${f}"
   if [[ -L "${link}" ]]; then
     target="$(readlink "${link}")"
     case "${target}" in
-      "${DOTFILES_DIR}"/*|*"/dotfiles/"*)
+      "${DOTFILES_DIR}"/*|*"/dotfiles/"*|"${HOME}/.npmrc.local"|".npmrc.local")
         rm "${link}"
         ;;
     esac
