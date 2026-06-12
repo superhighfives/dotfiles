@@ -40,15 +40,8 @@ for arg in "$@"; do
   esac
 done
 
-VSCODE_EXTENSIONS=(
-  anthropic.claude-code
-  astro-build.astro-vscode
-  biomejs.biome
-  bradlc.vscode-tailwindcss
-  sst-dev.opencode
-  teabyii.ayu
-  unifiedjs.vscode-mdx
-)
+# Zed extensions are installed automatically via `auto_install_extensions`
+# in .config/zed/settings.json - no list needed here.
 
 # --- Colors ---
 if command -v tput &>/dev/null && tput sgr0 &>/dev/null; then
@@ -337,6 +330,15 @@ for f in .npmrc; do
   fi
 done
 
+# Zed auto-creates ~/.config/zed/{settings.json,keymap.json} on first launch.
+# If those exist as real files, stow's --adopt would pull Zed's defaults into
+# the repo. Remove them so stow can create clean symlinks to our versions.
+# User data (prompts/, themes/) lives alongside and stays local.
+for f in settings.json keymap.json; do
+  path="${HOME}/.config/zed/${f}"
+  [[ -f "${path}" && ! -L "${path}" ]] && rm "${path}"
+done
+
 print_info "Linking dotfiles with stow..."
 # --adopt moves existing files into the repo and replaces them with symlinks.
 # We then restore the repo versions with git checkout, so the symlinked files
@@ -399,17 +401,15 @@ else
   print_success "~/.secrets already exists"
 fi
 
-# --- VS Code / Windsurf extensions ---
-print_step "Installing editor extensions"
-for ext_cmd in "windsurf"; do
-  if command -v "${ext_cmd}" &>/dev/null; then
-    print_info "Installing ${ext_cmd} extensions..."
-    for ext in "${VSCODE_EXTENSIONS[@]}"; do
-      "${ext_cmd}" --install-extension "${ext}" --force 2>/dev/null || true
-    done
-    print_success "${ext_cmd} extensions installed"
-  fi
-done
+# --- Editor extensions ---
+# Zed reads .config/zed/settings.json and auto-installs the extensions listed
+# under `auto_install_extensions` on first launch - no install step needed.
+print_step "Editor extensions"
+if [[ -d "/Applications/Zed.app" ]]; then
+  print_success "Zed will auto-install extensions on first launch"
+else
+  print_info "Zed is not installed yet - run \`brew bundle\` first"
+fi
 
 # --- Raycast settings ---
 print_step "Setting up Raycast"

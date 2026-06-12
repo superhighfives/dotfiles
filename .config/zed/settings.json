@@ -1,0 +1,104 @@
+// Zed editor settings
+// Docs: https://zed.dev/docs/configuring-zed
+// All settings reference: https://zed.dev/docs/reference/all-settings
+{
+  // --- Appearance ---
+  "theme": "Ayu Dark",
+  "ui_font_family": "Berkeley Mono",
+  "buffer_font_family": "Berkeley Mono",
+  "ui_font_size": 15,
+  "buffer_font_size": 14,
+
+  // --- Editor ---
+  "soft_wrap": "editor_width",
+  "show_whitespaces": "boundary",
+  "current_line_highlight": "gutter",
+  "cursor_shape": "block",
+  "relative_line_numbers": false,
+  "scrollbar": {
+    "show": "auto",
+    "git_diff": true,
+    "diagnostics": "all"
+  },
+
+  // --- AI / Agent ---
+  // Set ANTHROPIC_API_KEY in your env (or use the in-app sign-in) to enable
+  // Anthropic. Zed has a native agent panel - cmd+? to open.
+  "agent": {
+    "default_profile": "write",
+    "inline_assistant_model": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5"
+    }
+  },
+
+  // Use Zed's own edit prediction (Tab to accept) - the equivalent of inline AI suggestions.
+  "edit_predictions": {
+    "provider": "zed",
+    "mode": "eager",
+    "disabled_globs": [
+      "**/.env*",
+      "**/.dev.vars",
+      "**/*.pem",
+      "**/*.key",
+      "**/*.cert",
+      "**/*.crt",
+      "**/secrets.yml"
+    ]
+  },
+
+  // --- Formatters ---
+  // Biome handles JS/TS/JSON. Prettier is used as a fallback for things Biome doesn't cover.
+  "languages": {
+    "JavaScript": {
+      "formatter": { "language_server": { "name": "biome" } },
+      "code_actions_on_format": { "source.organizeImports.biome": true }
+    },
+    "TypeScript": {
+      "formatter": { "language_server": { "name": "biome" } },
+      "code_actions_on_format": { "source.organizeImports.biome": true }
+    },
+    "TSX": {
+      "formatter": { "language_server": { "name": "biome" } },
+      "code_actions_on_format": { "source.organizeImports.biome": true }
+    },
+    "JSX": {
+      "formatter": { "language_server": { "name": "biome" } }
+    },
+    "JSON": {
+      "formatter": { "language_server": { "name": "biome" } }
+    },
+    "JSONC": {
+      "formatter": { "language_server": { "name": "biome" } }
+    },
+    "Python": {
+      "formatter": { "language_server": { "name": "ruff" } },
+      "code_actions_on_format": {
+        "source.fixAll.ruff": true,
+        "source.organizeImports.ruff": true
+      }
+    },
+    "Markdown": {
+      "soft_wrap": "editor_width",
+      "format_on_save": "off"
+    }
+  },
+
+  // --- Extensions ---
+  // Auto-install on launch. Zed has Python (basedpyright + ruff), Tailwind, JSON,
+  // ESLint, and many other language servers built in - so we only install the
+  // language extensions Zed doesn't ship by default.
+  "auto_install_extensions": {
+    "astro": true,
+    "biome": true,
+    "mdx": true
+  },
+
+  // --- Telemetry ---
+  // Disable everything - matches the privacy stance in your other tools.
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+    "anthropic_retention": false
+  }
+}
