@@ -23,3 +23,7 @@ export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 if [[ -d "$HOME/.local/share/mise/shims" ]]; then
   export PATH="$HOME/.local/share/mise/shims:$PATH"
 fi
+
+# Machine-local additions (Cloudflare WARP certs, cargo env, etc).
+# Anything that third-party installers want to drop into .zshenv should go here.
+[[ -f ~/.zshenv.local ]] && source ~/.zshenv.local

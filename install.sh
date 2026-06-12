@@ -344,14 +344,23 @@ for f in .npmrc; do
   fi
 done
 
-# Zed auto-creates ~/.config/zed/{settings.json,keymap.json} on first launch.
-# If those exist as real files, stow's --adopt would pull Zed's defaults into
-# the repo. Remove them so stow can create clean symlinks to our versions.
-# User data (prompts/, themes/) lives alongside and stays local.
+# Zed and atuin auto-create their config files on first launch. If those
+# exist as real files, stow's --adopt would pull their defaults into the
+# repo. Remove them so stow can create clean symlinks to our versions.
+# User data (Zed's prompts/, themes/) lives alongside and stays local.
+ZED_DIR="${HOME}/.config/zed"
 for f in settings.json keymap.json; do
-  path="${HOME}/.config/zed/${f}"
+  path="${ZED_DIR}/${f}"
   [[ -f "${path}" && ! -L "${path}" ]] && rm "${path}"
 done
+
+ATUIN_DIR="${HOME}/.config/atuin"
+if [[ -d "${ATUIN_DIR}" && ! -L "${ATUIN_DIR}" ]]; then
+  if [[ -f "${ATUIN_DIR}/config.toml" && ! -L "${ATUIN_DIR}/config.toml" ]]; then
+    rm "${ATUIN_DIR}/config.toml"
+  fi
+  rmdir "${ATUIN_DIR}" 2>/dev/null || true
+fi
 
 print_info "Linking dotfiles with stow..."
 # --adopt moves existing files into the repo and replaces them with symlinks.
