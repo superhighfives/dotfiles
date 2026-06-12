@@ -1,9 +1,9 @@
 # atuin - shell history with sqlite backend
 # https://docs.atuin.sh/configuration/config/
 
-# Enter selects the command and brings it to the prompt (safer than auto-run).
-# Press Enter again to actually execute. Tab also returns to the prompt for editing.
-enter_accept = false
+# Enter runs the selected command immediately. Tab brings it to the prompt
+# for editing first.
+enter_accept = true
 
 # Fuzzy search is the most forgiving and matches fzf-like behavior.
 search_mode = "fuzzy"
