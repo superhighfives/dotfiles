@@ -106,8 +106,8 @@ fi
 # --- ripgrep ---
 export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 
-# --- uv (supply chain defense: 7-day minimum release age) ---
-export UV_EXCLUDE_NEWER="$(date -u -v-7d '+%Y-%m-%dT%H:%M:%SZ')"
+# --- uv (supply chain defense: 1-day minimum release age) ---
+export UV_EXCLUDE_NEWER="$(date -u -v-1d '+%Y-%m-%dT%H:%M:%SZ')"
 
 # --- PATH ---
 export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"

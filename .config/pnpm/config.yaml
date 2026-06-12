@@ -1,6 +1,6 @@
-# Supply chain defense: refuse versions published less than 7 days ago.
+# Supply chain defense: refuse versions published less than 1 day ago.
 # https://daniakash.com/posts/simplest-supply-chain-defense/
-# pnpm v11 defaults to 1440 (1 day); we bump it to 7 days.
 # pnpm reads min-release-age from pnpm-workspace.yaml or this global config,
 # NOT from .npmrc (which only carries auth/registry settings for pnpm).
-minimumReleaseAge: 10080 # 7 days in minutes
+# pnpm v11 already defaults to 1440 (1 day); set explicitly for clarity.
+minimumReleaseAge: 1440 # 1 day in minutes

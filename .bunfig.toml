@@ -1,4 +1,4 @@
-# Supply chain defense: refuse versions published less than 7 days ago.
+# Supply chain defense: refuse versions published less than 1 day ago.
 # https://daniakash.com/posts/simplest-supply-chain-defense/
 [install]
-minimumReleaseAge = 604800 # 7 days in seconds
+minimumReleaseAge = 86400 # 1 day in seconds
