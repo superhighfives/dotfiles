@@ -91,6 +91,12 @@ _fzf_comprun() {
   esac
 }
 
+# --- atuin (shell history) ---
+# Must come after fzf so atuin owns ctrl+r. Config lives in ~/.config/atuin/config.toml.
+if command -v atuin &>/dev/null; then
+  eval "$(atuin init zsh)"
+fi
+
 # --- zoxide (smart cd) ---
 if command -v zoxide &>/dev/null; then
   eval "$(zoxide init zsh)"

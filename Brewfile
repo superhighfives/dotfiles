@@ -5,6 +5,7 @@ tap "homebrew-ffmpeg/ffmpeg"         # provides ffmpeg tap
 tap "lescanauxdiscrets/tap"          # provides zvbi for ffmpeg
 
 # --- Core CLI Tools ---
+brew "atuin"                         # shell history with sqlite backend (replaces ctrl+r)
 brew "bat"                           # cat replacement with syntax highlighting
 brew "git-filter-repo"               # rewrite git history (filter-branch alternative)
 brew "delta"                         # git diff viewer with syntax highlighting

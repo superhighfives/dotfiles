@@ -1,0 +1,41 @@
+# atuin - shell history with sqlite backend
+# https://docs.atuin.sh/configuration/config/
+
+# Enter selects the command and brings it to the prompt (safer than auto-run).
+# Press Enter again to actually execute. Tab also returns to the prompt for editing.
+enter_accept = false
+
+# Fuzzy search is the most forgiving and matches fzf-like behavior.
+search_mode = "fuzzy"
+
+# Show history from everywhere by default; cycle with ctrl-r through filters.
+filter_mode = "global"
+
+# Use auto so the keymap matches the active shell binding (emacs by default in zsh).
+keymap_mode = "auto"
+
+# Compact, predictable inline UI - doesn't take over the whole terminal.
+style = "compact"
+inline_height = 20
+show_preview = true
+
+# Don't phone home for update checks; brew handles updates.
+update_check = false
+
+# Local-only for now; opt into sync later with `atuin register` or `atuin login`.
+auto_sync = false
+
+[stats]
+# Treat the subcommand as part of stats for these (so `git push` is distinct from `git`).
+common_subcommands = [
+  "cargo",
+  "docker",
+  "git",
+  "go",
+  "kubectl",
+  "npm",
+  "pnpm",
+  "uv",
+  "yarn",
+]
+common_prefix = ["sudo"]
