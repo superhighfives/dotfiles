@@ -135,7 +135,15 @@ Store the entire `rclone.conf` as a secure note or document in 1Password. On the
 
 ### 3. Raycast
 
-Export your Raycast settings and save to `Raycast.rayconfig` in the dotfiles repo. On a new machine, the install script will import them automatically. To export: Raycast > Settings > Advanced > Export.
+Export your Raycast settings and save to `Raycast.rayconfig` in the dotfiles repo. On a new machine, the install script will import them automatically.
+
+To export: Raycast > Settings > Advanced > Export. In the export dialog, select **No password** and check only the following:
+
+- Settings (including aliases, hotkeys & favorites)
+- Extensions
+- Quicklinks
+
+Leave the rest unchecked - they're either machine-specific (AI Chats, MCP Servers, Script Directories) or potentially sensitive (Clipboard History, Raycast Notes).
 
 ### Secrets
 
