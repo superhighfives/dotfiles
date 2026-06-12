@@ -37,7 +37,7 @@ The install script handles everything in order:
 7. **SSH** — generates an Ed25519 key and configures commit signing
 8. **Dotfiles** — symlinks configs to `~` using [GNU Stow](https://www.gnu.org/software/stow/)
 9. **Secrets** — creates `~/.secrets` and prompts for your npm token
-10. **Extensions** — installs VS Code / Windsurf extensions
+10. **Extensions** — Zed auto-installs extensions on first launch via `auto_install_extensions` in `.config/zed/settings.json`
 11. **Raycast** — imports settings from `Raycast.rayconfig` if present
 
 ## What's Included
@@ -152,7 +152,7 @@ export NPM_TOKEN="your-token-here"
 
 - **Terminal**: [Ghostty](https://ghostty.org/)
 - **Shell**: zsh + [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) + [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
-- **Editor**: [Windsurf](https://codeium.com/windsurf) (AI code editor)
+- **Editor**: [Zed](https://zed.dev) (fast editor with native AI agent panel)
 - **Version manager**: [mise](https://mise.jdx.dev/)
 
 ## Updating

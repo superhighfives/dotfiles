@@ -39,8 +39,8 @@ fi
 
 # --- Editor ---
 code() {
-  if command -v windsurf &>/dev/null; then
-    windsurf "$@"
+  if command -v zed &>/dev/null; then
+    zed "$@"
   else
     nano "$@"
   fi
@@ -48,8 +48,8 @@ code() {
 
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='nano'
-elif command -v windsurf &>/dev/null; then
-  export EDITOR='windsurf --wait'
+elif command -v zed &>/dev/null; then
+  export EDITOR='zed --wait'
 else
   export EDITOR='nano'
 fi

@@ -1,18 +1,18 @@
 // Zed keymap - https://zed.dev/docs/key-bindings
-// Zed's default keymap is already close to VS Code's; we only override the
-// pieces that diverged in Windsurf.
+// Zed's default keymap is already close to VS Code's; this just layers on
+// a few personal overrides.
 [
   {
     "bindings": {
-      // Match Windsurf: cmd+t opens the file finder, cmd+p opens project symbols.
-      // (Zed default is the opposite.)
+      // cmd+t opens the file finder; cmd+p opens project symbols.
+      // (Zed's defaults have these swapped.)
       "cmd-t": "file_finder::Toggle",
       "cmd-p": "project_symbols::Toggle",
 
-      // Match Windsurf: shift+cmd+g goes to previous search match.
+      // shift+cmd+g goes to the previous search match.
       "shift-cmd-g": "search::SelectPreviousMatch",
 
-      // Match Windsurf: cmd+shift+l selects all matches of the current selection.
+      // cmd+shift+l selects all matches of the current selection.
       "cmd-shift-l": "editor::SelectAllMatches"
     }
   },
@@ -25,7 +25,7 @@
       "cmd-right": ["terminal::SendKeystroke", "end"],
       "shift-cmd-left": ["terminal::SendKeystroke", "shift-home"],
       "shift-cmd-right": ["terminal::SendKeystroke", "shift-end"],
-      // Backslash-newline for soft line continuation, like Windsurf.
+      // Backslash-newline for soft line continuation in the terminal.
       "shift-enter": ["terminal::SendText", "\\\n"]
     }
   }
