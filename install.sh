@@ -154,6 +154,20 @@ print_step "Installing Homebrew packages"
 # Without this, brew's auto-adopt fails when the existing app's version doesn't
 # match the cask (e.g. /Applications/calibre.app 9.5.0 vs cask 9.7.0).
 export HOMEBREW_CASK_OPTS="--force"
+
+# Brew 6+ requires explicit trust for third-party taps. Trust the ones our
+# Brewfiles depend on; otherwise `brew bundle` errors out with "Refusing to
+# load formula ... from untrusted tap".
+TRUSTED_TAPS=(
+  anomalyco/tap            # opencode
+  homebrew-ffmpeg/ffmpeg   # full ffmpeg with codecs
+  amiaopensource/amiaos    # ffmpeg dep (amia)
+  lescanauxdiscrets/tap    # ffmpeg dep (zvbi)
+)
+for tap in "${TRUSTED_TAPS[@]}"; do
+  brew trust "${tap}" 2>/dev/null || true
+done
+
 if [[ -f "${DOTFILES_DIR}/Brewfile" ]]; then
   brew bundle --file="${DOTFILES_DIR}/Brewfile"
   print_success "Homebrew packages installed"
