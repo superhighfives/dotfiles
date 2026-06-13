@@ -347,8 +347,14 @@ done
 # Zed and atuin auto-create their config files on first launch. If those
 # exist as real files, stow's --adopt would pull their defaults into the
 # repo. Remove them so stow can create clean symlinks to our versions.
-# User data (Zed's prompts/, themes/) lives alongside and stays local.
+# For Zed, ensure ~/.config/zed exists as a real directory so stow unfolds
+# into per-file symlinks. Otherwise stow links the whole dir and Zed's
+# local data (prompts/, themes/) ends up written into this repo.
 ZED_DIR="${HOME}/.config/zed"
+if [[ -L "${ZED_DIR}" ]]; then
+  rm "${ZED_DIR}"
+fi
+mkdir -p "${ZED_DIR}"
 for f in settings.json keymap.json; do
   path="${ZED_DIR}/${f}"
   [[ -f "${path}" && ! -L "${path}" ]] && rm "${path}"
