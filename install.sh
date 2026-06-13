@@ -355,9 +355,15 @@ if [[ -L "${ZED_DIR}" ]]; then
   rm "${ZED_DIR}"
 fi
 mkdir -p "${ZED_DIR}"
+# Drop any pre-existing settings.json/keymap.json — whether real files (which
+# would trigger --adopt and overwrite the repo with Zed's defaults) or stray
+# symlinks (e.g. absolute-path links stow won't recognise as its own and would
+# refuse with a "not owned by stow" conflict).
 for f in settings.json keymap.json; do
   path="${ZED_DIR}/${f}"
-  [[ -f "${path}" && ! -L "${path}" ]] && rm "${path}"
+  if [[ -e "${path}" || -L "${path}" ]]; then
+    rm "${path}"
+  fi
 done
 
 ATUIN_DIR="${HOME}/.config/atuin"
