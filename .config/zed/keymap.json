@@ -33,5 +33,15 @@
     "bindings": {
       "cmd-shift-escape": "agent::NewTerminalThread"
     }
+  },
+  {
+    "bindings": {
+      "alt-cmd-]": "multi_workspace::NextThread"
+    }
+  },
+  {
+    "bindings": {
+      "alt-cmd-[": "multi_workspace::PreviousThread"
+    }
   }
 ]
