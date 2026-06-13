@@ -28,5 +28,10 @@
       // Backslash-newline for soft line continuation in the terminal.
       "shift-enter": ["terminal::SendText", "\\\n"]
     }
+  },
+  {
+    "bindings": {
+      "cmd-shift-escape": "agent::NewTerminalThread"
+    }
   }
 ]

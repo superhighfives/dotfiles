@@ -32,7 +32,8 @@
 	},
 
 	"agent": {
-		"default_profile": "write",
+		"sidebar_side": "left",
+  "default_profile": "write",
 		"inline_assistant_model": {
 			"provider": "anthropic",
 			"model": "claude-sonnet-4-5"
