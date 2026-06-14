@@ -408,6 +408,24 @@ if [[ -d "${HOME}/.agents/skills" ]]; then
   [[ -L "${HOME}/.claude/skills" ]] || rm -rf "${HOME}/.claude/skills"
   ln -sfn "../.agents/skills" "${HOME}/.claude/skills"
   print_success "Linked ~/.claude/skills -> ~/.agents/skills"
+
+  # OpenCode reads commands from ~/.config/opencode/commands/<name>.md. For
+  # every skill at ~/.agents/skills/<name>/SKILL.md, ensure a matching symlink
+  # exists. These symlinks are gitignored - install.sh is the source of truth,
+  # so re-run it after adding a skill (the loop is idempotent).
+  print_step "Linking agent skills into OpenCode"
+  mkdir -p "${HOME}/.config/opencode/commands"
+  for skill in "${HOME}"/.agents/skills/*/SKILL.md; do
+    [[ -f "${skill}" ]] || continue
+    name="$(basename "$(dirname "${skill}")")"
+    link="${HOME}/.config/opencode/commands/${name}.md"
+    target="../../../.agents/skills/${name}/SKILL.md"
+    if [[ -L "${link}" && "$(readlink "${link}")" == "${target}" ]]; then
+      continue
+    fi
+    ln -sfn "${target}" "${link}"
+    print_success "Linked /${name} -> SKILL.md"
+  done
 fi
 
 # --- Secrets ---
