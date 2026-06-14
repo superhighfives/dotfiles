@@ -51,3 +51,6 @@ cask "postman"                       # API testing
 cask "raycast"                       # launcher and productivity
 cask "zed"                           # fast editor with native AI agent panel
 
+# --- Fonts ---
+cask "font-geist-mono"               # buffer font used in Zed
+

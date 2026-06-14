@@ -25,6 +25,17 @@ Icon
 # Devin - don't track the workspace
 .config/devin/
 
+# Raycast - runtime state (settings live in Raycast.rayconfig)
+.config/raycast/ai/
+.config/raycast/extensions/
+
+# Zed - runtime state created on first launch
+.config/zed/prompts/
+.config/zed/themes/
+
+# Windsurf - app state (Windsurf removed from stack)
+Library/Application Support/Windsurf/
+
 # NAPS2 - only track config and profiles
 .config/naps2/*
 !.config/naps2/config.xml

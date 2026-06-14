@@ -33,7 +33,7 @@
 
 	"agent": {
 		"sidebar_side": "left",
-  "default_profile": "write",
+		"default_profile": "write",
 		"inline_assistant_model": {
 			"provider": "anthropic",
 			"model": "claude-sonnet-4-5"
@@ -88,6 +88,7 @@
 
 	"auto_install_extensions": {
 		"astro": true,
+		"ayu-darker": true,
 		"biome": true,
 		"mdx": true
 	},
