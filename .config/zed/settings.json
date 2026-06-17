@@ -1,5 +1,10 @@
 {
-	"icon_theme": {
+	"terminal": {
+  "copy_on_select": true
+ },
+ "proxy": "",
+ "server_url": "https://zed.dev",
+ "icon_theme": {
 		"mode": "light",
 		"light": "Zed (Default)",
 		"dark": "Zed (Default)"
@@ -97,5 +102,15 @@
 		"diagnostics": false,
 		"metrics": false,
 		"anthropic_retention": false
-	}
+	},
+
+	"diagnostics": {
+		"inline": {
+			"enabled": true,
+			"max_severity": null
+		}
+	},
+
+	"hard_tabs": false,
+	"tab_size": 2
 }
