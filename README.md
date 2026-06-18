@@ -57,7 +57,6 @@ The install script handles everything in order:
 | `.config/uv/uv.toml` | uv global config; sets `exclude-newer = "7d"` |
 | `.tool-versions` | Runtime versions for mise (Node, Bun, pnpm, uv) |
 | `.ripgreprc` | Ripgrep config (smart-case, hidden files) |
-| `.ssh/config` | SSH hosts and settings |
 | `.config/git/ignore` | Per-user git ignore patterns |
 | `.config/gh/config.yml` | GitHub CLI settings |
 | `.config/ghostty/config` | Ghostty terminal settings |
