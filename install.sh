@@ -148,6 +148,16 @@ else
   print_success "Dotfiles already cloned"
 fi
 
+# --- Refresh Homebrew ---
+# On a fresh machine these are near-instant. On a re-run they pull the latest
+# package index, upgrade installed formulae/casks, and prune old versions so
+# deprecation warnings (and security fixes) surface here rather than later.
+print_step "Refreshing Homebrew"
+brew update
+brew upgrade
+brew cleanup
+print_success "Homebrew refreshed"
+
 # --- Install packages from Brewfile ---
 print_step "Installing Homebrew packages"
 # Force cask installs to overwrite apps previously installed outside Homebrew.
