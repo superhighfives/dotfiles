@@ -121,7 +121,7 @@ export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 # LM Studio (conditional)
 [[ -d "$HOME/.lmstudio/bin" ]] && export PATH="$PATH:$HOME/.lmstudio/bin"
 
-# gs
+# gs - fuzzy-switch git branches, sorted by most recent commit, with a log preview vs main
 func gs() {
   git switch $(git for-each-ref --sort=-committerdate --format='%(refname:short)' 'refs/heads/**' | fzf --preview='git log main..{}')
 }
