@@ -1,0 +1,13 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+  "json": {
+    "parser": {
+      "allowComments": true,
+      "allowTrailingCommas": true
+    },
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2
+    }
+  }
+}
