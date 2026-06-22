@@ -15,6 +15,7 @@ brew "fzf"                           # fuzzy finder for files, history, etc.
 brew "gh"                            # GitHub CLI
 brew "git"                           # version control
 brew "htop"                          # interactive process viewer
+brew "neovim"                        # hyperextensible vim-based text editor
 brew "prettyping"                    # prettier ping output
 brew "ripgrep"                       # grep replacement, very fast
 brew "tmux"                          # terminal multiplexer
