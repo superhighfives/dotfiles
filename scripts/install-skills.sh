@@ -9,7 +9,7 @@
 #
 # Drop work- or machine-specific skill sources in ~/.skills.local.
 # One per line, blank lines and `#` comments ignored.
-# Format: `<source> [skill-names-csv]` (defaults to `*`).
+# Format: `<source> [skill-name ...]` (defaults to `*`).
 # Local entries run with DISABLE_TELEMETRY=1.
 
 set -euo pipefail
@@ -30,21 +30,22 @@ agents=(opencode)
 if ! $skip_personal; then
   agents+=(claude-code)
 fi
-agents_csv=$(IFS=,; echo "${agents[*]}")
 
-# install_skill <source> <skill-names-csv-or-*>
+# install_skill <source> [skill1 skill2 ...]  (default: *)
 install_skill() {
-  local src="$1" names="${2:-*}"
-  echo ">> installing $names from $src for: $agents_csv"
+  local src="$1"; shift
+  local names=("$@")
+  [[ ${#names[@]} -eq 0 ]] && names=('*')
+  echo ">> installing ${names[*]} from $src for: ${agents[*]}"
   npx -y skills add "$src" \
     --global \
-    --agent "$agents_csv" \
-    --skill "$names" \
+    --agent "${agents[@]}" \
+    --skill "${names[@]}" \
     --yes
 }
 
 install_skill vercel-labs/agent-skills \
-  vercel-composition-patterns,vercel-react-best-practices,vercel-react-view-transitions,web-design-guidelines,writing-guidelines
+  vercel-composition-patterns vercel-react-best-practices vercel-react-view-transitions web-design-guidelines writing-guidelines
 
 local_file="${HOME}/.skills.local"
 if [[ -f "$local_file" ]]; then
@@ -54,10 +55,10 @@ if [[ -f "$local_file" ]]; then
     line="${line#"${line%%[![:space:]]*}"}"
     line="${line%"${line##*[![:space:]]}"}"
     [[ -z "$line" ]] && continue
-    src="${line%% *}"
-    names="*"
-    [[ "$line" == *" "* ]] && names="${line#* }"
-    DISABLE_TELEMETRY=1 install_skill "$src" "$names"
+    # shellcheck disable=SC2206
+    parts=($line)
+    src="${parts[0]}"
+    DISABLE_TELEMETRY=1 install_skill "$src" "${parts[@]:1}"
   done < "$local_file"
 fi
 
