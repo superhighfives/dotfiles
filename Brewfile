@@ -23,6 +23,7 @@ brew "zoxide"                        # smart cd replacement (z/zi)
 
 # --- Development ---
 brew "biome"                         # JavaScript/TypeScript formatter and linter
+brew "cloudflared"                   # Cloudflare Tunnel daemon
 brew "flyctl"                        # fly.io CLI for deploying apps
 brew "gcc"                           # GNU compiler collection
 brew "openssl@3"                     # TLS/SSL toolkit
