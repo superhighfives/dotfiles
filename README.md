@@ -14,15 +14,18 @@ The script is idempotent — safe to run multiple times. It will skip anything a
 
 ### Local overlays
 
-Files ending in `.local` are untracked machine-specific overlays. They live directly in `~/` and the tracked dotfiles pick them up automatically:
+Anything matching `*.local`, `*.local.*`, or `.*.local*` is gitignored. The tracked configs pick these up automatically so machine- or work-specific stuff stays out of the public repo. All overlays are **additive** — they layer on top of the tracked config, they don't replace it — with the one exception called out below.
 
-- `~/.zshrc.local` - sourced at the end of `.zshrc`.
-- `~/.gitconfig.local` - included from `.gitconfig`.
-- `~/.npmrc.local` - if present, `install.sh` overrides `~/.npmrc` to point at it (npm has no include mechanism).
-- `~/.config/opencode/opencode.local.jsonc` - `.zshrc` exports `OPENCODE_CONFIG` pointing at it if present, so opencode merges it with the global config.
-- `~/Brewfile.local` - `install.sh` runs it after the main `Brewfile` if it exists.
+| Overlay | Mechanism | Additive or replacing |
+|---------|-----------|------|
+| `~/.zshrc.local` | Sourced at the end of `.zshrc` | Additive (later wins for vars/aliases) |
+| `~/.gitconfig.local` | `[include]` directive in `.gitconfig` | Additive (later wins) |
+| `~/.config/opencode/opencode.local.jsonc` | `.zshrc` exports `OPENCODE_CONFIG` pointing at it; opencode merges with the global config | Additive (deep merge) |
+| `~/Brewfile.local` | `install.sh` runs `brew bundle` against it after the main Brewfile | Additive (just installs more) |
+| `~/.skills.local` | Plain-text list of skill sources read at the end of `scripts/install-skills.sh` (one `<source> [skill-csv]` per line, `#` comments OK). Each entry runs with `DISABLE_TELEMETRY=1`. | Additive (each line installs more skills) |
+| `~/.npmrc.local` | `install.sh` repoints `~/.npmrc` at it (npm has no include mechanism) | **Replacing** — copy anything you still want from the tracked `.npmrc` |
 
-The public repo stays clean. Drop a file into place and it gets loaded.
+Drop a file into place and it gets loaded on the next shell, the next `install.sh` run, or the next `scripts/install-skills.sh` run depending on which one wraps it.
 
 ## What It Does
 
