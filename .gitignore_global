@@ -27,3 +27,4 @@ Temporary Items
 # Mise
 .tool-versions
 mise.toml
+**/.claude/settings.local.json
