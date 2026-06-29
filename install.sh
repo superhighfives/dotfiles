@@ -412,6 +412,22 @@ if [[ -f "${HOME}/.npmrc.local" ]]; then
 fi
 
 # --- Agent skills ---
+# Install skills from GitHub via the `skills` CLI, then symlink them into
+# each agent's global skills dir. The install-skills.sh script handles
+# fetching from remote sources; the block below wires up local symlinks.
+print_step "Installing agent skills"
+skills_script="${DOTFILES_DIR}/scripts/install-skills.sh"
+if [[ -x "${skills_script}" ]]; then
+  if [[ "${SKIP_PERSONAL}" == true ]]; then
+    "${skills_script}" --skip-personal
+  else
+    "${skills_script}"
+  fi
+  print_success "Agent skills installed"
+else
+  print_info "install-skills.sh not found or not executable — skipping"
+fi
+
 # Skill content is committed in this repo under .agents/skills and stowed to
 # ~/.agents/skills (the portable agent-skills convention, shared across tools).
 # Claude Code looks for personal skills in ~/.claude/skills, which stow ignores,
