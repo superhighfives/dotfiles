@@ -30,6 +30,13 @@ MAS_APPS=(
   "Xcode|497799835"
 )
 
+# Claude Code MCP servers: "name|transport|url"
+# Registered at user scope so they're available across all projects.
+# Idempotent - existing servers are left untouched.
+MCP_SERVERS=(
+  "sentry|http|https://mcp.sentry.dev/mcp"
+)
+
 # Parse arguments
 for arg in "$@"; do
   case "$arg" in
@@ -435,6 +442,31 @@ if [[ -d "${HOME}/.agents/skills" ]]; then
     fi
     ln -sfn "${target}" "${link}"
     print_success "Linked /${name} -> SKILL.md"
+  done
+fi
+
+# --- Claude Code MCP servers ---
+print_step "Setting up Claude Code MCP servers"
+if ! command -v claude &>/dev/null; then
+  print_info "claude CLI not found — skipping MCP server setup"
+else
+  for entry in "${MCP_SERVERS[@]}"; do
+    mcp_name="${entry%%|*}"
+    rest="${entry#*|}"
+    mcp_transport="${rest%%|*}"
+    mcp_url="${rest##*|}"
+
+    # Skip if already registered (mcp get exits non-zero when absent).
+    if claude mcp get "${mcp_name}" &>/dev/null; then
+      print_success "MCP '${mcp_name}' already registered"
+      continue
+    fi
+
+    if claude mcp add --scope user --transport "${mcp_transport}" "${mcp_name}" "${mcp_url}"; then
+      print_success "MCP '${mcp_name}' registered"
+    else
+      print_error "Failed to register MCP '${mcp_name}' — skipping"
+    fi
   done
 fi
 
