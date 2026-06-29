@@ -45,7 +45,10 @@ install_skill() {
 }
 
 install_skill vercel-labs/agent-skills \
-  vercel-composition-patterns vercel-react-best-practices vercel-react-view-transitions web-design-guidelines writing-guidelines
+  vercel-composition-patterns vercel-react-best-practices \
+  vercel-react-view-transitions web-design-guidelines \
+  writing-guidelines zeke/faster-chrome-devtools-skill
+
 
 local_file="${HOME}/.skills.local"
 if [[ -f "$local_file" ]]; then

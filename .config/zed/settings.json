@@ -1,4 +1,5 @@
 {
+  "vim_mode": false,
   "terminal": {
     "copy_on_select": true,
   },

@@ -123,6 +123,44 @@ uv add foo --exclude-newer=""
 
 This is not a substitute for lockfiles, `--ignore-scripts` in CI, or SHA-pinned actions. It's one cheap layer of defense-in-depth.
 
+## Skills
+
+[Skills](https://skills.sh) are reusable instruction files (`SKILL.md`) that tell AI coding agents how to handle specific tasks. This repo manages two kinds: **local skills** committed alongside the dotfiles, and **shared skills** installed from external sources.
+
+### Local skills
+
+Custom skills live in `.agents/skills/<name>/SKILL.md` and are tracked in git. Stow symlinks the `.agents/` directory into `~/.agents/`, and `install.sh` wires them into each agent:
+
+- **Claude Code** — `~/.claude/skills` is symlinked to `~/.agents/skills`
+- **OpenCode** — each skill gets a symlink at `~/.config/opencode/commands/<name>.md` pointing back to its `SKILL.md`
+
+To add a new local skill, drop a `SKILL.md` in `.agents/skills/<name>/` and re-run `install.sh` (the linking loop is idempotent).
+
+### Shared skills
+
+`scripts/install-skills.sh` uses the [`skills`](https://skills.sh) CLI to install skills globally from GitHub repos. These land in `~/.agents/skills/` alongside the local ones, so both agents pick them up automatically.
+
+```sh
+scripts/install-skills.sh                   # opencode + claude-code
+scripts/install-skills.sh --skip-personal   # opencode only (work machines)
+```
+
+The default set pulls from [`vercel-labs/agent-skills`](https://github.com/vercel-labs/agent-skills). Update everything later with `npx skills update -g`.
+
+The lock file at `.agents/.skill-lock.json` tracks installed versions but is gitignored — it can contain private skill URLs from `~/.skills.local`.
+
+### Machine-specific skills
+
+`~/.skills.local` adds skill sources per machine without touching the repo. One entry per line, `#` comments OK:
+
+```
+# format: <source> [skill-name ...]  (defaults to *)
+github-org/internal-skills some-skill another-skill
+git@gitlab.example.com:team/skills.git
+```
+
+Each line runs with `DISABLE_TELEMETRY=1`. See the [local overlays](#local-overlays) table for how this fits with the other `*.local` files.
+
 ## Post-Install (Manual Steps)
 
 ### 1. GitHub CLI

@@ -32,6 +32,9 @@ Icon
 # Devin - don't track the workspace
 .config/devin/
 
+# Wrangler - local cache
+.wrangler/
+
 # Raycast - runtime state (settings live in Raycast.rayconfig)
 .config/raycast/ai/
 .config/raycast/extensions/
