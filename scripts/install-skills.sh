@@ -45,10 +45,13 @@ install_skill() {
 }
 
 install_skill vercel-labs/agent-skills \
-  vercel-composition-patterns vercel-react-best-practices \
-  vercel-react-view-transitions web-design-guidelines \
-  writing-guidelines zeke/faster-chrome-devtools-skill
+  vercel-composition-patterns \  # compound components, render props, context
+  vercel-react-best-practices \  # React/Next.js performance patterns
+  vercel-react-view-transitions \ # View Transition API for route/shared-element animations
+  web-design-guidelines \        # UI/accessibility review checklist
+  writing-guidelines             # docs/prose style and voice review
 
+install_skill zeke/faster-chrome-devtools-skill  # Chrome DevTools Protocol automation (CDP)
 
 local_file="${HOME}/.skills.local"
 if [[ -f "$local_file" ]]; then
