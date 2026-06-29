@@ -52,6 +52,7 @@ install_skill vercel-labs/agent-skills \
   writing-guidelines             # docs/prose style and voice review
 
 install_skill zeke/faster-chrome-devtools-skill  # Chrome DevTools Protocol automation (CDP)
+install_skill diffusionstudio/lottie              # Lottie animation integration patterns
 
 local_file="${HOME}/.skills.local"
 if [[ -f "$local_file" ]]; then
