@@ -29,6 +29,9 @@ Icon
 # GitHub CLI auth tokens (managed by `gh auth login`)
 .config/gh/hosts.yml
 
+# Stripe CLI - config.toml holds API credentials
+.config/stripe/
+
 # Devin - don't track the workspace
 .config/devin/
 
