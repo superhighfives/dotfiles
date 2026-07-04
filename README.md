@@ -136,7 +136,7 @@ This is not a substitute for lockfiles, `--ignore-scripts` in CI, or SHA-pinned 
 
 ## Skills
 
-[Skills](https://skills.sh) are reusable instruction files (`SKILL.md`) that tell AI coding agents how to handle specific tasks. This repo manages two kinds: **local skills** committed alongside the dotfiles, and **shared skills** installed from external sources.
+[Skills](https://skills.sh) are reusable instruction files (`SKILL.md`) that tell AI coding agents how to handle specific tasks. This repo manages two kinds: **local skills** authored here, and **shared skills** fetched from external sources. Both are committed to `.agents/skills/` — the difference is how they get there.
 
 ### Local skills
 
@@ -156,7 +156,7 @@ scripts/install-skills.sh                   # opencode + claude-code
 scripts/install-skills.sh --skip-personal   # opencode only (work machines)
 ```
 
-The default set pulls from [`vercel-labs/agent-skills`](https://github.com/vercel-labs/agent-skills). Update everything later with `npx skills update -g`.
+The default set pulls from [`vercel-labs/agent-skills`](https://github.com/vercel-labs/agent-skills). The fetched content is **committed** to `.agents/skills/` (vendored), so a fresh clone has every skill without a network fetch — and works even if an upstream repo disappears. Update everything later with `npx skills update -g`, which refreshes the folders in place; review and commit the resulting diffs.
 
 The lock file at `.agents/.skill-lock.json` tracks installed versions but is gitignored — it can contain private skill URLs from `~/.skills.local`.
 
