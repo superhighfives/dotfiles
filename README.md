@@ -36,6 +36,8 @@ Drop a file into place and it gets loaded on the next shell, the next `install.s
 
 Run `scripts/config-drift.sh` to audit this. It lists any `.config` entry on disk that's caught only by the blanket rule (a new tool you haven't decided about) and flags stale `!` lines pointing at paths that no longer exist. It exits non-zero when it finds drift, so it also works in a pre-commit hook or CI.
 
+`install.sh` runs the check as a non-fatal final step, and the tracked `.githooks/pre-commit` hook runs it on every commit — advisory only (it prints drift but never blocks the commit; use `git commit --no-verify` to skip). The hook is wired up by `git config core.hooksPath .githooks`, which `install.sh` sets for you; run it by hand once in an existing clone.
+
 ## What It Does
 
 The install script handles everything in order:

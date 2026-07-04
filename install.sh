@@ -155,6 +155,13 @@ else
   print_success "Dotfiles already cloned"
 fi
 
+# Point this repo at the tracked hooks dir so the advisory .config drift check
+# (.githooks/pre-commit) runs on commit. Repo-local, idempotent.
+if [[ -d "${DOTFILES_DIR}/.githooks" ]]; then
+  git -C "${DOTFILES_DIR}" config core.hooksPath .githooks
+  print_success "Git hooks enabled (.githooks)"
+fi
+
 # --- Refresh Homebrew ---
 # On a fresh machine these are near-instant. On a re-run they pull the latest
 # package index, upgrade installed formulae/casks, and prune old versions so

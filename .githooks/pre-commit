@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# pre-commit — advisory .config drift check.
+#
+# Runs scripts/config-drift.sh and prints its report if a config on disk is
+# being silently ignored (or an allowlist line has gone stale). It does NOT
+# block the commit: under the allowlist model ignored files can't be staged by
+# accident, so drift is a nudge to decide about a new tool, not a hazard.
+#
+# Installed repo-locally via `git config core.hooksPath .githooks` (install.sh
+# does this on setup; run it by hand in an existing clone). Bypass a single run
+# with `git commit --no-verify`.
+
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+drift_script="${repo_root}/scripts/config-drift.sh"
+
+[[ -x "${drift_script}" ]] || exit 0
+
+# Only surface output when there's drift; stay silent on a clean tree.
+if ! output="$("${drift_script}" 2>&1)"; then
+  printf '%s\n' "${output}"
+  echo "pre-commit: .config drift above is advisory — commit not blocked."
+  echo "            resolve it in .gitignore, or skip this check with 'git commit --no-verify'."
+fi
+
+exit 0
