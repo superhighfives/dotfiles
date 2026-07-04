@@ -27,6 +27,15 @@ Anything matching `*.local`, `*.local.*`, or `.*.local*` is gitignored. The trac
 
 Drop a file into place and it gets loaded on the next shell, the next `install.sh` run, or the next `scripts/install-skills.sh` run depending on which one wraps it.
 
+### Config tracking
+
+`~/.config` uses an **allowlist model**: `.gitignore` drops everything under `.config/` by default (`.config/*`) and re-includes only the configs worth tracking with `!` lines. A newly installed tool that writes credentials into `.config/` is therefore ignored until you deliberately opt it in — the failure mode is "I forgot to back up a config," never "I leaked a secret to this public repo."
+
+- **Track a new config** — add `!.config/<name>/` under the tracked list in `.gitignore`, then `git add`.
+- **Keep one out for good** — add `.config/<name>/` under the acknowledged-ignores block, so it's a recorded decision rather than an accident.
+
+Run `scripts/config-drift.sh` to audit this. It lists any `.config` entry on disk that's caught only by the blanket rule (a new tool you haven't decided about) and flags stale `!` lines pointing at paths that no longer exist. It exits non-zero when it finds drift, so it also works in a pre-commit hook or CI.
+
 ## What It Does
 
 The install script handles everything in order:

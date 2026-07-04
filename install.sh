@@ -533,6 +533,17 @@ else
   print_info "No Raycast.rayconfig found — export your settings via Raycast > Settings > Advanced > Export"
 fi
 
+# --- Config drift check ---
+# .config tracking uses an allowlist model, so a newly installed tool can drop
+# config that git silently ignores. Surface any such drift (non-fatal) — the
+# `|| print_info` guard keeps set -e from aborting the install on exit 1. See
+# scripts/config-drift.sh and the "Config tracking" section of the README.
+drift_script="${DOTFILES_DIR}/scripts/config-drift.sh"
+if [[ -x "${drift_script}" ]]; then
+  print_step "Checking .config drift"
+  "${drift_script}" || print_info "Review the drift above, then update .gitignore (see 'Config tracking' in README)"
+fi
+
 # --- Done ---
 cat <<EOF
 
