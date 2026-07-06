@@ -8,7 +8,7 @@
   "agent_servers": {
     "claude-acp": {
       "default_config_options": {
-        "mode": "acceptEdits"
+        "mode": "acceptEdits",
       },
       "type": "registry",
     },
@@ -117,6 +117,9 @@
     "Markdown": {
       "soft_wrap": "editor_width",
       "format_on_save": "off",
+    },
+    "CSS": {
+      "language_servers": ["tailwindcss-language-server"],
     },
   },
 
