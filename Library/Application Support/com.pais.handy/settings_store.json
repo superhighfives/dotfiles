@@ -33,21 +33,26 @@
     },
     "clamshell_microphone": null,
     "clipboard_handling": "dont_modify",
+    "custom_filler_words": null,
     "custom_words": [],
     "debug_mode": false,
     "experimental_enabled": false,
     "external_script_path": null,
+    "extra_recording_buffer_ms": 0,
     "history_limit": 5,
     "keyboard_implementation": "handy_keys",
+    "lazy_stream_close": false,
     "log_level": "debug",
     "model_unload_timeout": "never",
     "mute_while_recording": false,
+    "ort_accelerator": "auto",
     "overlay_position": "bottom",
     "paste_delay_ms": 60,
     "paste_method": "ctrl_v",
     "post_process_api_keys": {
       "anthropic": "",
       "apple_intelligence": "",
+      "bedrock_mantle": "",
       "cerebras": "",
       "custom": "",
       "groq": "",
@@ -59,6 +64,7 @@
     "post_process_models": {
       "anthropic": "",
       "apple_intelligence": "Apple Intelligence",
+      "bedrock_mantle": "",
       "cerebras": "",
       "custom": "",
       "groq": "",
@@ -138,6 +144,14 @@
         "label": "Z.AI",
         "models_endpoint": "/models",
         "supports_structured_output": true
+      },
+      {
+        "allow_base_url_edit": false,
+        "base_url": "https://bedrock-mantle.us-east-1.api.aws/v1",
+        "id": "bedrock_mantle",
+        "label": "AWS Bedrock (Mantle)",
+        "models_endpoint": "/models",
+        "supports_structured_output": true
       }
     ],
     "post_process_selected_prompt_id": null,
@@ -153,6 +167,8 @@
     "translate_to_english": false,
     "typing_tool": "auto",
     "update_checks_enabled": true,
+    "whisper_accelerator": "auto",
+    "whisper_gpu_device": -1,
     "word_correction_threshold": 0.18
   }
 }
