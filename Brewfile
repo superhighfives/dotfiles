@@ -52,7 +52,7 @@ cask "opencode-desktop"              # AI coding assistant
 cask "postman"                       # API testing
 cask "raycast"                       # launcher and productivity
 cask "zed"                           # fast editor with native AI agent panel
+cask "pika"                          # the little color picker I made
 
 # --- Fonts ---
 cask "font-geist-mono"               # buffer font used in Zed
-
