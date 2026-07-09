@@ -45,8 +45,10 @@
     "log_level": "debug",
     "model_unload_timeout": "never",
     "mute_while_recording": false,
+    "onboarding_completed": true,
     "ort_accelerator": "auto",
     "overlay_position": "bottom",
+    "overlay_style": "live",
     "paste_delay_ms": 60,
     "paste_method": "ctrl_v",
     "post_process_api_keys": {
@@ -161,14 +163,18 @@
     "selected_microphone": null,
     "selected_model": "parakeet-tdt-0.6b-v3",
     "selected_output_device": null,
+    "settings_schema_version": 1,
     "show_tray_icon": true,
+    "show_whats_new_on_update": true,
     "sound_theme": "marimba",
     "start_hidden": true,
+    "transcribe_accelerator": "auto",
+    "transcribe_gpu_device": -1,
     "translate_to_english": false,
     "typing_tool": "auto",
     "update_checks_enabled": true,
-    "whisper_accelerator": "auto",
-    "whisper_gpu_device": -1,
+    "vad_enabled": true,
+    "whats_new_last_seen_version": "",
     "word_correction_threshold": 0.18
   }
 }
