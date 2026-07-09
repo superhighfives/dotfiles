@@ -72,6 +72,8 @@ Library/Application Support/Windsurf/
 .config/devin/
 # Raycast - app runtime state
 .config/raycast/
+# macOS Finder metadata
+.config/.DS_Store
 
 # Local machine overlays - never commit
 *.local
