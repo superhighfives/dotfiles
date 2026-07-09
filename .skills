@@ -1,0 +1,13 @@
+# Cross-machine skill sources, tracked in this repo.
+# Installed by scripts/install-skills.sh alongside the script's built-in defaults.
+#
+# Format: one entry per line, `#` comments and blank lines ignored.
+#   <source> [skill-name ...]
+# `<source>` is anything the `skills` CLI accepts (github org/repo, git URL, path).
+# Skill names default to `*` (install everything from the source).
+#
+# For work-only or machine-specific sources, use ~/.skills.local instead
+# (untracked, same format, runs with DISABLE_TELEMETRY=1).
+
+# Personal skills repo (github.com/superhighfives/skills)
+superhighfives/skills dependabot-bundle make-the-change-easy review-github review-gitlab writing-change-descriptions
