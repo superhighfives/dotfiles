@@ -1,5 +1,6 @@
-uv      0.9.7
-nodejs  24.16.0
-bun     latest
-pnpm    latest
-npm     latest
+uv   0.9.7
+nodejs 24.16.0
+bun  latest
+pnpm latest
+npm  latest
+golang 1.24
