@@ -7,10 +7,11 @@
 #   scripts/install-skills.sh                  # opencode + claude-code
 #   scripts/install-skills.sh --skip-personal  # opencode only (work machines)
 #
-# Drop work- or machine-specific skill sources in ~/.skills.local.
-# One per line, blank lines and `#` comments ignored.
-# Format: `<source> [skill-name ...]` (defaults to `*`).
-# Local entries run with DISABLE_TELEMETRY=1.
+# Tracked cross-machine skill sources go in .skills at the dotfiles repo root.
+# Work- or machine-specific (private) sources go in ~/.skills.local.
+# Both use the same format: one entry per line, blank lines and `#` comments
+# ignored. Format: `<source> [skill-name ...]` (defaults to `*`).
+# Entries from ~/.skills.local run with DISABLE_TELEMETRY=1.
 
 set -euo pipefail
 
@@ -59,9 +60,13 @@ install_skill vercel-labs/agent-skills \
 install_skill zeke/faster-chrome-devtools-skill  # Chrome DevTools Protocol automation (CDP)
 install_skill diffusionstudio/lottie             # Lottie animation integration patterns
 
-local_file="${HOME}/.skills.local"
-if [[ -f "$local_file" ]]; then
-  echo ">> reading $local_file"
+# read_skills_file <path> [env-prefix]
+# env-prefix is prepended to install_skill (e.g. "DISABLE_TELEMETRY=1")
+read_skills_file() {
+  local file="$1"
+  local env_prefix="${2:-}"
+  [[ -f "$file" ]] || return 0
+  echo ">> reading $file"
   while IFS= read -r line || [[ -n "$line" ]]; do
     line="${line%%#*}"
     line="${line#"${line%%[![:space:]]*}"}"
@@ -70,9 +75,20 @@ if [[ -f "$local_file" ]]; then
     # shellcheck disable=SC2206
     parts=($line)
     src="${parts[0]}"
-    DISABLE_TELEMETRY=1 install_skill "$src" "${parts[@]:1}"
-  done < "$local_file"
-fi
+    if [[ -n "$env_prefix" ]]; then
+      # shellcheck disable=SC2163
+      export $env_prefix
+      install_skill "$src" "${parts[@]:1}"
+      unset "${env_prefix%%=*}"
+    else
+      install_skill "$src" "${parts[@]:1}"
+    fi
+  done < "$file"
+}
+
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+read_skills_file "${repo_root}/.skills"
+read_skills_file "${HOME}/.skills.local" "DISABLE_TELEMETRY=1"
 
 echo
 echo "done. update later with: npx skills update -g"
