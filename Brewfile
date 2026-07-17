@@ -29,6 +29,7 @@ brew "flyctl"                        # fly.io CLI for deploying apps
 brew "gcc"                           # GNU compiler collection
 brew "openssl@3"                     # TLS/SSL toolkit
 brew "anomalyco/tap/opencode"         # AI coding assistant (tap version, stays current)
+brew "pi-coding-agent"               # pi.dev AI agent toolkit
 
 # --- Media ---
 brew "homebrew-ffmpeg/ffmpeg/ffmpeg" # full ffmpeg (tap version, skip chromaprint to avoid circular dep)

@@ -23,6 +23,7 @@ Anything matching `*.local`, `*.local.*`, or `.*.local*` is gitignored. The trac
 | `~/.config/opencode/opencode.local.jsonc` | `.zshrc` exports `OPENCODE_CONFIG` pointing at it; opencode merges with the global config | Additive (deep merge) |
 | `~/Brewfile.local` | `install.sh` runs `brew bundle` against it after the main Brewfile | Additive (just installs more) |
 | `~/.skills.local` | Plain-text list of skill sources read at the end of `scripts/install-skills.sh` (one `<source> [skill-csv]` per line, `#` comments OK). Each entry runs with `DISABLE_TELEMETRY=1`. | Additive (each line installs more skills) |
+| `~/.pi/agent/{settings,mcp}.local.json` | `scripts/sync-pi-config.sh` deep-merges `pi/{settings,mcp}.base.json` with these into `~/.pi/agent/{settings,mcp}.json` on every `install.sh` run | Additive (deep merge; arrays concat + dedupe) |
 | `~/.npmrc.local` | `install.sh` repoints `~/.npmrc` at it (npm has no include mechanism) | **Replacing** — copy anything you still want from the tracked `.npmrc` |
 
 Drop a file into place and it gets loaded on the next shell, the next `install.sh` run, or the next `scripts/install-skills.sh` run depending on which one wraps it.

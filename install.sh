@@ -493,6 +493,16 @@ else
   done
 fi
 
+# --- Pi coding-agent config ---
+# Renders ~/.pi/agent/{settings,mcp}.json by deep-merging tracked base files
+# with any per-machine ~/.pi/agent/{settings,mcp}.local.json overlay. Idempotent.
+pi_sync_script="${DOTFILES_DIR}/scripts/sync-pi-config.sh"
+if [[ -x "${pi_sync_script}" ]] && command -v pi &>/dev/null; then
+  print_step "Syncing pi config"
+  "${pi_sync_script}"
+  print_success "Pi config rendered"
+fi
+
 # --- Secrets ---
 print_step "Setting up secrets"
 if [[ ! -f "${HOME}/.secrets" ]]; then
