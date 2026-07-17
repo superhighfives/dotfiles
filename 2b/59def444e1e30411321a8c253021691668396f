@@ -1,0 +1,19 @@
+scripts/sync-pi-config.sh
+  s_b9d9f7b9d4f992::t_eab0290d53447a 1-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2b59def444e1e30411321a8c253021691668396f",
+  "prompts": {},
+  "sessions": {
+    "s_b9d9f7b9d4f992": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_098158d04ffeMISX71i5duE9fO",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    }
+  }
+}
