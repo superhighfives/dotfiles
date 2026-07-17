@@ -15,3 +15,12 @@
 # 60/hr rate limit and drops into an interactive `gh` login prompt that hangs a
 # non-interactive run. The SSH URL just `git clone`s (SSH key auth), no API call.
 git@github.com:superhighfives/skills.git dependabot-bundle review-github review-gitlab review-sentry planning writing-change-descriptions
+
+# Vercel Labs agent skills (github.com/vercel-labs/agent-skills)
+git@github.com:vercel-labs/agent-skills.git vercel-composition-patterns vercel-react-best-practices vercel-react-view-transitions web-design-guidelines writing-guidelines
+
+# Chrome DevTools Protocol automation (CDP)
+git@github.com:zeke/faster-chrome-devtools-skill.git
+
+# Lottie animation integration patterns
+git@github.com:diffusionstudio/lottie.git

@@ -45,21 +45,6 @@ install_skill() {
     --yes
 }
 
-# vercel-composition-patterns  - compound components, render props, context
-# vercel-react-best-practices  - React/Next.js performance patterns
-# vercel-react-view-transitions - View Transition API for route/shared-element animations
-# web-design-guidelines         - UI/accessibility review checklist
-# writing-guidelines            - docs/prose style and voice review
-install_skill vercel-labs/agent-skills \
-  vercel-composition-patterns \
-  vercel-react-best-practices \
-  vercel-react-view-transitions \
-  web-design-guidelines \
-  writing-guidelines
-
-install_skill zeke/faster-chrome-devtools-skill  # Chrome DevTools Protocol automation (CDP)
-install_skill diffusionstudio/lottie             # Lottie animation integration patterns
-
 # read_skills_file <path> [env-prefix]
 # env-prefix is prepended to install_skill (e.g. "DISABLE_TELEMETRY=1")
 read_skills_file() {
