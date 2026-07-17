@@ -1,0 +1,13 @@
+{
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-4-7",
+  "defaultThinkingLevel": "high",
+  "hideThinkingBlock": false,
+  "theme": "dark",
+  "packages": [
+    "git:github.com/dmmulroy/pi-mcp"
+  ],
+  "terminal": {
+    "showTerminalProgress": false
+  }
+}

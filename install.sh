@@ -466,6 +466,16 @@ if [[ -d "${HOME}/.agents/skills" ]]; then
     ln -sfn "${target}" "${link}"
     print_success "Linked /${name} -> SKILL.md"
   done
+
+  # Pi looks for skills at ~/.pi/agent/skills. Point that at the shared
+  # ~/.agents/skills dir so every agent (Claude Code, opencode, pi) picks up
+  # the same set. Only wire this up if pi has been initialised on the machine.
+  if [[ -d "${HOME}/.pi/agent" ]]; then
+    print_step "Linking agent skills into pi"
+    [[ -L "${HOME}/.pi/agent/skills" ]] || rm -rf "${HOME}/.pi/agent/skills"
+    ln -sfn "../../.agents/skills" "${HOME}/.pi/agent/skills"
+    print_success "Linked ~/.pi/agent/skills -> ~/.agents/skills"
+  fi
 fi
 
 # --- Claude Code MCP servers ---
@@ -491,6 +501,16 @@ else
       print_error "Failed to register MCP '${mcp_name}' — skipping"
     fi
   done
+fi
+
+# --- Pi coding-agent config ---
+# Renders ~/.pi/agent/{settings,mcp}.json by deep-merging tracked base files
+# with any per-machine ~/.pi/agent/{settings,mcp}.local.json overlay. Idempotent.
+pi_sync_script="${DOTFILES_DIR}/scripts/sync-pi-config.sh"
+if [[ -x "${pi_sync_script}" ]] && command -v pi &>/dev/null; then
+  print_step "Syncing pi config"
+  "${pi_sync_script}"
+  print_success "Pi config rendered"
 fi
 
 # --- Secrets ---
