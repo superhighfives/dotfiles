@@ -14,4 +14,4 @@
 # skills CLI resolve the repo via the GitHub API, which trips the anonymous
 # 60/hr rate limit and drops into an interactive `gh` login prompt that hangs a
 # non-interactive run. The SSH URL just `git clone`s (SSH key auth), no API call.
-git@github.com:superhighfives/skills.git dependabot-bundle review-github review-gitlab writing-change-descriptions
+git@github.com:superhighfives/skills.git dependabot-bundle review-github review-gitlab review-sentry project-plans-lifecycle writing-change-descriptions
