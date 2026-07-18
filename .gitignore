@@ -74,6 +74,8 @@ Library/Application Support/Windsurf/
 .config/raycast/
 # macOS Finder metadata
 .config/.DS_Store
+# cog - update-checker runtime state
+.config/cog/
 
 # Local machine overlays - never commit
 *.local
