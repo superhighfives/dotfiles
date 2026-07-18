@@ -24,7 +24,7 @@ brew "zoxide"                        # smart cd replacement (z/zi)
 # --- Development ---
 brew "biome"                         # JavaScript/TypeScript formatter and linter
 brew "cloudflared"                   # Cloudflare Tunnel daemon
-brew "replicate/tap/cog"             # containers for machine learning (Replicate)
+cask "replicate/tap/cog"             # containers for machine learning (Replicate)
 brew "flyctl"                        # fly.io CLI for deploying apps
 brew "gcc"                           # GNU compiler collection
 brew "openssl@3"                     # TLS/SSL toolkit
