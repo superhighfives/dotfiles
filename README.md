@@ -146,27 +146,30 @@ This is not a substitute for lockfiles, `--ignore-scripts` in CI, or SHA-pinned 
 
 ## Skills
 
-[Skills](https://skills.sh) are reusable instruction files (`SKILL.md`) that tell AI coding agents how to handle specific tasks. This repo manages two kinds: **local skills** authored here, and **shared skills** fetched from external sources. Both are committed to `.agents/skills/` — the difference is how they get there.
+[Skills](https://skills.sh) are reusable instruction files (`SKILL.md`) that tell AI coding agents how to handle specific tasks. This repo doesn't vendor skill content — instead it tracks a **source list** and installs skills from it via the [`skills`](https://skills.sh) CLI. Personal skills live in a separate repo ([`superhighfives/skills`](https://github.com/superhighfives/skills)); shared ones come from public repos like [`vercel-labs/agent-skills`](https://github.com/vercel-labs/agent-skills).
 
-### Local skills
+### The source list
 
-Custom skills live in `.agents/skills/<name>/SKILL.md` and are tracked in git. Stow symlinks the `.agents/` directory into `~/.agents/`, and `install.sh` wires them into each agent:
+Cross-machine skill sources are tracked in [`.skills`](.skills) at the repo root — one entry per line, `#` comments and blank lines ignored:
 
-- **Claude Code** — `~/.claude/skills` is symlinked to `~/.agents/skills`
-- **OpenCode** — each skill gets a symlink at `~/.config/opencode/commands/<name>.md` pointing back to its `SKILL.md`
+```
+# format: <source> [skill-name ...]  (defaults to *)
+git@github.com:superhighfives/skills.git dependabot-bundle review-github ...
+git@github.com:vercel-labs/agent-skills.git vercel-composition-patterns ...
+```
 
-To add a new local skill, drop a `SKILL.md` in `.agents/skills/<name>/` and re-run `install.sh` (the linking loop is idempotent).
+`<source>` is anything the `skills` CLI accepts (a git URL, `owner/repo`, or a path). Prefer SSH git URLs over the `owner/repo` shortname — the shortname resolves via the GitHub API and can trip the anonymous rate limit into an interactive `gh` login prompt that hangs a non-interactive run.
 
-### Shared skills
+### Installing
 
-`scripts/install-skills.sh` uses the [`skills`](https://skills.sh) CLI to install skills globally from GitHub repos. These land in `~/.agents/skills/` alongside the local ones, so both agents pick them up automatically.
+`scripts/install-skills.sh` reads `.skills` and installs each source globally via the `skills` CLI:
 
 ```sh
 scripts/install-skills.sh                   # opencode + claude-code
 scripts/install-skills.sh --skip-personal   # opencode only (work machines)
 ```
 
-The default set pulls from [`vercel-labs/agent-skills`](https://github.com/vercel-labs/agent-skills). The fetched content is **committed** to `.agents/skills/` (vendored), so a fresh clone has every skill without a network fetch — and works even if an upstream repo disappears. Update everything later with `npx skills update -g`, which refreshes the folders in place; review and commit the resulting diffs.
+Installed skills land in `~/.agents/skills/` — which is stowed into the repo as `.agents/skills/` — so both agents pick them up automatically. Because they're reproducible from `.skills`, that installed content is **gitignored, not committed**; a fresh clone gets skills by running the script (or `install.sh`, which calls it). `install.sh` also symlinks `~/.claude/skills` → `~/.agents/skills` so Claude Code sees the same set. Update everything later with `npx skills update -g`.
 
 The lock file at `.agents/.skill-lock.json` tracks installed versions but is gitignored — it can contain private skill URLs from `~/.skills.local`.
 

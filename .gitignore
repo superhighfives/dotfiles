@@ -76,6 +76,10 @@ Library/Application Support/Windsurf/
 .config/.DS_Store
 # cog - update-checker runtime state
 .config/cog/
+# agent skills - installed by scripts/install-skills.sh from the tracked
+# .skills source list; reproducible, not committed (see the Skills section
+# in README.md). The .skill-lock.json above is ignored separately.
+.agents/skills/
 
 # Local machine overlays - never commit
 *.local

@@ -435,11 +435,12 @@ else
   print_info "install-skills.sh not found or not executable — skipping"
 fi
 
-# Skill content is committed in this repo under .agents/skills and stowed to
-# ~/.agents/skills (the portable agent-skills convention, shared across tools).
-# Claude Code looks for personal skills in ~/.claude/skills, which stow ignores,
-# so just point that at the shared dir. One symlink - no CLI, node or network -
-# and any `skills` CLI updates landing in ~/.agents flow through automatically.
+# Skills are installed (not committed) into ~/.agents/skills by the script
+# above; the .agents dir itself is stowed from this repo (the portable
+# agent-skills convention, shared across tools). Claude Code looks for personal
+# skills in ~/.claude/skills, which stow ignores, so just point that at the
+# shared dir. One symlink - no extra CLI, node or network - and any `skills`
+# CLI updates landing in ~/.agents flow through automatically.
 if [[ -d "${HOME}/.agents/skills" ]]; then
   print_step "Linking agent skills into Claude Code"
   mkdir -p "${HOME}/.claude"
