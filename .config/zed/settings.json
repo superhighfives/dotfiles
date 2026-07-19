@@ -121,6 +121,10 @@
     "CSS": {
       "language_servers": ["tailwindcss-language-server"],
     },
+    "Swift": {
+      "tab_size": 4,
+      "format_on_save": "off",
+    },
   },
 
   "auto_install_extensions": {
