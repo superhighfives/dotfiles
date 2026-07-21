@@ -49,6 +49,7 @@
     "ort_accelerator": "auto",
     "overlay_position": "bottom",
     "overlay_style": "live",
+    "paste_delay_after_ms": 60,
     "paste_delay_ms": 60,
     "paste_method": "ctrl_v",
     "post_process_api_keys": {
@@ -168,6 +169,7 @@
     "show_whats_new_on_update": true,
     "sound_theme": "marimba",
     "start_hidden": true,
+    "theme": "system",
     "transcribe_accelerator": "auto",
     "transcribe_gpu_device": -1,
     "translate_to_english": false,
