@@ -55,10 +55,11 @@ else
 fi
 
 # --- SSH ---
-# Load SSH keys from macOS Keychain (adds key if passphrase is cached in Keychain)
-if [[ -f ~/.ssh/id_ed25519 ]]; then
-  ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null
-fi
+# Keys load on demand from the macOS Keychain via ~/.ssh/config
+# (AddKeysToAgent + UseKeychain). No ssh-add here: running it during shell
+# startup can trigger a passphrase prompt below the p10k instant-prompt block,
+# which breaks instant prompt. Store the passphrase once with:
+#   ssh-add --apple-use-keychain ~/.ssh/id_ed25519
 
 # --- Aliases ---
 command -v bat &>/dev/null && alias cat='bat'
