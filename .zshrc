@@ -55,11 +55,11 @@ else
 fi
 
 # --- SSH ---
-# Keys load on demand from the macOS Keychain via ~/.ssh/config
-# (AddKeysToAgent + UseKeychain). No ssh-add here: running it during shell
-# startup can trigger a passphrase prompt below the p10k instant-prompt block,
-# which breaks instant prompt. Store the passphrase once with:
-#   ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+# No ssh-add here. Apple's launchd ssh-agent already re-adds the key on login
+# from the Keychain, and ~/.ssh/config (AddKeysToAgent + UseKeychain) covers
+# on-demand loading. A startup ssh-add just races that agent: run early enough
+# it prompts for a passphrase below the p10k instant-prompt block, which breaks
+# instant prompt.
 
 # --- Aliases ---
 command -v bat &>/dev/null && alias cat='bat'

@@ -332,23 +332,25 @@ if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   fi
 else
   print_success "SSH key already exists"
-  # Keys generated before we started storing the passphrase in the Keychain
-  # (install.sh above) never got it cached, so on-demand UseKeychain loading and
-  # any `ssh-add --apple-use-keychain` had nothing to read and prompted on every
-  # boot. Store it now. Silent no-op once the passphrase is in the Keychain.
+  # On a fresh machine the credential Apple's ssh-agent uses to auto-load the
+  # key doesn't exist yet, so cache it once here. Silent no-op if it's already
+  # stored (as it is once macOS has managed the key), so this is safe to re-run.
   if [[ "${INTERACTIVE}" == true ]]; then
     print_info "Ensuring SSH passphrase is cached in the Keychain..."
     ssh-add --apple-use-keychain "${HOME}/.ssh/id_ed25519" \
-      || print_info "Skipped — passphrase not cached (add later with: ssh-add --apple-use-keychain ~/.ssh/id_ed25519)"
+      || print_info "Skipped — add later with: ssh-add --apple-use-keychain ~/.ssh/id_ed25519"
   fi
 fi
 
-# Load keys from the macOS Keychain on demand so we don't need an ssh-add in
-# shell startup (which prompted for a passphrase below p10k's instant-prompt
-# block and broke it). ~/.ssh/config is machine-local and untracked — different
-# laptops have different host/key setups — so we manage just this block via a
-# marker instead of shipping a whole config. Host-specific IdentityAgent blocks
-# elsewhere in the file still win for their hosts (first-match-wins).
+# Make on-demand Keychain loading explicit so we don't need an ssh-add in shell
+# startup. Apple's launchd ssh-agent already re-adds the key on login, but the
+# old startup ssh-add ran below p10k's instant-prompt block before the agent was
+# ready — losing that race, it prompted for a passphrase, and that console
+# prompt broke instant prompt. ~/.ssh/config is machine-local and untracked —
+# different laptops have different host/key setups — so we manage just this
+# block via a marker instead of shipping a whole config. Host-specific
+# IdentityAgent blocks elsewhere in the file still win for their hosts
+# (first-match-wins).
 if [[ -f "${HOME}/.ssh/id_ed25519" ]]; then
   SSH_CONFIG="${HOME}/.ssh/config"
   KEYCHAIN_MARKER="# >>> dotfiles: load default identity from Keychain >>>"
