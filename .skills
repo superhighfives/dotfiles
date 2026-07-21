@@ -21,6 +21,9 @@ git@github.com:superhighfives/skills.git dependabot-bundle review-github review-
 # and the app share one source of truth for the lifecycle.
 git@github.com:superhighfives/plans.git plans
 
+# Emil's design and animation skills
+git@github.com:emilkowalski/skills.git animation-vocabulary apple-design emil-design-eng find-animation-opportunities improve-animations pick-ui-library review-animations
+
 # Vercel Labs agent skills (github.com/vercel-labs/agent-skills)
 git@github.com:vercel-labs/agent-skills.git vercel-composition-patterns vercel-react-best-practices vercel-react-view-transitions web-design-guidelines writing-guidelines
 
