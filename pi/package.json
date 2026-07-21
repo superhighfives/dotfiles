@@ -1,0 +1,19 @@
+{
+  "name": "pi-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.9.0",
+  "workspaces": [
+    "agent/extensions/web-tools",
+    "agent/extensions/pi-skill-toggle"
+  ],
+  "scripts": {
+    "check": "npm run check --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "^0.80.8",
+    "@earendil-works/pi-coding-agent": "^0.80.8",
+    "@earendil-works/pi-tui": "^0.80.8"
+  }
+}

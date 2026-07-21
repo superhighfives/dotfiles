@@ -29,6 +29,11 @@ Icon
 # Windsurf - app state (Windsurf removed from stack)
 Library/Application Support/Windsurf/
 
+# Pi workspace - deps installed by `npm install` in dotfiles/pi/
+pi/node_modules/
+pi/**/node_modules/
+pi/package-lock.json
+
 # --- .config: allowlist model (default-deny) ---
 # Everything under .config/ is ignored unless re-included with a `!` line
 # below, so a newly installed tool's credentials can't silently land in this

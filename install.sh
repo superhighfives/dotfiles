@@ -552,6 +552,55 @@ if [[ -x "${pi_sync_script}" ]] && command -v pi &>/dev/null; then
   print_success "Pi config rendered"
 fi
 
+# --- Pi extensions and workspace ---
+# Source of truth is dotfiles/pi/. Symlink the workspace root files, cloak
+# config, themes, and each extension entry into ~/.pi/. Symlinks are used
+# per-file so that anything unmanaged already living in ~/.pi/agent/extensions/
+# (e.g. root-owned installer artifacts) is left alone.
+if [[ -d "${HOME}/.pi/agent" ]]; then
+  print_step "Linking pi workspace and extensions"
+  pi_src="${DOTFILES_DIR}/pi"
+
+  # Workspace root files
+  for f in package.json tsconfig.json AGENTS.md; do
+    [[ -f "${pi_src}/${f}" ]] || continue
+    ln -sfn "${pi_src}/${f}" "${HOME}/.pi/${f}"
+  done
+
+  # Cloak config
+  if [[ -f "${pi_src}/agent/cloak.json" ]]; then
+    ln -sfn "${pi_src}/agent/cloak.json" "${HOME}/.pi/agent/cloak.json"
+  fi
+
+  # Themes directory (whole dir; safe to symlink since it's a new namespace)
+  if [[ -d "${pi_src}/agent/themes" ]]; then
+    [[ -L "${HOME}/.pi/agent/themes" ]] || rm -rf "${HOME}/.pi/agent/themes"
+    ln -sfn "${pi_src}/agent/themes" "${HOME}/.pi/agent/themes"
+  fi
+
+  # Extensions - per-entry symlinks so we don't clobber existing files
+  mkdir -p "${HOME}/.pi/agent/extensions"
+  for entry in "${pi_src}"/agent/extensions/*; do
+    [[ -e "${entry}" ]] || continue
+    name="$(basename "${entry}")"
+    ln -sfn "${entry}" "${HOME}/.pi/agent/extensions/${name}"
+  done
+
+  print_success "Linked pi workspace files into ~/.pi/"
+
+  # Install workspace dependencies into dotfiles/pi/. Pi loads extensions from
+  # ~/.pi/agent/extensions/*, which are symlinks into dotfiles/pi/. Node's
+  # realpath-based module resolution walks up from the linked source, so the
+  # node_modules must live next to the source (dotfiles/pi/), not next to the
+  # symlinks (~/.pi/).
+  if command -v npm &>/dev/null; then
+    print_step "Installing pi workspace dependencies"
+    (cd "${pi_src}" && npm install --silent) \
+      && print_success "Pi workspace dependencies installed" \
+      || print_error "npm install failed in ${pi_src}"
+  fi
+fi
+
 # --- Secrets ---
 print_step "Setting up secrets"
 if [[ ! -f "${HOME}/.secrets" ]]; then
