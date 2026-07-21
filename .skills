@@ -14,7 +14,12 @@
 # skills CLI resolve the repo via the GitHub API, which trips the anonymous
 # 60/hr rate limit and drops into an interactive `gh` login prompt that hangs a
 # non-interactive run. The SSH URL just `git clone`s (SSH key auth), no API call.
-git@github.com:superhighfives/skills.git dependabot-bundle review-github review-gitlab review-sentry planning writing-change-descriptions
+git@github.com:superhighfives/skills.git dependabot-bundle review-github review-gitlab review-sentry writing-change-descriptions
+
+# Planning skill — lives in the plans app repo (github.com/superhighfives/plans),
+# co-located with the app that reads the plans/ structure it defines, so the skill
+# and the app share one source of truth for the lifecycle.
+git@github.com:superhighfives/plans.git planning
 
 # Vercel Labs agent skills (github.com/vercel-labs/agent-skills)
 git@github.com:vercel-labs/agent-skills.git vercel-composition-patterns vercel-react-best-practices vercel-react-view-transitions web-design-guidelines writing-guidelines
