@@ -1,0 +1,19 @@
+.zshrc
+  s_027020d9f67627::t_cfcbd20309d251 58-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "01f64e00cd0927aee80701511019239a5b29aa94",
+  "prompts": {},
+  "sessions": {
+    "s_027020d9f67627": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_08df8382effeqqXxIcfUku0YC0",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    }
+  }
+}
