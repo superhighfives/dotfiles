@@ -1,0 +1,163 @@
+pi/agent/cloak.json
+  s_027020d9f67627::t_ce3a02ceac0785 1-58
+pi/agent/extensions/answer.ts
+  s_027020d9f67627::t_9cca4d717fe8e3 1-621
+pi/agent/extensions/continue-after-compaction.ts
+  s_027020d9f67627::t_916b2e5acf6089 1-55
+pi/agent/extensions/git-interceptor.ts
+  s_027020d9f67627::t_8dc5054a1e500a 1-39
+pi/agent/extensions/pi-skill-toggle/package.json
+  s_027020d9f67627::t_07ea6405a44e5e 1-23
+pi/agent/extensions/pi-skill-toggle/src/apply/planner.test.ts
+  s_027020d9f67627::t_7b6b9ec59162bf 1-78
+pi/agent/extensions/pi-skill-toggle/src/apply/planner.ts
+  s_027020d9f67627::t_1439915eb704b9 1-49
+pi/agent/extensions/pi-skill-toggle/src/apply/writer.ts
+  s_027020d9f67627::t_1e8698c037bd2b 1-36
+pi/agent/extensions/pi-skill-toggle/src/command.ts
+  s_027020d9f67627::t_7bc6cbd832cacc 1-75
+pi/agent/extensions/pi-skill-toggle/src/discovery/pi-paths.ts
+  s_027020d9f67627::t_a5c4283b67461c 1-65
+pi/agent/extensions/pi-skill-toggle/src/discovery/skill-locator.test.ts
+  s_027020d9f67627::t_a364c7171a76a2 1-110
+pi/agent/extensions/pi-skill-toggle/src/discovery/skill-locator.ts
+  s_027020d9f67627::t_fe3f8e4b3475a8 1-96
+pi/agent/extensions/pi-skill-toggle/src/frontmatter/parser.ts
+  s_027020d9f67627::t_5a0639774b21a7 1-83
+pi/agent/extensions/pi-skill-toggle/src/frontmatter/patcher.test.ts
+  s_027020d9f67627::t_a847b621e635f5 1-75
+pi/agent/extensions/pi-skill-toggle/src/frontmatter/patcher.ts
+  s_027020d9f67627::t_2c6dcf5a1bc1f1 1-79
+pi/agent/extensions/pi-skill-toggle/src/frontmatter/validation.test.ts
+  s_027020d9f67627::t_1e1a303473b80f 1-27
+pi/agent/extensions/pi-skill-toggle/src/frontmatter/validation.ts
+  s_027020d9f67627::t_ef1e3b8fbb1c3d 1-70
+pi/agent/extensions/pi-skill-toggle/src/index.ts
+  s_027020d9f67627::t_eddb98772735b2 1-26
+pi/agent/extensions/pi-skill-toggle/src/inventory/classifier.ts
+  s_027020d9f67627::t_92a254070afe67 1-31
+pi/agent/extensions/pi-skill-toggle/src/inventory/loader.ts
+  s_027020d9f67627::t_bdd0462a29f1e2 1-57
+pi/agent/extensions/pi-skill-toggle/src/ports/fs.ts
+  s_027020d9f67627::t_d9fd9b880728f4 1-58
+pi/agent/extensions/pi-skill-toggle/src/types.ts
+  s_027020d9f67627::t_dd9014d2621fcc 1-74
+pi/agent/extensions/pi-skill-toggle/src/ui/overlay.ts
+  s_027020d9f67627::t_3d9d864a3f1cf7 1-262
+pi/agent/extensions/pi-skill-toggle/src/ui/render.ts
+  s_027020d9f67627::t_ae02a320ff0eac 1-33
+pi/agent/extensions/pi-skill-toggle/src/ui/view-model.ts
+  s_027020d9f67627::t_c950e1e690cbcc 1-33
+pi/agent/extensions/pi-skill-toggle/tsconfig.json
+  s_027020d9f67627::t_918c19686efe30 1-14
+pi/agent/extensions/web-tools/README.md
+  s_027020d9f67627::t_44f802592fcd00 1-112
+pi/agent/extensions/web-tools/fetch-page.ts
+  s_027020d9f67627::t_f5b3b3385ca1e4 1-170
+pi/agent/extensions/web-tools/html.ts
+  s_027020d9f67627::t_69f3e754f491b6 1-391
+pi/agent/extensions/web-tools/index.ts
+  s_027020d9f67627::t_2a99d9eab7c297 1-8
+pi/agent/extensions/web-tools/network.ts
+  s_027020d9f67627::t_75a71a7d18592e 1-573
+pi/agent/extensions/web-tools/package.json
+  s_027020d9f67627::t_5fb6f29afae2a9 1-28
+pi/agent/extensions/web-tools/providers/exa-protocol.ts
+  s_027020d9f67627::t_48c6c1e0870a73 1-189
+pi/agent/extensions/web-tools/providers/exa-results.ts
+  s_027020d9f67627::t_b10661f1644155 1-192
+pi/agent/extensions/web-tools/providers/exa.ts
+  s_027020d9f67627::t_bc230c316ee234 1-200
+pi/agent/extensions/web-tools/providers/types.ts
+  s_027020d9f67627::t_ac569de5720cb1 1-29
+pi/agent/extensions/web-tools/public-web-client.ts
+  s_027020d9f67627::t_cec0eb477f0a27 1-44
+pi/agent/extensions/web-tools/redacted.ts
+  s_027020d9f67627::t_c42f4142fd8a9a 1-55
+pi/agent/extensions/web-tools/render.ts
+  s_027020d9f67627::t_cdd38964c2bd2a 1-34
+pi/agent/extensions/web-tools/result.ts
+  s_027020d9f67627::t_7da8f5c10a2df7 1-24
+pi/agent/extensions/web-tools/search-web.ts
+  s_027020d9f67627::t_8909069043f8f7 1-51
+pi/agent/extensions/web-tools/settings.ts
+  s_027020d9f67627::t_b20eb5fdf4e54b 1-125
+pi/agent/extensions/web-tools/temp.ts
+  s_027020d9f67627::t_90565bd3ca6986 1-10
+pi/agent/extensions/web-tools/test/exa-protocol.test.ts
+  s_027020d9f67627::t_d4c4147159dd4c 1-76
+pi/agent/extensions/web-tools/test/exa-provider.test.ts
+  s_027020d9f67627::t_b828838b6f78d5 1-97
+pi/agent/extensions/web-tools/test/exa-results.test.ts
+  s_027020d9f67627::t_2b033ba9fa0081 1-110
+pi/agent/extensions/web-tools/test/fetch-page.test.ts
+  s_027020d9f67627::t_7d4929036f9391 1-101
+pi/agent/extensions/web-tools/test/html.test.ts
+  s_027020d9f67627::t_de1f8f0b49d7ab 1-83
+pi/agent/extensions/web-tools/test/network.test.ts
+  s_027020d9f67627::t_651850cee17642 1-188
+pi/agent/extensions/web-tools/test/redacted.test.ts
+  s_027020d9f67627::t_fa5d52e3cb1a56 1-17
+pi/agent/extensions/web-tools/test/result.test.ts
+  s_027020d9f67627::t_eb4e7d0d139441 1-11
+pi/agent/extensions/web-tools/test/search-web.test.ts
+  s_027020d9f67627::t_0fee30239136a8 1-54
+pi/agent/extensions/web-tools/test/settings.test.ts
+  s_027020d9f67627::t_18cde4fef4f3c7 1-27
+pi/agent/extensions/web-tools/test/tool-output.test.ts
+  s_027020d9f67627::t_fc3029a8db9eda 1-53
+pi/agent/extensions/web-tools/test/truncation.test.ts
+  s_027020d9f67627::t_0e0d2b43e4b074 1-20
+pi/agent/extensions/web-tools/test/types.test.ts
+  s_027020d9f67627::t_7302cd53c3ea9c 1-46
+pi/agent/extensions/web-tools/test/webfetch-input.test.ts
+  s_027020d9f67627::t_ac91a22e50644c 1-63
+pi/agent/extensions/web-tools/test/webfetch.test.ts
+  s_027020d9f67627::t_5fc5c0b9198693 1-58
+pi/agent/extensions/web-tools/test/websearch-adapter.test.ts
+  s_027020d9f67627::t_8b32a57696f7a3 1-73
+pi/agent/extensions/web-tools/test/websearch-input.test.ts
+  s_027020d9f67627::t_f1b5d770801206 1-69
+pi/agent/extensions/web-tools/test/websearch.test.ts
+  s_027020d9f67627::t_aa1aac893b087a 1-27
+pi/agent/extensions/web-tools/tool-output.ts
+  s_027020d9f67627::t_d724b3001139cf 1-216
+pi/agent/extensions/web-tools/truncation.ts
+  s_027020d9f67627::t_b66b2a7fd50833 1-54
+pi/agent/extensions/web-tools/tsconfig.json
+  s_027020d9f67627::t_f5102b80f8225b 1-35
+pi/agent/extensions/web-tools/types.ts
+  s_027020d9f67627::t_14b7b970a33115 1-154
+pi/agent/extensions/web-tools/vendor.d.ts
+  s_027020d9f67627::t_6390d735d55fdf 1-8
+pi/agent/extensions/web-tools/webfetch-input.ts
+  s_027020d9f67627::t_e6f96cb68d9534 1-89
+pi/agent/extensions/web-tools/webfetch.ts
+  s_027020d9f67627::t_4b1b18d375ba8a 1-242
+pi/agent/extensions/web-tools/websearch-input.ts
+  s_027020d9f67627::t_468dff852da473 1-97
+pi/agent/extensions/web-tools/websearch.ts
+  s_027020d9f67627::t_c315e0687edade 1-226
+pi/agent/extensions/worker-configuration-guard.ts
+  s_027020d9f67627::t_67aae3991850da 1-75
+pi/agent/themes/catppuccin-macchiato.json
+  s_027020d9f67627::t_61ab17bb066e1c 1-91
+pi/tsconfig.json
+  s_027020d9f67627::t_82161d45d33574 1-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2d6057fa9e6b79e9b6f1e4aeeff7dde7a620c498",
+  "prompts": {},
+  "sessions": {
+    "s_027020d9f67627": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_08df8382effeqqXxIcfUku0YC0",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    }
+  }
+}
