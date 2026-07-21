@@ -1,0 +1,19 @@
+.skills
+  s_027020d9f67627::t_6c5911cc62fb5a 24-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "64304945946b902c1aa995a437183e1a89c9f4f9",
+  "prompts": {},
+  "sessions": {
+    "s_027020d9f67627": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_08df8382effeqqXxIcfUku0YC0",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    }
+  }
+}
