@@ -127,6 +127,40 @@ func gs() {
   git switch $(git for-each-ref --sort=-committerdate --format='%(refname:short)' 'refs/heads/**' | fzf --preview='git log main..{}')
 }
 
+# killport - kill whatever process is listening on the given TCP port(s) (--force sends SIGKILL)
+#   killport 3000         killport 3000 --force         killport 3000..3003
+func killport() {
+  local spec="" sig="TERM"
+  for arg in "$@"; do
+    case "$arg" in
+      --force|-9) sig="KILL" ;;
+      *) spec="$arg" ;;
+    esac
+  done
+  if [[ -z "$spec" ]]; then
+    echo "usage: killport <port|start..end> [--force]" >&2
+    return 1
+  fi
+
+  local -a ports
+  if [[ "$spec" == *..* ]]; then
+    ports=({${spec%%..*}..${spec##*..}})
+  else
+    ports=("$spec")
+  fi
+
+  local port pids hit=0
+  for port in "${ports[@]}"; do
+    pids=$(lsof -ti "tcp:$port")
+    [[ -z "$pids" ]] && continue
+    echo "$pids" | xargs kill "-$sig" && hit=1
+  done
+  if (( ! hit )); then
+    echo "killport: nothing listening on $spec" >&2
+    return 1
+  fi
+}
+
 # --- rclone mount aliases (conditional) ---
 if command -v rclone &>/dev/null; then
   alias mount-brightly='mount-encrypted-storage brightly'
