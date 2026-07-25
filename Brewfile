@@ -45,6 +45,7 @@ brew "unar"                          # universal archive extractor (rar, 7z, zip
 cask "1password"                     # password manager
 cask "caffeine"                      # prevent mac from sleeping
 cask "figma"                         # design tool
+cask "gcloud-cli"                    # Google Cloud SDK CLI
 cask "ghostty"                       # terminal emulator
 cask "github"                        # GitHub Desktop
 cask "google-chrome"                 # web browser
