@@ -85,6 +85,8 @@ The install script handles everything in order:
 | `.config/gh/config.yml` | GitHub CLI settings |
 | `.config/ghostty/config` | Ghostty terminal settings |
 | `.config/opencode/opencode.json` | OpenCode AI assistant config |
+| `.config/opencode/INSTRUCTIONS.md` | Global OpenCode rules — code/git conventions, orchestration posture, writing style |
+| `.config/opencode/agents/` | Read-only specialist subagents (reviewer, oracle, planner, security, …) |
 
 | `Library/Application Support/com.pais.handy/settings_store.json` | Handy speech-to-text settings |
 | `.local/bin/mount-encrypted-storage` | rclone NFS mount helper script |
@@ -184,6 +186,41 @@ git@gitlab.example.com:team/skills.git
 ```
 
 Each line runs with `DISABLE_TELEMETRY=1`. See the [local overlays](#local-overlays) table for how this fits with the other `*.local` files.
+
+## Agents
+
+Skills are just markdown context. Agents are something else: read-only
+specialist subagents the primary agent calls out to. They live in
+[`.config/opencode/agents/`](.config/opencode/agents/) (stowed to
+`~/.config/opencode/agents/`) and are invoked with `@name` or dispatched
+automatically for a matching task.
+
+| Agent | Role |
+|-------|------|
+| `reviewer` | Adversarial code review through the five `control-room` lenses |
+| `style-reviewer` | Style/smells, runs the project's configured linters in check mode |
+| `security-auditor` | Auth, authz, input validation, data exposure, crypto, config |
+| `pentester` | Offensive review — traces attack paths from untrusted input to sink |
+| `secrets-deps-scanner` | Hardcoded secrets and vulnerable/risky dependencies |
+| `challenger` | Pressure-tests reasoning, plans, and conclusions (not line-level code) |
+| `oracle` | High-context second opinion; catches drift from earlier decisions |
+| `planner` | Turns a goal into a concrete, ordered implementation plan |
+| `researcher` | Web research brief; the only agent with `webfetch` allowed |
+
+They're all read-only (`permission.edit: deny`) by design — the orchestration
+posture in [`INSTRUCTIONS.md`](.config/opencode/INSTRUCTIONS.md) keeps a
+**single writer** (the primary agent) and treats these as advisors that report
+evidence, never edit. Match effort to risk: do the work directly by default,
+and escalate to `@planner`, a parallel review, or a security sweep only when a
+change is non-trivial, risky, or security-sensitive.
+
+The review agents speak the same standard as CI: the
+[`control-room`](https://github.com/superhighfives/control-room) five lenses
+(security, code quality, performance, docs, agents), where severity decides
+blocking and reviews converge across rounds instead of manufacturing fresh
+nits. So a local `@reviewer` pass, the `review-github`/`review-gitlab --loop`
+skills, and a `control-room` CI run all read a change the same way — one
+standard, three surfaces.
 
 ## Post-Install (Manual Steps)
 

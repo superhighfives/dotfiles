@@ -26,6 +26,15 @@
   - code snippet showing the user-facing result (if applicable)
   - brief mention of (docs, tests, etc) as applicable
 
+### orchestration
+
+* **single writer.** one coherent write path - you. the subagents in `agents/` (`reviewer`, `style-reviewer`, `security-auditor`, `pentester`, `secrets-deps-scanner`, `challenger`, `oracle`, `planner`, `researcher`) are advisors, reviewers, and scouts. keep them read-only; they report, you decide and edit.
+* **match effort to risk.** do the work directly by default. escalate to planning (`@planner`), parallel review, or a security sweep only when the change is non-trivial, risky, broad, or security-sensitive.
+* **fresh-context review.** point review subagents at the actual repo and diff, not at the conversation. they should read the code directly and return evidence with file:line.
+* **synthesize, don't rubber-stamp.** sort review feedback into fix-now / optional / ignore. don't apply everything blindly - reviewers are frequently wrong or nitpicky. escalate an unapproved scope/architecture/product decision instead of deciding silently.
+* **one review standard, two surfaces.** local review (the `reviewer` agent, the `review-github`/`review-gitlab --loop` skills) and CI review both use the `control-room` standard (`superhighfives/control-room`): five lenses (security, code quality, performance, docs, agents), severity decides blocking, and reviews converge across rounds rather than manufacturing fresh nits. keep local and CI speaking the same language.
+* **model tiers.** agents run on the session's default model unless a stronger tier is warranted. reserve the strongest reasoning for `oracle` and `challenger` (deep second opinions); everything else inherits. pin `model:` on an agent only when a specific tier genuinely matters.
+
 ### general
 
 * never say "you're absolutely right" - agree or disagree directly, then move on.
