@@ -42,7 +42,7 @@ install_skill() {
     --global \
     --agent "${agents[@]}" \
     --skill "${names[@]}" \
-    --yes
+    --yes </dev/null
 }
 
 # read_skills_file <path> [env-prefix]
