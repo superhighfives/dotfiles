@@ -71,6 +71,26 @@ print_error()   { printf "%s %b\n" "${red}✖${reset}" "$1"; }
 print_info()    { printf "%s %b\n" "${blue}ⓘ${reset}" "$1"; }
 print_step()    { printf "\n%s %b\n" "${yellow}→${reset}" "$1"; }
 
+# Run `brew bundle` with retries. Bottle downloads from ghcr.io occasionally
+# fail with transient network errors (e.g. "curl: (35) Send failure: Broken
+# pipe"). `brew bundle` is idempotent — already-installed packages are skipped
+# with "Using ..." — so retrying only re-attempts what failed.
+brew_bundle() {
+  local attempt=1 max=3
+  while true; do
+    if brew bundle "$@"; then
+      return 0
+    fi
+    if (( attempt >= max )); then
+      print_error "brew bundle failed after ${max} attempts"
+      return 1
+    fi
+    print_info "brew bundle failed (attempt ${attempt}/${max}), retrying in $((attempt * 5))s..."
+    sleep $((attempt * 5))
+    ((attempt++))
+  done
+}
+
 # --- Banner ---
 cat <<EOF
 ${yellow}
@@ -193,7 +213,7 @@ for tap in "${TRUSTED_TAPS[@]}"; do
 done
 
 if [[ -f "${DOTFILES_DIR}/Brewfile" ]]; then
-  brew bundle --file="${DOTFILES_DIR}/Brewfile"
+  brew_bundle --file="${DOTFILES_DIR}/Brewfile"
   print_success "Homebrew packages installed"
 else
   print_error "Brewfile not found at ${DOTFILES_DIR}/Brewfile"
@@ -204,14 +224,14 @@ if [[ "${SKIP_PERSONAL}" == true ]]; then
   print_info "Skipping personal apps (--skip-personal)"
 elif [[ -f "${DOTFILES_DIR}/Brewfile.personal" ]]; then
   print_info "Installing personal apps..."
-  brew bundle --file="${DOTFILES_DIR}/Brewfile.personal"
+  brew_bundle --file="${DOTFILES_DIR}/Brewfile.personal"
   print_success "Personal apps installed"
 fi
 
 # Install local-only apps if ~/Brewfile.local is present
 if [[ -f "${HOME}/Brewfile.local" ]]; then
   print_info "Installing local-only apps from ~/Brewfile.local..."
-  brew bundle --file="${HOME}/Brewfile.local"
+  brew_bundle --file="${HOME}/Brewfile.local"
   print_success "Local-only apps installed"
 fi
 
