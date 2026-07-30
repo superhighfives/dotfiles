@@ -1,0 +1,495 @@
+#!/usr/bin/env bash
+# shepherd — install and manage unattended PR/MR watch jobs (launchd/systemd).
+#
+# Pairs with the `shepherd` agent skill: the skill decides WHAT to do each tick;
+# this CLI owns the scheduler mechanics (writing units, loading, listing,
+# stopping) so they're deterministic and tested instead of hand-assembled.
+#
+# The credential is never embedded in a unit. Jobs run through a shim
+# (~/.config/shepherd/exec.sh) that resolves the credential at runtime from
+# $CLAUDE_CODE_OAUTH_TOKEN, else ~/.config/shepherd/token. `install` requires
+# one of those (or it errors); if the env var is set it seeds the token file so
+# the detached tick can read it. Rotate with `shepherd token`.
+#
+#   shepherd install [PR] [-C dir] [--runner claude|opencode] [--interval sec] [--no-start]
+#   shepherd list | status <id> | logs <id> [-f] | restart <id>
+#   shepherd stop <id> [--purge] | killall [--yes]
+#   shepherd token                 # write ~/.config/shepherd/token (from env or prompt)
+#   shepherd doctor                # verify shim, dirs, credential, PATH, runner
+#   shepherd setup | self-update   # (re)link the binary + shim; pull latest
+#
+# Implements macOS/launchd; on Linux it points you at the skill's systemd
+# section rather than shipping an untested code path.
+
+set -euo pipefail
+
+STATE_DIR="${SHEPHERD_STATE_DIR:-$HOME/.opencode/shepherd}"
+LOG_DIR="${SHEPHERD_LOG_DIR:-$HOME/.config/opencode/logs}"
+SHIM="$HOME/.config/shepherd/exec.sh"
+LA_DIR="$HOME/Library/LaunchAgents"
+LABEL_PREFIX="com.shepherd"
+INTERVAL_DEFAULT=600
+
+die()  { printf 'shepherd: %s\n' "$*" >&2; exit 1; }
+warn() { printf 'shepherd: %s\n' "$*" >&2; }
+info() { printf '%s\n' "$*"; }
+need() { command -v "$1" >/dev/null 2>&1 || die "missing required command: $1"; }
+os()   { case "$(uname -s)" in Darwin) echo macos;; Linux) echo linux;; *) echo other;; esac; }
+
+require_macos() {
+  [ "$(os)" = macos ] || die "the CLI currently implements launchd (macOS) only.
+On Linux, follow the systemd section of the shepherd skill. (PRs welcome.)"
+}
+
+# ---- the credential shim (managed; overwritten to stay current) ------------
+ensure_shim() {
+  mkdir -p "$(dirname "$SHIM")"
+  cat > "$SHIM" <<'SH'
+#!/bin/sh
+# shepherd credential shim — managed by the shepherd CLI, do not edit.
+# Resolves the headless credential at RUNTIME and execs the command passed as
+# arguments, so no scheduler unit ever contains the secret. Source order:
+#   1. $CLAUDE_CODE_OAUTH_TOKEN / $ANTHROPIC_API_KEY already in the environment
+#   2. ~/.config/shepherd/token  /  ~/.config/shepherd/api-key  (chmod 600)
+# Rotating = `shepherd token` (or edit the file); jobs pick it up next tick.
+[ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -r "$HOME/.config/shepherd/token" ]   && CLAUDE_CODE_OAUTH_TOKEN="$(cat "$HOME/.config/shepherd/token")"
+[ -z "${ANTHROPIC_API_KEY:-}" ]       && [ -r "$HOME/.config/shepherd/api-key" ] && ANTHROPIC_API_KEY="$(cat "$HOME/.config/shepherd/api-key")"
+[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN
+[ -n "${ANTHROPIC_API_KEY:-}" ]       && export ANTHROPIC_API_KEY
+exec "$@"
+SH
+  chmod 700 "$SHIM"
+}
+
+# ---- credential resolution -------------------------------------------------
+# Contract: check $CLAUDE_CODE_OAUTH_TOKEN, then ~/.config/shepherd/token, else
+# error. launchd/systemd ticks run in a bare env and can't see the shell var, so
+# when the var IS set at install time we seed the file (that's the runtime
+# source). Only enforced for the claude runner; opencode uses its own auth.
+TOKEN_FILE="$HOME/.config/shepherd/token"
+ensure_credential() {
+  if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+    if [ ! -s "$TOKEN_FILE" ]; then
+      mkdir -p "$(dirname "$TOKEN_FILE")"
+      ( umask 177; printf '%s' "$CLAUDE_CODE_OAUTH_TOKEN" > "$TOKEN_FILE" )
+      chmod 600 "$TOKEN_FILE"
+      info "seeded $TOKEN_FILE from \$CLAUDE_CODE_OAUTH_TOKEN (${#CLAUDE_CODE_OAUTH_TOKEN} bytes)"
+    fi
+    return 0
+  fi
+  [ -s "$TOKEN_FILE" ] && return 0
+  die "no Claude credential found. Fix one, then retry:
+  - export CLAUDE_CODE_OAUTH_TOKEN=...   (get it with: claude setup-token), or
+  - populate $TOKEN_FILE   (run: shepherd token)"
+}
+
+# ---- resolve this script's real path (follow symlinks; macOS has no readlink -f)
+resolve_self() {
+  local s="${BASH_SOURCE[0]}" t
+  while [ -L "$s" ]; do
+    t="$(readlink "$s")"
+    case "$t" in /*) s="$t";; *) s="$(cd "$(dirname "$s")" && pwd)/$t";; esac
+  done
+  printf '%s' "$(cd "$(dirname "$s")" && pwd)/$(basename "$s")"
+}
+
+link_self() { # ensure ~/.local/bin/shepherd -> this script
+  local self; self="$(resolve_self)"
+  mkdir -p "$HOME/.local/bin"
+  ln -sf "$self" "$HOME/.local/bin/shepherd"
+  info "linked ~/.local/bin/shepherd -> $self"
+}
+
+# ---- git remote parsing: sets PLATFORM, OWNER_REPO, SLUG -------------------
+parse_remote() {
+  local url="$1" host path
+  case "$url" in
+    git@*)              host="${url#git@}"; host="${host%%:*}"; path="${url#*:}" ;;
+    ssh://*)            path="${url#ssh://}"; path="${path#*@}"; host="${path%%/*}"; path="${path#*/}" ;;
+    https://*|http://*) path="${url#*://}"; host="${path%%/*}"; path="${path#*/}" ;;
+    *) die "unrecognized git remote URL: $url" ;;
+  esac
+  path="${path%.git}"
+  case "$host" in
+    *gitlab*) PLATFORM=gitlab ;;
+    *github*) PLATFORM=github ;;
+    *) die "unknown git host '$host' (not github/gitlab)" ;;
+  esac
+  OWNER_REPO="$path"
+  SLUG="$(printf '%s' "$path" | tr '/' '-')"
+}
+
+label_for() { printf '%s.%s-%s' "$LABEL_PREFIX" "$1" "$2"; } # slug id
+plist_for() { printf '%s/%s.plist' "$LA_DIR" "$(label_for "$1" "$2")"; }
+state_for() { printf '%s/%s-%s-%s.json' "$STATE_DIR" "$1" "$2" "$3"; } # platform slug id
+log_for()   { printf '%s/shepherd-%s-%s.log' "$LOG_DIR" "$1" "$2"; }   # slug id
+
+is_loaded() { launchctl list 2>/dev/null | awk -v l="$1" '$3==l {found=1} END{exit !found}'; }
+
+# state file basename (without .json) -> echoes "platform slug id"
+job_fields_from_plist() {
+  local label="$1" rest slug id
+  rest="${label#"$LABEL_PREFIX".}"     # slug-id
+  id="${rest##*-}"
+  slug="${rest%-*}"
+  printf '%s %s' "$slug" "$id"
+}
+
+# ---- install ---------------------------------------------------------------
+cmd_install() {
+  require_macos
+  need git
+  local pr="" dir="$PWD" runner="" interval="$INTERVAL_DEFAULT" start=1
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -C|--dir)     dir="$2"; shift 2 ;;
+      --runner)     runner="$2"; shift 2 ;;
+      --interval)   interval="$2"; shift 2 ;;
+      --no-start)   start=0; shift ;;
+      -*)           die "install: unknown flag $1" ;;
+      *)            pr="$1"; shift ;;
+    esac
+  done
+  [ -d "$dir" ] || die "not a directory: $dir"
+  local url; url="$(git -C "$dir" remote get-url origin 2>/dev/null)" || die "no git remote 'origin' in $dir"
+  parse_remote "$url"
+
+  # resolve PR/MR number
+  if [ -z "$pr" ]; then
+    if [ "$PLATFORM" = github ]; then
+      need gh
+      pr="$(cd "$dir" && gh pr view --json number -q .number 2>/dev/null)" \
+        || die "no PR for the current branch; pass one: shepherd install <pr>"
+    else
+      need glab
+      pr="$(cd "$dir" && glab mr view --output json 2>/dev/null | sed -n 's/.*"iid":[[:space:]]*\([0-9]*\).*/\1/p' | head -1)" \
+        || die "no MR for the current branch; pass one: shepherd install <iid>"
+    fi
+  fi
+  [ -n "$pr" ] || die "could not determine PR/MR number"
+
+  # resolve runner + binary
+  if [ -z "$runner" ]; then
+    if command -v claude >/dev/null 2>&1; then runner=claude
+    elif command -v opencode >/dev/null 2>&1; then runner=opencode
+    else die "neither 'claude' nor 'opencode' found on PATH"; fi
+  fi
+  local runner_bin; runner_bin="$(command -v "$runner")" || die "runner not found: $runner"
+
+  # credential pre-flight (claude runner): $CLAUDE_CODE_OAUTH_TOKEN -> token file -> error
+  [ "$runner" = claude ] && ensure_credential
+
+  # environment pieces for the bare launchd PATH
+  local homebrew_bin shims_dir path_env
+  homebrew_bin="$(dirname "$(command -v gh 2>/dev/null || command -v "$runner")")"
+  shims_dir=""
+  for d in "$HOME/.local/share/mise/shims" "$HOME/.asdf/shims"; do
+    [ -d "$d" ] && { shims_dir="$d"; break; }
+  done
+  if [ -n "$shims_dir" ]; then
+    path_env="$homebrew_bin:$shims_dir:/usr/bin:/bin:/usr/sbin:/sbin"
+  else
+    path_env="$homebrew_bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  fi
+
+  ensure_shim
+  mkdir -p "$STATE_DIR" "$LOG_DIR" "$LA_DIR"
+
+  local label plist state log prompt
+  label="$(label_for "$SLUG" "$pr")"
+  plist="$(plist_for "$SLUG" "$pr")"
+  state="$(state_for "$PLATFORM" "$SLUG" "$pr")"
+  log="$(log_for "$SLUG" "$pr")"
+  prompt="Use the shepherd skill for one tick: $PLATFORM $OWNER_REPO #$pr. Load state from $state, diff live state, act on changes, update state, then exit. Do not re-install the schedule."
+
+  # runner-specific argument block
+  local args_block
+  if [ "$runner" = claude ]; then
+    args_block=$(printf '    <string>%s</string>\n    <string>-p</string>\n    <string>%s</string>\n    <string>--permission-mode</string>\n    <string>bypassPermissions</string>' "$runner_bin" "$prompt")
+  else
+    args_block=$(printf '    <string>%s</string>\n    <string>run</string>\n    <string>%s</string>\n    <string>--title</string>\n    <string>shepherd-%s</string>' "$runner_bin" "$prompt" "$pr")
+  fi
+
+  # if a job is already loaded for this id, unload before rewriting
+  is_loaded "$label" && launchctl unload "$plist" 2>/dev/null || true
+
+  cat > "$plist" <<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>$label</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>$SHIM</string>
+$args_block
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>$path_env</string>
+  </dict>
+  <key>WorkingDirectory</key>
+  <string>$dir</string>
+  <key>StartInterval</key>
+  <integer>$interval</integer>
+  <key>StandardOutPath</key>
+  <string>$log</string>
+  <key>StandardErrorPath</key>
+  <string>$log</string>
+</dict>
+</plist>
+XML
+  chmod 600 "$plist"
+  plutil -lint "$plist" >/dev/null || die "generated an invalid plist: $plist"
+
+  # seed minimal state if absent (tick will fill the rest)
+  [ -f "$state" ] || printf '{"platform":"%s","repo":"%s","id":%s,"runner":"%s"}\n' \
+    "$PLATFORM" "$OWNER_REPO" "$pr" "$runner" > "$state"
+
+  launchctl load "$plist" || die "launchctl load failed"
+  info "installed $label -> $OWNER_REPO #$pr ($runner, every ${interval}s)"
+
+  if [ "$start" -eq 1 ]; then
+    launchctl kickstart -k "gui/$(id -u)/$label" 2>/dev/null || true
+    info "kicked off a first tick — check: shepherd logs $pr"
+  else
+    info "loaded (not started); first tick fires within ${interval}s"
+  fi
+}
+
+# ---- discovery helpers -----------------------------------------------------
+# echo every installed job's "slug id plist" (from plist files on disk)
+each_job() {
+  local p base
+  for p in "$LA_DIR/$LABEL_PREFIX".*.plist; do
+    [ -e "$p" ] || continue
+    base="$(basename "$p" .plist)"
+    set -- $(job_fields_from_plist "$base")
+    printf '%s %s %s\n' "$1" "$2" "$p"
+  done
+}
+
+# resolve a user-supplied <id> (bare number, slug-id, or full label) to a plist
+resolve_plist() {
+  local q="$1" p slug id
+  # exact file match first
+  for p in "$LA_DIR/$LABEL_PREFIX".*.plist; do
+    [ -e "$p" ] || continue
+    base="$(basename "$p" .plist)"
+    set -- $(job_fields_from_plist "$base")
+    slug="$1"; id="$2"
+    if [ "$q" = "$id" ] || [ "$q" = "$slug-$id" ] || [ "$q" = "$base" ] || [ "$q" = "$LABEL_PREFIX.$slug-$id" ]; then
+      printf '%s' "$p"; return 0
+    fi
+  done
+  return 1
+}
+
+# ---- list ------------------------------------------------------------------
+cmd_list() {
+  require_macos
+  local found=0
+  printf '%-34s %-8s %-24s %-8s %s\n' JOB LOADED REPO RUNNER STATE
+  while read -r slug id plist; do
+    [ -n "${slug:-}" ] || continue
+    found=1
+    local label loaded repo runner st state
+    label="$(label_for "$slug" "$id")"
+    if is_loaded "$label"; then loaded="yes"; else loaded="NO"; fi
+    repo="?"; runner="?"; st="?"
+    for state in "$STATE_DIR"/*-"$slug"-"$id".json; do
+      [ -e "$state" ] || continue
+      if command -v jq >/dev/null 2>&1; then
+        repo="$(jq -r '.repo // "?"' "$state")"
+        runner="$(jq -r '.runner // "?"' "$state")"
+        st="$(jq -r '.last_ci_status // "?"' "$state")"
+      fi
+      break
+    done
+    printf '%-34s %-8s %-24s %-8s %s\n' "$slug-$id" "$loaded" "$repo" "$runner" "$st"
+  done < <(each_job)
+
+  # dangling: loaded com.shepherd.* labels with no plist file
+  launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." '$3 ~ "^"pfx {print $3}' | while read -r label; do
+    [ -f "$LA_DIR/$label.plist" ] || printf '%-34s %-8s %s\n' "${label#"$LABEL_PREFIX".}" "DANGLING" "(loaded, no plist — shepherd killall to clear)"
+  done
+
+  [ "$found" -eq 1 ] || info "(no shepherd jobs installed)"
+}
+
+# ---- status ----------------------------------------------------------------
+cmd_status() {
+  require_macos
+  [ $# -ge 1 ] || die "usage: shepherd status <id>"
+  local plist; plist="$(resolve_plist "$1")" || die "no job matching '$1' (try: shepherd list)"
+  local base; base="$(basename "$plist" .plist)"
+  set -- $(job_fields_from_plist "$base"); local slug="$1" id="$2"
+  local label; label="$(label_for "$slug" "$id")"
+  is_loaded "$label" && info "loaded: yes" || info "loaded: NO"
+  local state
+  for state in "$STATE_DIR"/*-"$slug"-"$id".json; do
+    [ -e "$state" ] || continue
+    info "state: $state"
+    if command -v jq >/dev/null 2>&1; then jq . "$state"; else cat "$state"; fi
+    break
+  done
+}
+
+# ---- logs ------------------------------------------------------------------
+cmd_logs() {
+  require_macos
+  local follow=0 q=""
+  while [ $# -gt 0 ]; do case "$1" in -f|--follow) follow=1; shift;; *) q="$1"; shift;; esac; done
+  [ -n "$q" ] || die "usage: shepherd logs <id> [-f]"
+  local plist; plist="$(resolve_plist "$q")" || die "no job matching '$q'"
+  local base; base="$(basename "$plist" .plist)"
+  set -- $(job_fields_from_plist "$base")
+  local log; log="$(log_for "$1" "$2")"
+  [ -f "$log" ] || die "no log yet at $log (job may not have ticked)"
+  if [ "$follow" -eq 1 ]; then tail -f "$log"; else tail -30 "$log"; fi
+}
+
+# ---- stop ------------------------------------------------------------------
+stop_one() { # plist purge
+  local plist="$1" purge="$2" base label slug id
+  base="$(basename "$plist" .plist)"
+  set -- $(job_fields_from_plist "$base"); slug="$1"; id="$2"
+  label="$(label_for "$slug" "$id")"
+  # unload BEFORE deleting so no dangling registration is left behind
+  launchctl unload "$plist" 2>/dev/null || true
+  launchctl bootout "gui/$(id -u)/$label" 2>/dev/null || true
+  rm -f "$plist"
+  info "stopped $label"
+  if [ "$purge" -eq 1 ]; then
+    rm -f "$STATE_DIR"/*-"$slug"-"$id".json "$(log_for "$slug" "$id")"
+    info "purged state + log for $slug-$id"
+  fi
+}
+
+cmd_stop() {
+  require_macos
+  local purge=0 q=""
+  while [ $# -gt 0 ]; do case "$1" in --purge) purge=1; shift;; *) q="$1"; shift;; esac; done
+  [ -n "$q" ] || die "usage: shepherd stop <id> [--purge]"
+  local plist; plist="$(resolve_plist "$q")" || die "no job matching '$q'"
+  stop_one "$plist" "$purge"
+}
+
+# ---- killall ---------------------------------------------------------------
+cmd_killall() {
+  require_macos
+  local yes=0; [ "${1:-}" = "--yes" ] && yes=1
+  local n=0; while read -r s i p; do [ -n "${s:-}" ] && n=$((n+1)); done < <(each_job)
+  local dangling; dangling="$(launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." '$3 ~ "^"pfx {print $3}')"
+  if [ "$n" -eq 0 ] && [ -z "$dangling" ]; then info "no shepherd jobs to remove"; return 0; fi
+  if [ "$yes" -eq 0 ]; then
+    printf 'Remove %s shepherd job(s)%s? [y/N] ' "$n" "$([ -n "$dangling" ] && echo ' plus dangling registrations')"
+    read -r ans; case "$ans" in y|Y|yes) ;; *) info "aborted"; return 1;; esac
+  fi
+  while read -r s i p; do [ -n "${p:-}" ] && stop_one "$p" 0; done < <(each_job)
+  # sweep dangling (loaded, no file)
+  printf '%s\n' "$dangling" | while read -r label; do
+    [ -n "$label" ] || continue
+    [ -f "$LA_DIR/$label.plist" ] && continue
+    launchctl bootout "gui/$(id -u)/$label" 2>/dev/null && info "cleared dangling $label" || true
+  done
+}
+
+# ---- restart ---------------------------------------------------------------
+cmd_restart() {
+  require_macos
+  [ $# -ge 1 ] || die "usage: shepherd restart <id>"
+  local plist; plist="$(resolve_plist "$1")" || die "no job matching '$1'"
+  local base; base="$(basename "$plist" .plist)"
+  set -- $(job_fields_from_plist "$base")
+  local label; label="$(label_for "$1" "$2")"
+  launchctl unload "$plist" 2>/dev/null || true
+  launchctl load "$plist" || die "reload failed"
+  info "restarted $label"
+}
+
+# ---- token: populate ~/.config/shepherd/token ------------------------------
+cmd_token() {
+  mkdir -p "$(dirname "$TOKEN_FILE")"
+  local val="" src
+  if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+    val="$CLAUDE_CODE_OAUTH_TOKEN"; src='$CLAUDE_CODE_OAUTH_TOKEN'
+  else
+    printf 'Paste Claude OAuth token (hidden, ^C to cancel): ' >&2
+    stty -echo 2>/dev/null || true; IFS= read -r val; stty echo 2>/dev/null || true
+    printf '\n' >&2; src='stdin'
+  fi
+  [ -n "$val" ] || die "no token provided"
+  ( umask 177; printf '%s' "$val" > "$TOKEN_FILE" ); chmod 600 "$TOKEN_FILE"
+  info "wrote $TOKEN_FILE (${#val} bytes) from $src"
+}
+
+# ---- doctor: verify the install is healthy ---------------------------------
+cmd_doctor() {
+  ensure_shim
+  local ok=1
+  _chk() { if eval "$2"; then printf '  ok   %s\n' "$1"; else printf '  FAIL %s\n' "$1"; ok=0; fi; }
+  info "shepherd doctor:"
+  _chk "shim present + executable ($SHIM)"        "[ -x '$SHIM' ]"
+  _chk "state dir ($STATE_DIR)"                   "[ -d '$STATE_DIR' ] || mkdir -p '$STATE_DIR'"
+  _chk "log dir ($LOG_DIR)"                       "[ -d '$LOG_DIR' ] || mkdir -p '$LOG_DIR'"
+  if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+    printf '  ok   credential: $CLAUDE_CODE_OAUTH_TOKEN set in this shell\n'
+  elif [ -s "$TOKEN_FILE" ]; then
+    printf '  ok   credential: %s (%s bytes, %s)\n' "$TOKEN_FILE" "$(wc -c < "$TOKEN_FILE" | tr -d ' ')" "$(stat -f '%Sp' "$TOKEN_FILE" 2>/dev/null || stat -c '%A' "$TOKEN_FILE")"
+  else
+    printf '  FAIL credential: set $CLAUDE_CODE_OAUTH_TOKEN or run `shepherd token`\n'; ok=0
+  fi
+  _chk "on PATH via ~/.local/bin"                 "command -v shepherd >/dev/null"
+  _chk "runner available (claude/opencode)"       "command -v claude >/dev/null || command -v opencode >/dev/null"
+  [ "$ok" -eq 1 ] && info "all good" || die "issues above need fixing"
+}
+
+# ---- setup: (re)link the binary + shim + dirs ------------------------------
+cmd_setup() {
+  link_self
+  ensure_shim
+  mkdir -p "$STATE_DIR" "$LOG_DIR"
+  info "setup complete"
+  cmd_doctor
+}
+
+# ---- self-update: pull the repo holding this script, then re-link ----------
+cmd_selfupdate() {
+  local self dir; self="$(resolve_self)"; dir="$(dirname "$self")"
+  if git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    info "updating $(git -C "$dir" rev-parse --show-toplevel) ..."
+    git -C "$dir" pull --ff-only || warn "git pull failed — resolve manually"
+  else
+    warn "$self is not in a git repo; nothing to pull"
+  fi
+  link_self; ensure_shim
+  info "self-update done ($(sha1sum "$self" 2>/dev/null | cut -c1-8 || shasum "$self" | cut -c1-8))"
+}
+
+usage() { sed -n '2,27p' "$0" | sed 's/^# \{0,1\}//'; }
+
+main() {
+  [ $# -ge 1 ] || { usage; exit 1; }
+  local cmd="$1"; shift
+  case "$cmd" in
+    install)      cmd_install "$@" ;;
+    list|ls)      cmd_list "$@" ;;
+    status)       cmd_status "$@" ;;
+    logs|log)     cmd_logs "$@" ;;
+    stop|rm)      cmd_stop "$@" ;;
+    killall)      cmd_killall "$@" ;;
+    restart)      cmd_restart "$@" ;;
+    token)        cmd_token "$@" ;;
+    doctor)       cmd_doctor "$@" ;;
+    setup)        cmd_setup "$@" ;;
+    self-update|update) cmd_selfupdate "$@" ;;
+    -h|--help|help) usage ;;
+    *) die "unknown command: $cmd (try: shepherd help)" ;;
+  esac
+}
+
+main "$@"

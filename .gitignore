@@ -73,6 +73,8 @@ pi/package-lock.json
 # scripts/config-drift.sh treats them as decided rather than as new drift.
 # Stripe CLI - config.toml holds API credentials
 .config/stripe/
+# shepherd - token store holds a long-lived Claude Code OAuth token (secret)
+.config/shepherd/
 # Devin - workspace, not config
 .config/devin/
 # Raycast - app runtime state
