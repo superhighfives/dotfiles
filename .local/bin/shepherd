@@ -293,32 +293,40 @@ resolve_plist() {
 cmd_list() {
   require_macos
   local found=0
-  printf '%-34s %-8s %-24s %-8s %s\n' JOB LOADED REPO RUNNER STATE
+  local fmt='%-46s %-8s %-8s %-10s %s\n'
+  printf "$fmt" JOB LOADED RUNNER CI READY
+  printf '%*s\n' 80 '' | tr ' ' '-'
   while read -r slug id plist; do
     [ -n "${slug:-}" ] || continue
     found=1
-    local label loaded repo runner st state
+    local label loaded runner ci ready state
     label="$(label_for "$slug" "$id")"
-    if is_loaded "$label"; then loaded="yes"; else loaded="NO"; fi
-    repo="?"; runner="?"; st="?"
+    if is_loaded "$label"; then loaded="yes"; else loaded="no"; fi
+    runner="?"; ci="?"; ready="?"
     for state in "$STATE_DIR"/*-"$slug"-"$id".json; do
       [ -e "$state" ] || continue
       if command -v jq >/dev/null 2>&1; then
-        repo="$(jq -r '.repo // "?"' "$state")"
         runner="$(jq -r '.runner // "?"' "$state")"
-        st="$(jq -r '.last_ci_status // "?"' "$state")"
+        ci="$(jq -r '.last_ci_status // "?"' "$state" | tr '[:upper:]' '[:lower:]')"
+        ready="$(jq -r 'if .ready_notified == true then "yes" else "no" end' "$state")"
       fi
       break
     done
-    printf '%-34s %-8s %-24s %-8s %s\n' "$slug-$id" "$loaded" "$repo" "$runner" "$st"
+    printf "$fmt" "$slug-$id" "$loaded" "$runner" "$ci" "$ready"
   done < <(each_job)
 
-  # dangling: loaded com.shepherd.* labels with no plist file
+  # dangling: loaded com.shepherd.* labels with no plist file (align with cols)
   launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." '$3 ~ "^"pfx {print $3}' | while read -r label; do
-    [ -f "$LA_DIR/$label.plist" ] || printf '%-34s %-8s %s\n' "${label#"$LABEL_PREFIX".}" "DANGLING" "(loaded, no plist — shepherd killall to clear)"
+    [ -f "$LA_DIR/$label.plist" ] || printf '%-46s %-8s %s\n' "${label#"$LABEL_PREFIX".}" "DANGLING" "loaded, no plist — run: shepherd killall"
   done
 
-  [ "$found" -eq 1 ] || info "(no shepherd jobs installed)"
+  if [ "$found" -eq 1 ]; then
+    printf '\n%s\n' "JOB is <repo-slug>-<number> (repo path with / as -). Target a job by number, slug-id, or full label."
+    printf '%s\n'   "LOADED  yes=scheduled · no=file present, not loaded · DANGLING=loaded but plist gone (shepherd killall)"
+    printf '%s\n'   "CI      last tick's check rollup (e.g. success/failure/pending · ?=not ticked yet)   READY  ready-to-merge notified"
+  else
+    info "(no shepherd jobs installed)"
+  fi
 }
 
 # ---- status ----------------------------------------------------------------
