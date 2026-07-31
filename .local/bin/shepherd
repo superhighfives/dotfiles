@@ -29,7 +29,7 @@ LOG_DIR="${SHEPHERD_LOG_DIR:-$HOME/.config/opencode/logs}"
 SHIM="$HOME/.config/shepherd/exec.sh"
 LA_DIR="$HOME/Library/LaunchAgents"
 LABEL_PREFIX="com.shepherd"
-INTERVAL_DEFAULT=600
+INTERVAL_DEFAULT=300
 
 die()  { printf 'shepherd: %s\n' "$*" >&2; exit 1; }
 warn() { printf 'shepherd: %s\n' "$*" >&2; }
