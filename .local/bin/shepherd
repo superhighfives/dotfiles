@@ -9,13 +9,18 @@
 # (~/.config/shepherd/exec.sh) that resolves the credential at runtime from
 # $CLAUDE_CODE_OAUTH_TOKEN, else ~/.config/shepherd/token. `install` requires
 # one of those (or it errors); if the env var is set it seeds the token file so
-# the detached tick can read it. Rotate with `shepherd token`.
+# the detached tick can read it. Rotate with `shepherd token`. The shim also
+# exports an optional Discord webhook (~/.config/shepherd/webhook) the tick uses
+# to push a one-way alert when it defers a decision to you. Set with `shepherd
+# webhook`; review the deferred queue with `shepherd inbox`.
 #
 #   shepherd install [PR] [-C dir] [--runner claude|opencode] [--interval sec] [--no-start]
 #   shepherd list | status <id> | logs <id> [-f] | restart <id>
 #   shepherd stop <id> [--purge] | killall [--yes]
 #   shepherd cleanup [--yes]       # dry-run sweep: merged/closed jobs + orphans
+#   shepherd inbox                 # decisions shepherd deferred to you (unresolved)
 #   shepherd token                 # write ~/.config/shepherd/token (from env or prompt)
+#   shepherd webhook               # write ~/.config/shepherd/webhook (Discord, optional)
 #   shepherd doctor                # verify shim, dirs, credential, PATH, runner
 #   shepherd setup | self-update   # (re)link the binary + shim; pull latest
 #
@@ -27,6 +32,7 @@ set -euo pipefail
 STATE_DIR="${SHEPHERD_STATE_DIR:-$HOME/.opencode/shepherd}"
 LOG_DIR="${SHEPHERD_LOG_DIR:-$HOME/.config/opencode/logs}"
 SHIM="$HOME/.config/shepherd/exec.sh"
+WEBHOOK_FILE="$HOME/.config/shepherd/webhook"
 LA_DIR="$HOME/Library/LaunchAgents"
 LABEL_PREFIX="com.shepherd"
 INTERVAL_DEFAULT=300
@@ -53,10 +59,14 @@ ensure_shim() {
 #   1. $CLAUDE_CODE_OAUTH_TOKEN / $ANTHROPIC_API_KEY already in the environment
 #   2. ~/.config/shepherd/token  /  ~/.config/shepherd/api-key  (chmod 600)
 # Rotating = `shepherd token` (or edit the file); jobs pick it up next tick.
+# Also exports an optional Discord webhook (~/.config/shepherd/webhook) so the
+# tick can push a one-way alert when it defers a decision. Absent = no push.
 [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -r "$HOME/.config/shepherd/token" ]   && CLAUDE_CODE_OAUTH_TOKEN="$(cat "$HOME/.config/shepherd/token")"
 [ -z "${ANTHROPIC_API_KEY:-}" ]       && [ -r "$HOME/.config/shepherd/api-key" ] && ANTHROPIC_API_KEY="$(cat "$HOME/.config/shepherd/api-key")"
+[ -z "${SHEPHERD_DISCORD_WEBHOOK:-}" ] && [ -r "$HOME/.config/shepherd/webhook" ] && SHEPHERD_DISCORD_WEBHOOK="$(cat "$HOME/.config/shepherd/webhook")"
 [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN
 [ -n "${ANTHROPIC_API_KEY:-}" ]       && export ANTHROPIC_API_KEY
+[ -n "${SHEPHERD_DISCORD_WEBHOOK:-}" ] && export SHEPHERD_DISCORD_WEBHOOK
 exec "$@"
 SH
   chmod 700 "$SHIM"
@@ -531,6 +541,65 @@ cmd_token() {
   info "wrote $TOKEN_FILE (${#val} bytes) from $src"
 }
 
+# ---- webhook: populate ~/.config/shepherd/webhook (Discord, optional) -------
+# The tick reads this (via the shim's $SHEPHERD_DISCORD_WEBHOOK) to push a
+# one-way alert when it defers a decision to you. Optional: with no webhook the
+# tick still records the decision (label + state + `shepherd inbox`), just no
+# push. The URL is a secret, so it's stored 600 next to the token, never in a
+# scheduler unit.
+cmd_webhook() {
+  mkdir -p "$(dirname "$WEBHOOK_FILE")"
+  local val="" src
+  if [ -n "${SHEPHERD_DISCORD_WEBHOOK:-}" ]; then
+    val="$SHEPHERD_DISCORD_WEBHOOK"; src='$SHEPHERD_DISCORD_WEBHOOK'
+  else
+    printf 'Paste Discord webhook URL (hidden, ^C to cancel): ' >&2
+    stty -echo 2>/dev/null || true; IFS= read -r val; stty echo 2>/dev/null || true
+    printf '\n' >&2; src='stdin'
+  fi
+  [ -n "$val" ] || die "no webhook URL provided"
+  case "$val" in
+    https://discord.com/api/webhooks/*|https://discordapp.com/api/webhooks/*) ;;
+    https://*) warn "that doesn't look like a Discord webhook URL — saving anyway" ;;
+    *) die "webhook must be an https:// URL" ;;
+  esac
+  ( umask 177; printf '%s' "$val" > "$WEBHOOK_FILE" ); chmod 600 "$WEBHOOK_FILE"
+  info "wrote $WEBHOOK_FILE from $src — running jobs pick it up next tick"
+}
+
+# ---- inbox: decisions shepherd deferred to you (unresolved) -----------------
+# Reads pending_decisions[] across every state file and prints the open ones.
+# This is the pull side of escalation: the tick pushes to Discord once when it
+# raises a decision; `inbox` is the queue you check when you sit back down. You
+# answer on the PR/MR thread (not here) — the next tick sees the reply, clears
+# the label, and marks it resolved.
+cmd_inbox() {
+  command -v jq >/dev/null 2>&1 || die "inbox needs jq (brew install jq)"
+  local found=0 state
+  for state in "$STATE_DIR"/*.json; do
+    [ -e "$state" ] || continue
+    # any unresolved pending decisions in this job?
+    local n; n="$(jq '[.pending_decisions[]? | select(.resolved != true)] | length' "$state" 2>/dev/null || echo 0)"
+    [ "${n:-0}" -gt 0 ] || continue
+    if [ "$found" -eq 0 ]; then
+      found=1
+      info "Decisions shepherd is waiting on (answer on the PR/MR thread):"
+      printf '\n'
+    fi
+    local repo id
+    repo="$(jq -r '.repo // "?"' "$state")"
+    id="$(jq -r '.id // "?"' "$state")"
+    printf '  \033[1m%s #%s\033[0m\n' "$repo" "$id"
+    jq -r '.pending_decisions[]? | select(.resolved != true)
+      | "    • \(.summary // "(no summary)")"
+      + (if .lean       then "\n      lean: \(.lean)"        else "" end)
+      + (if .thread_url then "\n      → \(.thread_url)"      else "" end)
+      + (if .raised_at  then "\n      raised: \(.raised_at)" else "" end)' "$state"
+    printf '\n'
+  done
+  [ "$found" -eq 1 ] || info "inbox empty — no decisions waiting on you"
+}
+
 # ---- doctor: verify the install is healthy ---------------------------------
 cmd_doctor() {
   ensure_shim
@@ -549,6 +618,14 @@ cmd_doctor() {
   fi
   _chk "on PATH via ~/.local/bin"                 "command -v shepherd >/dev/null"
   _chk "runner available (claude/opencode)"       "command -v claude >/dev/null || command -v opencode >/dev/null"
+  # webhook is optional — report presence, never fail on its absence
+  if [ -n "${SHEPHERD_DISCORD_WEBHOOK:-}" ]; then
+    printf '  ok   Discord webhook: $SHEPHERD_DISCORD_WEBHOOK set in this shell\n'
+  elif [ -s "$WEBHOOK_FILE" ]; then
+    printf '  ok   Discord webhook: %s (%s)\n' "$WEBHOOK_FILE" "$(stat -f '%Sp' "$WEBHOOK_FILE" 2>/dev/null || stat -c '%A' "$WEBHOOK_FILE")"
+  else
+    printf '  --   Discord webhook: not set (optional; run `shepherd webhook` to enable push alerts)\n'
+  fi
   [ "$ok" -eq 1 ] && info "all good" || die "issues above need fixing"
 }
 
@@ -574,7 +651,7 @@ cmd_selfupdate() {
   info "self-update done ($(sha1sum "$self" 2>/dev/null | cut -c1-8 || shasum "$self" | cut -c1-8))"
 }
 
-usage() { sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; }
 
 main() {
   [ $# -ge 1 ] || { usage; exit 1; }
@@ -588,7 +665,9 @@ main() {
     killall)      cmd_killall "$@" ;;
     cleanup)      cmd_cleanup "$@" ;;
     restart)      cmd_restart "$@" ;;
+    inbox)        cmd_inbox "$@" ;;
     token)        cmd_token "$@" ;;
+    webhook)      cmd_webhook "$@" ;;
     doctor)       cmd_doctor "$@" ;;
     setup)        cmd_setup "$@" ;;
     self-update|update) cmd_selfupdate "$@" ;;
