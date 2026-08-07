@@ -122,9 +122,12 @@ export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 # LM Studio (conditional)
 [[ -d "$HOME/.lmstudio/bin" ]] && export PATH="$PATH:$HOME/.lmstudio/bin"
 
-# gs - fuzzy-switch git branches, sorted by most recent commit, with a log preview vs main
+# gs - fuzzy-switch git branches, sorted by most recent commit, with a log preview vs the default branch
 func gs() {
-  git switch $(git for-each-ref --sort=-committerdate --format='%(refname:short)' 'refs/heads/**' | fzf --preview='git log main..{}')
+  local base
+  base=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')
+  base=${base:-main}
+  git switch $(git for-each-ref --sort=-committerdate --format='%(refname:short)' 'refs/heads/**' | fzf --preview="git log $base..{}")
 }
 
 # killport - kill whatever process is listening on the given TCP port(s) (--force sends SIGKILL)
