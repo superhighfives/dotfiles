@@ -592,6 +592,11 @@ if [[ -d "${HOME}/.pi/agent" ]]; then
     ln -sfn "${pi_src}/agent/cloak.json" "${HOME}/.pi/agent/cloak.json"
   fi
 
+  # Keybindings
+  if [[ -f "${pi_src}/agent/keybindings.json" ]]; then
+    ln -sfn "${pi_src}/agent/keybindings.json" "${HOME}/.pi/agent/keybindings.json"
+  fi
+
   # Themes directory (whole dir; safe to symlink since it's a new namespace)
   if [[ -d "${pi_src}/agent/themes" ]]; then
     [[ -L "${HOME}/.pi/agent/themes" ]] || rm -rf "${HOME}/.pi/agent/themes"

@@ -15,9 +15,12 @@ dotfiles/pi/
 ├── mcp.base.json               # Merged with mcp.local.json into ~/.pi/agent/mcp.json
 └── agent/
     ├── cloak.json              # Secret masking patterns for agent output
+    ├── keybindings.json        # Custom keybindings (frees Ctrl+P for the palette)
     ├── themes/                 # Custom themes (e.g. catppuccin-macchiato)
     └── extensions/
         ├── answer.ts                       # /answer + Ctrl+. — extract questions to a form
+        ├── btw.ts                          # /btw — out-of-band side question, kept out of task context
+        ├── command-palette.ts              # Ctrl+P — fuzzy command palette (/palette)
         ├── continue-after-compaction.ts    # Auto-resume work after /compact
         ├── git-interceptor.ts              # Force non-interactive git, block --no-verify
         ├── worker-configuration-guard.ts   # Block manual edits to worker-configuration.d.ts

@@ -1,0 +1,4 @@
+{
+  "app.model.cycleForward": ["alt+p"],
+  "app.model.cycleBackward": ["alt+shift+p"]
+}
