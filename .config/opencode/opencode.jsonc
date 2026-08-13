@@ -10,23 +10,23 @@
         "baseURL": "https://ollama.charliegleason.com/v1",
         "headers": {
           "CF-Access-Client-Id": "{env:OLLAMA_CLIENT_ID}",
-          "CF-Access-Client-Secret": "{env:OLLAMA_CLIENT_SECRET}"
-        }
+          "CF-Access-Client-Secret": "{env:OLLAMA_CLIENT_SECRET}",
+        },
       },
-      "models": { "muse-glimmer:latest": { "name": "muse-glimmer" } }
-    }
+      "models": { "muse-glimmer:latest": { "name": "Muse Glimmer" } },
+    },
   },
   "mcp": {
     "chrome-devtools": {
       "type": "local",
       "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
-      "enabled": false
+      "enabled": false,
     },
     "playwright": {
       "type": "local",
       "command": ["npx", "@playwright/mcp@latest"],
-      "enabled": false
-    }
+      "enabled": false,
+    },
   },
   "permission": {
     "webfetch": "allow",
@@ -36,16 +36,16 @@
       "*.env": "deny",
       "*.env.*": "deny",
       "*.dev.vars": "deny",
-      "*.env.example": "allow"
+      "*.env.example": "allow",
     },
     "edit": {
-      "*": "allow"
+      "*": "allow",
     },
     "external_directory": {
       "*": "ask",
       "~/repos/**": "allow",
       "/tmp/**": "allow",
-      "/private/tmp/**": "allow"
+      "/private/tmp/**": "allow",
     },
     "bash": {
       "*": "ask",
@@ -233,7 +233,7 @@
       "gem *": "allow",
       "bundle *": "allow",
       // Shell
-      "omz *": "allow"
-    }
-  }
+      "omz *": "allow",
+    },
+  },
 }
