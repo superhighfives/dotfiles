@@ -2,6 +2,20 @@
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": true,
   "instructions": ["{env:HOME}/.config/opencode/INSTRUCTIONS.md"],
+  "provider": {
+    "ollama-remote": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (Remote)",
+      "options": {
+        "baseURL": "https://ollama.charliegleason.com/v1",
+        "headers": {
+          "CF-Access-Client-Id": "{env:OLLAMA_CLIENT_ID}",
+          "CF-Access-Client-Secret": "{env:OLLAMA_CLIENT_SECRET}"
+        }
+      },
+      "models": { "muse-glimmer:latest": { "name": "muse-glimmer" } }
+    }
+  },
   "mcp": {
     "chrome-devtools": {
       "type": "local",
