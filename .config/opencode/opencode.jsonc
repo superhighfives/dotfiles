@@ -13,7 +13,10 @@
           "CF-Access-Client-Secret": "{env:OLLAMA_CLIENT_SECRET}",
         },
       },
-      "models": { "muse-glimmer:latest": { "name": "Muse Glimmer" } },
+      "models": {
+        "qwen3.8:latest": { "name": "Qwen 3.8" },
+        "muse-glimmer:latest": { "name": "Muse Glimmer" },
+      },
     },
   },
   "mcp": {
