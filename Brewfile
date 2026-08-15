@@ -3,6 +3,7 @@ tap "amiaopensource/amiaos"          # provides amia for ffmpeg
 tap "anomalyco/tap"                  # provides opencode tap
 tap "homebrew-ffmpeg/ffmpeg"         # provides ffmpeg tap
 tap "lescanauxdiscrets/tap"          # provides zvbi for ffmpeg
+tap "vjeantet/tap"                   # provides alerter for opencode-notify
 
 # --- Core CLI Tools ---
 brew "atuin"                         # shell history with sqlite backend (replaces ctrl+r)
@@ -18,6 +19,7 @@ brew "htop"                          # interactive process viewer
 brew "neovim"                        # hyperextensible vim-based text editor
 brew "prettyping"                    # prettier ping output
 brew "ripgrep"                       # grep replacement, very fast
+brew "vjeantet/tap/alerter"          # macOS notifications for opencode-notify plugin
 brew "tmux"                          # terminal multiplexer
 brew "zoxide"                        # smart cd replacement (z/zi)
 
