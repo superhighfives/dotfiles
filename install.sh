@@ -374,6 +374,20 @@ fi
 # (first-match-wins).
 if [[ -f "${HOME}/.ssh/id_ed25519" ]]; then
   SSH_CONFIG="${HOME}/.ssh/config"
+  # Before .ssh/config became machine-local, stow linked it into the repo.
+  # Machines set up back then still carry that symlink, now dangling — every
+  # test below reads through it and reports "no config", then the append fails
+  # with "No such file or directory". Clear the broken link so we can write a
+  # real file. Only symlinks pointing into the repo; never a live config.
+  if [[ -L "${SSH_CONFIG}" && ! -e "${SSH_CONFIG}" ]]; then
+    target="$(readlink "${SSH_CONFIG}")"
+    case "${target}" in
+      "${DOTFILES_DIR}"/*|*"/dotfiles/"*)
+        print_info "Removing dangling ~/.ssh/config symlink (was stowed from dotfiles)"
+        rm "${SSH_CONFIG}"
+        ;;
+    esac
+  fi
   KEYCHAIN_MARKER="# >>> dotfiles: load default identity from Keychain >>>"
   if ! grep -qF "${KEYCHAIN_MARKER}" "${SSH_CONFIG}" 2>/dev/null; then
     print_info "Adding Keychain SSH config block..."
