@@ -207,7 +207,6 @@ TRUSTED_TAPS=(
   homebrew-ffmpeg/ffmpeg   # full ffmpeg with codecs
   amiaopensource/amiaos    # ffmpeg dep (amia)
   lescanauxdiscrets/tap    # ffmpeg dep (zvbi)
-  vjeantet/tap             # alerter dep
 )
 for tap in "${TRUSTED_TAPS[@]}"; do
   brew trust "${tap}" 2>/dev/null || true
