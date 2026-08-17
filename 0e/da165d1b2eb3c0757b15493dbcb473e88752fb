@@ -1,0 +1,29 @@
+Brewfile
+  s_54e6ef81f5d4d2::t_ac9323dace08cb 6,22
+PLANS.md
+  s_328d8998d8d12e::t_de9df0bd78eb51 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "0eda165d1b2eb3c0757b15493dbcb473e88752fb",
+  "prompts": {},
+  "sessions": {
+    "s_328d8998d8d12e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ffe35217bffeFX6fYUQ2g447Hs",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    },
+    "s_54e6ef81f5d4d2": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ffdb2ae56ffeL0D9Y1w2xAl23Y",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    }
+  }
+}
