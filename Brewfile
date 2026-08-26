@@ -3,6 +3,7 @@ tap "amiaopensource/amiaos"          # provides amia for ffmpeg
 tap "anomalyco/tap"                  # provides opencode tap
 tap "homebrew-ffmpeg/ffmpeg"         # provides ffmpeg tap
 tap "lescanauxdiscrets/tap"          # provides zvbi for ffmpeg
+tap "replicate/tap"                  # provides cog
 
 # --- Core CLI Tools ---
 brew "atuin"                         # shell history with sqlite backend (replaces ctrl+r)
@@ -44,6 +45,7 @@ brew "unar"                          # universal archive extractor (rar, 7z, zip
 # --- Casks (macOS Applications) ---
 cask "1password"                     # password manager
 cask "caffeine"                      # prevent mac from sleeping
+cask "discord"                       # chat and communities
 cask "figma"                         # design tool
 cask "gcloud-cli"                    # Google Cloud SDK CLI
 cask "ghostty"                       # terminal emulator

@@ -43,7 +43,7 @@ Run `scripts/config-drift.sh` to audit this. It lists any `.config` entry on dis
 
 The install script handles everything in order:
 
-1. **Admin access** — prompts for `sudo` up front so later steps don't stall waiting for it
+1. **Admin access** — prompts for `sudo` up front and accepts the Xcode license if needed
 2. **Connectivity** — checks the internet is reachable before fetching anything
 3. **Xcode CLT** — ensures Command Line Tools are installed
 4. **Homebrew** — installs the package manager if missing
@@ -57,12 +57,13 @@ The install script handles everything in order:
 12. **zsh plugins** — zsh-autosuggestions, zsh-syntax-highlighting
 13. **SSH** — generates an Ed25519 key and configures commit signing
 14. **Dotfiles** — symlinks configs to `~` using [GNU Stow](https://www.gnu.org/software/stow/), then repoints `~/.npmrc` at `~/.npmrc.local` if present
-15. **Agent skills** — runs `scripts/install-skills.sh` for shared skills, then symlinks all skills into Claude Code (`~/.claude/skills`) and OpenCode (`~/.config/opencode/commands/`)
-16. **MCP servers** — registers Claude Code MCP servers (skipped if the `claude` CLI isn't installed)
-17. **Secrets** — creates `~/.secrets` and prompts for your npm token
-18. **Editor extensions** — Zed auto-installs extensions on first launch via `auto_install_extensions` in `.config/zed/settings.json`
-19. **Raycast** — imports settings from `Raycast.rayconfig` if present
-20. **Config drift** — runs `scripts/config-drift.sh` as a non-fatal check for `.config` entries git is silently ignoring
+15. **GitHub authentication** — runs `gh auth login` when needed so GitHub-hosted skill installs can authenticate
+16. **Agent skills** — runs `scripts/install-skills.sh` for shared skills, then symlinks all skills into Claude Code (`~/.claude/skills`) and OpenCode (`~/.config/opencode/commands/`)
+17. **MCP servers** — registers Claude Code MCP servers (skipped if the `claude` CLI isn't installed)
+18. **Secrets** — creates `~/.secrets` and prompts for your npm token
+19. **Editor extensions** — Zed auto-installs extensions on first launch via `auto_install_extensions` in `.config/zed/settings.json`
+20. **Raycast** — imports settings from `Raycast.rayconfig` if present
+21. **Config drift** — runs `scripts/config-drift.sh` as a non-fatal check for `.config` entries git is silently ignoring
 
 ## What's Included
 
