@@ -52,6 +52,7 @@ cask "ghostty"                       # terminal emulator
 cask "github"                        # GitHub Desktop
 cask "google-chrome"                 # web browser
 cask "handy"                         # speech-to-text (handy.computer)
+cask "meetingbar"                    # show upcoming meetings in the menu bar
 cask "obsidian"                      # markdown knowledge base
 cask "opencode-desktop"              # AI coding assistant
 cask "postman"                       # API testing
