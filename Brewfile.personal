@@ -11,7 +11,6 @@ cask "claude-code"                     # Anthropic CLI for Claude
 cask "ollama-app"                      # local LLM server (menu bar)
 
 # --- Personal communication ---
-cask "discord"                         # chat and communities
 cask "whatsapp"                        # messaging
 
 # --- Media ---

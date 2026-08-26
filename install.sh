@@ -108,7 +108,7 @@ EOF
 # --- Environment detection ---
 OS=$(uname -s 2>/dev/null)
 INTERACTIVE=false
-if [[ -t 0 ]] && [[ -t 1 ]]; then
+if [[ -t 0 ]]; then
   INTERACTIVE=true
 fi
 
@@ -126,6 +126,15 @@ if sudo -v; then
 else
   print_error "This script requires administrator access (needed by Homebrew and Xcode CLT)."
   exit 1
+fi
+
+# A preinstalled Xcode can block developer tools until its license is accepted.
+# Call its binary directly because xcode-select may still point at the CLT.
+XCODEBUILD="/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild"
+if [[ -x "${XCODEBUILD}" ]] && ! "${XCODEBUILD}" -license check &>/dev/null; then
+  print_info "Accepting the Xcode license..."
+  sudo "${XCODEBUILD}" -license accept
+  print_success "Xcode license accepted"
 fi
 
 # --- Check connectivity ---
@@ -207,6 +216,7 @@ TRUSTED_TAPS=(
   homebrew-ffmpeg/ffmpeg   # full ffmpeg with codecs
   amiaopensource/amiaos    # ffmpeg dep (amia)
   lescanauxdiscrets/tap    # ffmpeg dep (zvbi)
+  replicate/tap            # cog
 )
 for tap in "${TRUSTED_TAPS[@]}"; do
   brew trust "${tap}" 2>/dev/null || true
@@ -278,9 +288,15 @@ else
   print_success "mise already installed"
 fi
 
+if [[ -x "$HOME/.local/bin/mise" ]]; then
+  MISE_BIN="$HOME/.local/bin/mise"
+else
+  MISE_BIN="$(command -v mise)"
+fi
+
 if [[ -f "${DOTFILES_DIR}/.tool-versions" ]]; then
   print_info "Installing runtimes from .tool-versions..."
-  if "$HOME/.local/bin/mise" install --yes 2>/dev/null || mise install --yes 2>/dev/null; then
+  if "${MISE_BIN}" -C "${DOTFILES_DIR}" install --yes; then
     print_success "Runtimes installed"
   else
     print_error "Failed to install some runtimes — check mise configuration"
@@ -488,6 +504,30 @@ if [[ -f "${HOME}/.npmrc.local" ]]; then
   print_info "Linking ~/.npmrc -> ~/.npmrc.local"
   ln -sfn "${HOME}/.npmrc.local" "${HOME}/.npmrc"
   print_success "Local .npmrc linked"
+fi
+
+# uv and uvx are commonly invoked outside a project directory. Give their mise
+# shims an explicit global default rather than relying only on ~/.tool-versions.
+while read -r tool version _; do
+  if [[ "${tool}" == "uv" ]]; then
+    print_info "Setting global uv version to ${version}..."
+    "${MISE_BIN}" use --global --yes "uv@${version}"
+    print_success "Global uv version configured"
+    break
+  fi
+done < "${DOTFILES_DIR}/.tool-versions"
+
+# The skills CLI resolves GitHub-hosted sources through authenticated APIs.
+# Authenticate after gh and SSH are configured, but before installing skills.
+print_step "Authenticating GitHub CLI"
+if gh auth status --hostname github.com &>/dev/null; then
+  print_success "GitHub CLI already authenticated"
+elif [[ -t 0 ]]; then
+  gh auth login --hostname github.com
+  print_success "GitHub CLI authenticated"
+else
+  print_error "GitHub authentication is required before installing agent skills. Run: gh auth login"
+  exit 1
 fi
 
 # --- Agent skills ---
@@ -705,13 +745,10 @@ ${green}✔ All done!${reset}
 
 ${yellow}Manual steps remaining:${reset}
 
-  1. ${blue}GitHub CLI:${reset}
-     gh auth login
-
-  2. ${blue}rclone (optional):${reset}
+  1. ${blue}rclone (optional):${reset}
      # Restore ~/.config/rclone/rclone.conf from 1Password
      # Or run: rclone config
 
-  3. ${blue}Restart your terminal${reset} to apply all changes.
+  2. ${blue}Restart your terminal${reset} to apply all changes.
 
 EOF
