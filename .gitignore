@@ -69,6 +69,12 @@ pi/package-lock.json
 !.config/naps2/config.xml
 !.config/naps2/profiles.xml
 
+# herdr - track session config, but not runtime state
+!.config/herdr/
+.config/herdr/*.log
+.config/herdr/*.sock
+.config/herdr/.plugins.lock
+
 # Acknowledged ignores — intentionally untracked, listed explicitly so
 # scripts/config-drift.sh treats them as decided rather than as new drift.
 # Stripe CLI - config.toml holds API credentials
