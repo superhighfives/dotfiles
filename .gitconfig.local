@@ -1,0 +1,5 @@
+[user]
+	email = cgleason@cloudflare.com
+
+[include]
+	path = /Users/cgleason/.local/share/cloudflare-warp-certs/gitconfig
