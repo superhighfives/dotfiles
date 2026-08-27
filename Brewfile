@@ -27,6 +27,7 @@ brew "biome"                         # JavaScript/TypeScript formatter and linte
 brew "cloudflared"                   # Cloudflare Tunnel daemon
 cask "replicate/tap/cog"             # containers for machine learning (Replicate)
 brew "flyctl"                        # fly.io CLI for deploying apps
+brew "herdr"                         # AI snippet and window manager
 brew "gcc"                           # GNU compiler collection
 brew "openssl@3"                     # TLS/SSL toolkit
 brew "anomalyco/tap/opencode"         # AI coding assistant (tap version, stays current)
@@ -52,7 +53,6 @@ cask "ghostty"                       # terminal emulator
 cask "github"                        # GitHub Desktop
 cask "google-chrome"                 # web browser
 cask "handy"                         # speech-to-text (handy.computer)
-cask "herdr"                         # AI snippet and window manager
 cask "meetingbar"                    # show upcoming meetings in the menu bar
 cask "obsidian"                      # markdown knowledge base
 cask "opencode-desktop"              # AI coding assistant
