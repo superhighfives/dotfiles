@@ -57,6 +57,7 @@ pi/package-lock.json
 # opencode - track config, but not the generated skill commands
 !.config/opencode/
 .config/opencode/commands/*.md
+.config/opencode/plugins/git-ai.ts
 
 # zed - track settings, but not runtime state
 !.config/zed/
