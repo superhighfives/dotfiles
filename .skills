@@ -14,7 +14,7 @@
 # skills CLI resolve the repo via the GitHub API, which trips the anonymous
 # 60/hr rate limit and drops into an interactive `gh` login prompt that hangs a
 # non-interactive run. The SSH URL just `git clone`s (SSH key auth), no API call.
-git@github.com:superhighfives/skills.git dependabot-bundle make-wireframe review-github review-gitlab review-merge shepherd review-sentry writing-change-descriptions
+git@github.com:superhighfives/skills.git dependabot-bundle make-wireframe product-description review-github review-gitlab review-merge shepherd review-sentry writing-change-descriptions
 
 # Plans skill — lives in the plans app repo (github.com/superhighfives/plans),
 # co-located with the app that reads the plans/ structure it defines, so the skill
