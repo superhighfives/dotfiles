@@ -21,6 +21,7 @@ Anything matching `*.local`, `*.local.*`, or `.*.local*` is gitignored. The trac
 | `~/.zshrc.local` | Sourced at the end of `.zshrc` | Additive (later wins for vars/aliases) |
 | `~/.gitconfig.local` | `[include]` directive in `.gitconfig` | Additive (later wins) |
 | `~/.config/opencode/opencode.local.jsonc` | `.zshrc` exports `OPENCODE_CONFIG` pointing at it; opencode merges with the global config | Additive (deep merge) |
+| `~/INSTRUCTIONS.local.md` | Loaded after the tracked `~/INSTRUCTIONS.md` by OpenCode | Additive (local work or machine-specific rules) |
 | `~/Brewfile.local` | `install.sh` runs `brew bundle` against it after the main Brewfile | Additive (just installs more) |
 | `~/.skills.local` | Plain-text list of skill sources read at the end of `scripts/install-skills.sh` (one `<source> [skill-csv]` per line, `#` comments OK). Each entry runs with `DISABLE_TELEMETRY=1`. | Additive (each line installs more skills) |
 | `~/.pi/agent/{settings,mcp}.local.json` | `scripts/sync-pi-config.sh` deep-merges `pi/{settings,mcp}.base.json` with these into `~/.pi/agent/{settings,mcp}.json` on every `install.sh` run | Additive (deep merge; arrays concat + dedupe) |
@@ -86,7 +87,7 @@ The install script handles everything in order:
 | `.config/gh/config.yml` | GitHub CLI settings |
 | `.config/ghostty/config` | Ghostty terminal settings |
 | `.config/opencode/opencode.json` | OpenCode AI assistant config |
-| `.config/opencode/INSTRUCTIONS.md` | Global OpenCode rules — code/git conventions, orchestration posture, writing style |
+| `INSTRUCTIONS.md` | Global OpenCode rules, stowed to `~/INSTRUCTIONS.md` and referenced by OpenCode |
 | `.config/opencode/agents/` | Read-only specialist subagents (reviewer, oracle, planner, security, …) |
 
 | `Library/Application Support/com.pais.handy/settings_store.json` | Handy speech-to-text settings |

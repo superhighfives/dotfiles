@@ -1,7 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": true,
-  "instructions": ["{env:HOME}/.config/opencode/INSTRUCTIONS.md"],
+  "instructions": [
+    "{env:HOME}/INSTRUCTIONS.md",
+    "{env:HOME}/INSTRUCTIONS.local.md",
+  ],
   "provider": {
     "ollama-remote": {
       "npm": "@ai-sdk/openai-compatible",
@@ -51,7 +54,7 @@
       "/private/tmp/**": "allow",
     },
     "bash": {
-      "*": "ask",
+      "*": "allow",
       // Git
       "git status *": "allow",
       "git diff *": "allow",
@@ -154,16 +157,16 @@
       "gh ruleset view *": "allow",
       // Write operations
       "gh pr create *": "allow",
-      "gh pr merge *": "ask",
-      "gh pr close *": "ask",
+      "gh pr merge *": "allow",
+      "gh pr close *": "allow",
       "gh issue create *": "allow",
-      "gh issue close *": "ask",
-      "gh run cancel *": "ask",
-      "gh run rerun *": "ask",
-      "gh release create *": "ask",
+      "gh issue close *": "allow",
+      "gh run cancel *": "allow",
+      "gh run rerun *": "allow",
+      "gh release create *": "allow",
       "gh release delete *": "deny",
       "lsof *": "allow",
-      "kill *": "ask",
+      "kill *": "allow",
       "wrangler *": "allow",
       // Additional commands based on install.sh CLI utilities
       "jq *": "allow",
@@ -200,10 +203,10 @@
       "glab repo view *": "allow",
       "glab auth *": "allow",
       "glab mr create *": "allow",
-      "glab mr merge *": "ask",
-      "glab mr close *": "ask",
+      "glab mr merge *": "allow",
+      "glab mr close *": "allow",
       "glab issue create *": "allow",
-      "glab issue close *": "ask",
+      "glab issue close *": "allow",
       "mkcert *": "allow",
       "age *": "allow",
       "stow *": "allow",
@@ -216,7 +219,7 @@
       "gifski *": "allow",
       "ffmpeg *": "allow",
       "websocat *": "allow",
-      "nmap *": "ask",
+      "nmap *": "allow",
       "cloudflared *": "allow",
       "pscale *": "allow",
       "yarn *": "allow",

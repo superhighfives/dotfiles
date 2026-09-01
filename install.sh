@@ -496,6 +496,11 @@ print_info "Restoring repo versions..."
 git -C "${DOTFILES_DIR}" checkout .
 print_success "Dotfiles linked"
 
+# OpenCode loads this after the tracked global instructions. Keep it as a real,
+# machine-local file so work-specific rules never enter the public repository.
+touch "${HOME}/INSTRUCTIONS.local.md"
+print_success "Local OpenCode instructions ready"
+
 # If ~/.npmrc.local exists, point ~/.npmrc at it. npm/pnpm/bun read ~/.npmrc
 # directly with no include mechanism, so we override the stow-managed symlink.
 # All other .local overlays (.zshrc.local, .gitconfig.local, opencode.local.jsonc)
