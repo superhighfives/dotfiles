@@ -29,3 +29,6 @@ git@github.com:vercel-labs/agent-skills.git vercel-composition-patterns vercel-r
 
 # Lottie animation integration patterns
 git@github.com:diffusionstudio/lottie.git
+
+# Opinionated Oxlint rules for TypeScript and JavaScript projects
+git@github.com:dmmulroy/anti-slop.git install-anti-slop
