@@ -180,3 +180,6 @@ fi
 
 # Local overlay (untracked, machine-specific)
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# bun completions
+[ -s "/Users/superhighfives/.bun/_bun" ] && source "/Users/superhighfives/.bun/_bun"
