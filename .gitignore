@@ -54,10 +54,13 @@ pi/package-lock.json
 !.config/gh/
 .config/gh/hosts.yml
 
-# opencode - track config, but not the generated skill commands
+# opencode - track config and agents, but not generated or linked resources
 !.config/opencode/
 .config/opencode/commands/*.md
-.config/opencode/plugins/git-ai.ts
+.config/opencode/plugins/
+.config/opencode/rules/
+.config/opencode/skills/
+.config/opencode/tools/
 
 # zed - track settings, but not runtime state
 !.config/zed/
