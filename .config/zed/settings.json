@@ -1,4 +1,5 @@
 {
+  "restore_on_startup": "last_workspace",
   "code_lens": "off",
   "vim_mode": false,
   "terminal": {
