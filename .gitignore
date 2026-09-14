@@ -50,6 +50,10 @@ pi/package-lock.json
 !.config/pnpm/
 !.config/uv/
 
+# control-room - track the README, but never the GitHub App private key
+!.config/control-room/
+.config/control-room/app-private-key.pem
+
 # gh - track config, but never the auth tokens
 !.config/gh/
 .config/gh/hosts.yml

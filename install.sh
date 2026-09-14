@@ -754,6 +754,10 @@ ${yellow}Manual steps remaining:${reset}
      # Restore ~/.config/rclone/rclone.conf from 1Password
      # Or run: rclone config
 
-  2. ${blue}Restart your terminal${reset} to apply all changes.
+  2. ${blue}control-room (optional):${reset}
+     # Restore ~/.config/control-room/app-private-key.pem from 1Password
+     # See ~/.config/control-room/README.md
+
+  3. ${blue}Restart your terminal${reset} to apply all changes.
 
 EOF
