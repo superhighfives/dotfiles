@@ -38,11 +38,8 @@
   "format_on_save": "on",
 
   "agent": {
-    "sidebar_side": "left",
-    "default_profile": "write",
-    "inline_assistant_model": {
-      "provider": "anthropic",
-      "model": "claude-sonnet-4-5",
+    "threads_sidebar": {
+      "position": "left",
     },
   },
 
@@ -140,7 +137,6 @@
   "telemetry": {
     "diagnostics": false,
     "metrics": false,
-    "anthropic_retention": false,
   },
 
   "diagnostics": {
