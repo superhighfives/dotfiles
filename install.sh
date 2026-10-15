@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
 # Dotfiles installer for Charlie Gleason (superhighfives)
-# Sets up a macOS development machine from scratch.
+# Sets up a macOS or Linux/WSL development machine from scratch.
 # Safe to run repeatedly (idempotent - checks before installing).
 #
+# On Windows, run this inside WSL as a regular (non-root) user, then run
+# windows/install.ps1 from PowerShell for the native Windows apps.
+#
 # Usage:
-#   sh install.sh [--skip-personal] 2>&1 | tee ~/install.log
+#   bash install.sh [--skip-personal] 2>&1 | tee ~/install.log
 #
 # Options:
 #   --skip-personal   Skip installing apps from Brewfile.personal
@@ -100,7 +103,7 @@ ${yellow}
 | | | | \\__ \\ || (_| | | |_\\__ \\ | | |
 |_|_| |_|___/\\__\\__,_|_|_(_)___/_| |_|
 ${reset}
-Sets up a macOS development machine.
+Sets up a macOS or Linux/WSL development machine.
 Safe to run repeatedly (idempotent).
 Repository: ${DOTFILES_REPO}
 EOF
@@ -112,10 +115,31 @@ if [[ -t 0 ]]; then
   INTERACTIVE=true
 fi
 
-print_info "OS: ${OS} | Interactive: ${INTERACTIVE} | Skip personal: ${SKIP_PERSONAL}"
+IS_MAC=false
+IS_WSL=false
+case "${OS}" in
+  Darwin) IS_MAC=true ;;
+  Linux)
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+      IS_WSL=true
+    fi
+    ;;
+  *)
+    print_error "Unsupported OS: ${OS}. This script supports macOS and Linux (including WSL)."
+    exit 1
+    ;;
+esac
 
-if [[ "${OS}" != "Darwin" ]]; then
-  print_error "This script is designed for macOS. Exiting."
+print_info "OS: ${OS} | WSL: ${IS_WSL} | Interactive: ${INTERACTIVE} | Skip personal: ${SKIP_PERSONAL}"
+
+# Homebrew refuses to run as root, and a fresh WSL distro can drop you into
+# root if no user was created on first launch. Fail early with the fix.
+if [[ "${IS_MAC}" == false && "${EUID}" -eq 0 ]]; then
+  print_error "Don't run this as root — Homebrew won't install, and everything would land in /root."
+  print_info "Create a user and make it the default, then re-run as that user:"
+  print_info "  adduser <name> && usermod -aG sudo <name>"
+  print_info "  On WSL, also add 'default=<name>' under a [user] section in /etc/wsl.conf,"
+  print_info "  then run 'wsl --shutdown' from Windows and reopen the terminal."
   exit 1
 fi
 
@@ -124,37 +148,58 @@ print_step "Requesting administrator access"
 if sudo -v; then
   print_success "Administrator access granted"
 else
-  print_error "This script requires administrator access (needed by Homebrew and Xcode CLT)."
+  print_error "This script requires administrator access (needed by Homebrew and system packages)."
   exit 1
 fi
 
 # A preinstalled Xcode can block developer tools until its license is accepted.
 # Call its binary directly because xcode-select may still point at the CLT.
 XCODEBUILD="/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild"
-if [[ -x "${XCODEBUILD}" ]] && ! "${XCODEBUILD}" -license check &>/dev/null; then
+if [[ "${IS_MAC}" == true && -x "${XCODEBUILD}" ]] && ! "${XCODEBUILD}" -license check &>/dev/null; then
   print_info "Accepting the Xcode license..."
   sudo "${XCODEBUILD}" -license accept
   print_success "Xcode license accepted"
 fi
 
 # --- Check connectivity ---
+# curl rather than ping: ping's flags differ between macOS and Linux (-t is a
+# timeout on macOS but TTL on Linux), and ICMP is sometimes blocked in WSL.
 print_step "Checking internet connectivity"
-if ! ping -q -t1 -c1 google.com &>/dev/null; then
+if ! curl -fsS --max-time 10 -o /dev/null https://github.com; then
   print_error "Cannot connect to the Internet"
   exit 1
 fi
 print_success "Internet reachable"
 
-# --- Xcode Command Line Tools ---
-print_step "Checking Xcode Command Line Tools"
-if ! xcode-select -p &>/dev/null; then
-  print_info "Installing Xcode Command Line Tools..."
-  xcode-select --install
-  print_info "Waiting for installation to complete..."
-  until xcode-select -p &>/dev/null; do sleep 5; done
-  print_success "Xcode Command Line Tools installed"
+if [[ "${IS_MAC}" == true ]]; then
+  # --- Xcode Command Line Tools ---
+  print_step "Checking Xcode Command Line Tools"
+  if ! xcode-select -p &>/dev/null; then
+    print_info "Installing Xcode Command Line Tools..."
+    xcode-select --install
+    print_info "Waiting for installation to complete..."
+    until xcode-select -p &>/dev/null; do sleep 5; done
+    print_success "Xcode Command Line Tools installed"
+  else
+    print_success "Xcode Command Line Tools already installed"
+  fi
 else
-  print_success "Xcode Command Line Tools already installed"
+  # --- System packages (Linux) ---
+  # Homebrew's Linux prerequisites, plus zsh (macOS ships it, Ubuntu doesn't).
+  print_step "Checking system packages"
+  APT_PACKAGES=(build-essential procps curl file git zsh unzip)
+  missing=()
+  for pkg in "${APT_PACKAGES[@]}"; do
+    dpkg -s "${pkg}" &>/dev/null || missing+=("${pkg}")
+  done
+  if (( ${#missing[@]} > 0 )); then
+    print_info "Installing: ${missing[*]}"
+    sudo apt-get update
+    sudo apt-get install -y "${missing[@]}"
+    print_success "System packages installed"
+  else
+    print_success "System packages already installed"
+  fi
 fi
 
 # --- Homebrew ---
@@ -167,6 +212,8 @@ if ! command -v brew &>/dev/null; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   elif [[ -x "/usr/local/bin/brew" ]]; then
     eval "$(/usr/local/bin/brew shellenv)"
+  elif [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   fi
   print_success "Homebrew installed"
 else
@@ -357,8 +404,12 @@ if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   if [[ "${INTERACTIVE}" == true ]]; then
     print_info "Generating SSH key..."
     ssh-keygen -t ed25519 -f "${HOME}/.ssh/id_ed25519" -C "${SSH_EMAIL}"
-    ssh-add --apple-use-keychain "${HOME}/.ssh/id_ed25519"
-    print_success "SSH key generated and added to Keychain"
+    if [[ "${IS_MAC}" == true ]]; then
+      ssh-add --apple-use-keychain "${HOME}/.ssh/id_ed25519"
+      print_success "SSH key generated and added to Keychain"
+    else
+      print_success "SSH key generated"
+    fi
     echo ""
     print_info "Add your public key to GitHub: https://github.com/settings/keys"
     cat "${HOME}/.ssh/id_ed25519.pub"
@@ -371,7 +422,7 @@ else
   # On a fresh machine the credential Apple's ssh-agent uses to auto-load the
   # key doesn't exist yet, so cache it once here. Silent no-op if it's already
   # stored (as it is once macOS has managed the key), so this is safe to re-run.
-  if [[ "${INTERACTIVE}" == true ]]; then
+  if [[ "${IS_MAC}" == true && "${INTERACTIVE}" == true ]]; then
     print_info "Ensuring SSH passphrase is cached in the Keychain..."
     ssh-add --apple-use-keychain "${HOME}/.ssh/id_ed25519" \
       || print_info "Skipped — add later with: ssh-add --apple-use-keychain ~/.ssh/id_ed25519"
@@ -386,8 +437,8 @@ fi
 # different laptops have different host/key setups — so we manage just this
 # block via a marker instead of shipping a whole config. Host-specific
 # IdentityAgent blocks elsewhere in the file still win for their hosts
-# (first-match-wins).
-if [[ -f "${HOME}/.ssh/id_ed25519" ]]; then
+# (first-match-wins). macOS only: Linux OpenSSH rejects the UseKeychain option.
+if [[ "${IS_MAC}" == true && -f "${HOME}/.ssh/id_ed25519" ]]; then
   SSH_CONFIG="${HOME}/.ssh/config"
   # Before .ssh/config became machine-local, stow linked it into the repo.
   # Machines set up back then still carry that symlink, now dangling — every
@@ -432,6 +483,34 @@ if [[ -f "${HOME}/.ssh/id_ed25519.pub" ]]; then
     print_success "SSH signing already configured"
   fi
 fi
+
+# --- Platform git config ---
+# The credential helper differs per OS (osxkeychain only exists on macOS), so
+# the tracked .gitconfig includes ~/.gitconfig.platform.local, generated here.
+# Regenerated on every run; put personal overrides in ~/.gitconfig.local.
+print_step "Configuring platform git settings"
+GIT_PLATFORM_CONFIG="${HOME}/.gitconfig.platform.local"
+if [[ "${IS_MAC}" == true ]]; then
+  cat > "${GIT_PLATFORM_CONFIG}" <<'EOF'
+# Generated by dotfiles install.sh (macOS) — edits are overwritten.
+[credential]
+	helper = osxkeychain
+EOF
+else
+  # gh is installed by the Brewfile and authenticated below; it serves as the
+  # credential helper for GitHub over HTTPS. Written here rather than via
+  # `gh auth setup-git`, which would edit the stowed (tracked) ~/.gitconfig.
+  cat > "${GIT_PLATFORM_CONFIG}" <<'EOF'
+# Generated by dotfiles install.sh (Linux) — edits are overwritten.
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential
+EOF
+fi
+print_success "Wrote ${GIT_PLATFORM_CONFIG}"
 
 # --- Link dotfiles with stow ---
 print_step "Linking dotfiles"
@@ -491,7 +570,13 @@ print_info "Linking dotfiles with stow..."
 # We then restore the repo versions with git checkout, so the symlinked files
 # end up with the content we actually want. This avoids needing to manually
 # back up existing dotfiles before running the script.
-stow --adopt --dir="${DOTFILES_DIR}" --target="${HOME}" .
+# ~/Library is macOS-only; don't create it on Linux.
+STOW_EXTRA=()
+if [[ "${IS_MAC}" == false ]]; then
+  STOW_EXTRA+=(--ignore='^Library$')
+fi
+# (The ${arr[@]+...} form keeps macOS's bash 3.2 happy with an empty array under set -u.)
+stow --adopt ${STOW_EXTRA[@]+"${STOW_EXTRA[@]}"} --dir="${DOTFILES_DIR}" --target="${HOME}" .
 print_info "Restoring repo versions..."
 git -C "${DOTFILES_DIR}" checkout .
 print_success "Dotfiles linked"
@@ -699,7 +784,9 @@ if [[ ! -f "${HOME}/.secrets" ]]; then
     printf "  Enter your NPM_TOKEN (or press Enter to skip): "
     read -r npm_token
     if [[ -n "${npm_token}" ]]; then
-      sed -i '' 's|# export NPM_TOKEN=""|export NPM_TOKEN="'"${npm_token}"'"|' "${HOME}/.secrets"
+      # -i.bak works with both BSD (macOS) and GNU sed; plain -i '' is BSD-only.
+      sed -i.bak 's|# export NPM_TOKEN=""|export NPM_TOKEN="'"${npm_token}"'"|' "${HOME}/.secrets"
+      rm -f "${HOME}/.secrets.bak"
       print_success "NPM_TOKEN saved to ~/.secrets"
     else
       print_info "Skipped — you can add it later in ~/.secrets"
@@ -715,21 +802,27 @@ fi
 # Zed reads .config/zed/settings.json and auto-installs the extensions listed
 # under `auto_install_extensions` on first launch - no install step needed.
 print_step "Editor extensions"
-if [[ -d "/Applications/Zed.app" ]]; then
+if [[ "${IS_WSL}" == true ]]; then
+  print_info "Zed runs on the Windows side — windows/install.ps1 installs it and copies its settings"
+elif [[ "${IS_MAC}" == false ]]; then
+  print_info "Skipping Zed check on Linux"
+elif [[ -d "/Applications/Zed.app" ]]; then
   print_success "Zed will auto-install extensions on first launch"
 else
   print_info "Zed is not installed yet - run \`brew bundle\` first"
 fi
 
 # --- Raycast settings ---
-print_step "Setting up Raycast"
-RAYCAST_CONFIG="${DOTFILES_DIR}/Raycast.rayconfig"
-if [[ -f "${RAYCAST_CONFIG}" ]]; then
-  print_info "Importing Raycast settings..."
-  open "${RAYCAST_CONFIG}"
-  print_success "Raycast settings import triggered"
-else
-  print_info "No Raycast.rayconfig found — export your settings via Raycast > Settings > Advanced > Export"
+if [[ "${IS_MAC}" == true ]]; then
+  print_step "Setting up Raycast"
+  RAYCAST_CONFIG="${DOTFILES_DIR}/Raycast.rayconfig"
+  if [[ -f "${RAYCAST_CONFIG}" ]]; then
+    print_info "Importing Raycast settings..."
+    open "${RAYCAST_CONFIG}"
+    print_success "Raycast settings import triggered"
+  else
+    print_info "No Raycast.rayconfig found — export your settings via Raycast > Settings > Advanced > Export"
+  fi
 fi
 
 # --- Config drift check ---
@@ -761,3 +854,14 @@ ${yellow}Manual steps remaining:${reset}
   3. ${blue}Restart your terminal${reset} to apply all changes.
 
 EOF
+
+if [[ "${IS_WSL}" == true ]]; then
+  win_script="$(wslpath -w "${DOTFILES_DIR}/windows/install.ps1" 2>/dev/null || echo "${DOTFILES_DIR}/windows/install.ps1")"
+  cat <<EOF
+${yellow}WSL:${reset} for the native Windows apps (1Password, Zed, browsers, …), run this
+from PowerShell on the Windows side:
+
+  powershell -ExecutionPolicy Bypass -File "${win_script}"
+
+EOF
+fi

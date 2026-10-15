@@ -31,6 +31,8 @@ if [[ -x "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ -x "/usr/local/bin/brew" ]]; then
   eval "$(/usr/local/bin/brew shellenv)"
+elif [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
 if command -v brew &>/dev/null; then
@@ -81,7 +83,8 @@ export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 export FZF_ALT_C_OPTS='--preview "ls -la {}"'
 source <(fzf --zsh 2>/dev/null) || { [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh; }
 alias pv="fzf --preview 'bat --color always {}'"
-bindkey "ç" fzf-cd-widget
+# macOS Option+C types "ç"; elsewhere Alt+C already triggers fzf-cd-widget.
+[[ "$OSTYPE" == darwin* ]] && bindkey "ç" fzf-cd-widget
 
 _fzf_comprun() {
   local command=$1
@@ -114,7 +117,12 @@ fi
 export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 
 # --- uv (supply chain defense: 1-day minimum release age) ---
-export UV_EXCLUDE_NEWER="$(date -u -v-1d '+%Y-%m-%dT%H:%M:%SZ')"
+# BSD date (macOS) uses -v-1d; GNU date (Linux) uses -d '1 day ago'.
+if [[ "$OSTYPE" == darwin* ]]; then
+  export UV_EXCLUDE_NEWER="$(date -u -v-1d '+%Y-%m-%dT%H:%M:%SZ')"
+else
+  export UV_EXCLUDE_NEWER="$(date -u -d '1 day ago' '+%Y-%m-%dT%H:%M:%SZ')"
+fi
 
 # --- PATH ---
 export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
@@ -182,4 +190,4 @@ fi
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 # bun completions
-[ -s "/Users/superhighfives/.bun/_bun" ] && source "/Users/superhighfives/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
