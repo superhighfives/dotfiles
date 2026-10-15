@@ -200,6 +200,18 @@ else
   else
     print_success "System packages already installed"
   fi
+
+  # Let this user run Docker without sudo, if Docker is installed. Membership
+  # in the docker group is root-equivalent; fine on a personal dev machine.
+  me="$(id -un)"
+  if getent group docker &>/dev/null; then
+    if id -nG "${me}" | tr ' ' '\n' | grep -qx docker; then
+      print_success "${me} is already in the docker group"
+    else
+      sudo usermod -aG docker "${me}"
+      print_success "Added ${me} to the docker group (takes effect in a new login shell)"
+    fi
+  fi
 fi
 
 # --- Homebrew ---

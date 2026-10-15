@@ -13,7 +13,9 @@
 # settings are backed up before being replaced.
 
 param(
-  [switch]$SkipPersonal
+  [switch]$SkipPersonal,
+  [switch]$SkipApps,                      # only do the Zed and WSL steps
+  [string]$WslUser = 'superhighfives'     # created if WSL's default user is root
 )
 
 $DotfilesDir = Split-Path -Parent $PSScriptRoot
@@ -73,16 +75,19 @@ function Install-App($entry) {
 
 # --- Apps ---
 Write-Step 'Installing apps with winget'
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+if ($SkipApps) {
+  Write-Info 'Skipping apps (-SkipApps)'
+} elseif (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
   Write-Fail 'winget not found - install "App Installer" from the Microsoft Store and re-run'
   exit 1
-}
-$CoreApps | ForEach-Object { Install-App $_ }
-
-if ($SkipPersonal) {
-  Write-Info 'Skipping personal apps (-SkipPersonal)'
 } else {
-  $PersonalApps | ForEach-Object { Install-App $_ }
+  $CoreApps | ForEach-Object { Install-App $_ }
+
+  if ($SkipPersonal) {
+    Write-Info 'Skipping personal apps (-SkipPersonal)'
+  } else {
+    $PersonalApps | ForEach-Object { Install-App $_ }
+  }
 }
 
 # --- Zed settings ---
@@ -110,21 +115,56 @@ foreach ($f in 'settings.json', 'keymap.json') {
   Write-Ok "Copied $f"
 }
 
-# --- WSL sanity check ---
-# A distro with no user created on first launch logs in as root, which
-# install.sh refuses (Homebrew won't run as root).
+# --- WSL user ---
+# A distro installed without a first interactive launch (e.g. over SSH) never
+# runs the create-a-user step, so it logs in as root - which install.sh refuses
+# (Homebrew won't run as root). Offer to create the user and make it the
+# default. This never runs `wsl --shutdown`: that stops every distro and
+# anything running in them, so it's left for you to do when it's safe.
 Write-Step 'Checking WSL'
-if (Get-Command wsl.exe -ErrorAction SilentlyContinue) {
-  $wslUser = (wsl.exe -- whoami | Out-String).Trim()
-  if ($wslUser -eq 'root') {
-    Write-Fail 'Your default WSL user is root. Create a regular user before running install.sh (see README).'
-  } elseif ($wslUser) {
-    Write-Ok "Default WSL user: $wslUser"
-  } else {
-    Write-Info 'No WSL distro found - run: wsl --install -d Ubuntu-24.04'
-  }
-} else {
+if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) {
   Write-Info 'WSL not installed - run: wsl --install -d Ubuntu-24.04'
+} else {
+  $current = (wsl.exe -- whoami | Out-String).Trim()
+  if (-not $current) {
+    Write-Info 'No WSL distro found - run: wsl --install -d Ubuntu-24.04'
+  } elseif ($current -ne 'root') {
+    Write-Ok "Default WSL user: $current"
+  } elseif ($WslUser -notmatch '^[a-z_][a-z0-9_-]{0,31}$') {
+    Write-Fail "'$WslUser' isn't a valid Linux username (lowercase letters, digits, - and _)"
+  } else {
+    Write-Info "Your default WSL user is root. install.sh needs a regular user."
+    $answer = Read-Host "  Create WSL user '$WslUser' and make it the default? [Y/n]"
+    if ($answer -match '^[nN]') {
+      Write-Info 'Skipped - see the Windows (WSL) section of the README to do it by hand'
+    } else {
+      wsl.exe -u root -e id -u $WslUser 2>$null | Out-Null
+      if ($LASTEXITCODE -eq 0) {
+        Write-Ok "User $WslUser already exists"
+      } else {
+        Write-Info "Creating $WslUser - choose a password (sudo will ask for it)"
+        wsl.exe -u root -e adduser $WslUser
+      }
+      wsl.exe -u root -e id -u $WslUser 2>$null | Out-Null
+      if ($LASTEXITCODE -ne 0) {
+        Write-Fail "Couldn't create $WslUser"
+      } else {
+        wsl.exe -u root -e usermod -aG sudo $WslUser
+        Write-Ok "$WslUser can use sudo"
+        # Append, never overwrite: wsl.conf may hold other sections (e.g.
+        # [boot] systemd=true, which Docker needs).
+        wsl.exe -u root -e sh -c 'grep -qs ^default= /etc/wsl.conf || printf ''\n[user]\ndefault=%s\n'' $1 >> /etc/wsl.conf' sh $WslUser
+        $set = (wsl.exe -u root -e sh -c 'grep ^default= /etc/wsl.conf' | Out-String).Trim()
+        if ($set -eq "default=$WslUser") {
+          Write-Ok "Default user set in /etc/wsl.conf"
+        } else {
+          Write-Fail "/etc/wsl.conf already sets a different default ($set) - left unchanged"
+        }
+        Write-Info 'This takes effect the next time WSL starts. When nothing important is'
+        Write-Info 'running in WSL, run `wsl --shutdown`, then reopen Ubuntu and run install.sh.'
+      }
+    }
+  }
 }
 
 Write-Host @"

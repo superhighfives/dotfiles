@@ -16,12 +16,11 @@ The script is idempotent — safe to run multiple times. It will skip anything a
 
 On Windows the dev environment lives in WSL, and native apps are installed separately with winget.
 
-1. **Install WSL** from PowerShell: `wsl --install -d Ubuntu-24.04`, then reboot. On first launch, create a regular user when prompted. `install.sh` refuses to run as root (Homebrew won't install as root). If the distro already logs in as root:
+1. **Install WSL** from PowerShell: `wsl --install -d Ubuntu-24.04`, then reboot. On first launch, create a regular user when prompted. `install.sh` refuses to run as root (Homebrew won't install as root). If the distro already logs in as root (e.g. it was installed over SSH and never launched), `windows/install.ps1 -SkipApps` offers to create the user (`-WslUser`, default `superhighfives`), add it to sudo, and set it as the default in `/etc/wsl.conf`. It appends to that file, so existing sections like `[boot] systemd=true` are kept. It then tells you to run `wsl --shutdown` and reopen Ubuntu, but never runs it itself: that stops everything running in WSL. By hand:
    ```sh
    adduser <name> && usermod -aG sudo <name>
    printf '[user]\ndefault=<name>\n' >> /etc/wsl.conf
    ```
-   then `wsl --shutdown` from PowerShell and reopen.
 2. **Inside WSL**, run the Quick Start above. Clone into the Linux home (`~/Development`), not `/mnt/c/...`. Filesystem access across the Windows boundary is far slower.
 3. **From PowerShell**, install the Windows apps and copy Zed's settings into `%APPDATA%\Zed`:
    ```powershell
@@ -29,7 +28,7 @@ On Windows the dev environment lives in WSL, and native apps are installed separ
    ```
    Pass `-SkipPersonal` to skip personal apps. Re-run after changing the Zed settings (they're copied, not linked).
 
-What differs on Linux/WSL: Brewfile casks and `mas` entries are wrapped in `if OS.mac?` and skipped; Keychain SSH setup and Raycast import are macOS-only; git's credential helper comes from `~/.gitconfig.platform.local`, which `install.sh` generates per OS (`osxkeychain` on macOS, `gh auth git-credential` on Linux).
+What differs on Linux/WSL: if Docker is installed, `install.sh` adds you to the `docker` group; Brewfile casks and `mas` entries are wrapped in `if OS.mac?` and skipped; Keychain SSH setup and Raycast import are macOS-only; git's credential helper comes from `~/.gitconfig.platform.local`, which `install.sh` generates per OS (`osxkeychain` on macOS, `gh auth git-credential` on Linux).
 
 ### Local overlays
 
