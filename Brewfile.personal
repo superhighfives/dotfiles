@@ -4,13 +4,15 @@
 # --- Cloud storage sync ---
 brew "rclone"                          # cloud storage sync
 
-# Casks and Mac App Store apps are macOS-only. On Windows, the native
+# --- Personal AI/LLM tools (cross-platform) ---
+cask "claude-code"                       # Anthropic CLI for Claude (cask ships a Linux binary too)
+
+# Other casks and Mac App Store apps are macOS-only. On Windows, the native
 # equivalents are installed by windows/install.ps1.
 if OS.mac?
   # --- Personal AI/LLM tools ---
   cask "chatgpt"                         # OpenAI chat client
   cask "claude"                          # Anthropic chat client
-  cask "claude-code"                     # Anthropic CLI for Claude
   cask "ollama-app"                      # local LLM server (menu bar)
 
   # --- Personal communication ---

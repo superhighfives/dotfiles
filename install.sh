@@ -216,17 +216,25 @@ fi
 
 # --- Homebrew ---
 print_step "Setting up Homebrew"
+# Put an existing brew on PATH first. On Linux, shellenv only lives in .zshrc,
+# so when this script runs under bash `command -v brew` would miss it and
+# reinstall Homebrew on every run.
+load_brew_shellenv() {
+  local b
+  for b in /opt/homebrew/bin/brew /usr/local/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+    if [[ -x "${b}" ]]; then
+      eval "$("${b}" shellenv)"
+      return 0
+    fi
+  done
+  return 1
+}
+command -v brew &>/dev/null || load_brew_shellenv || true
+
 if ! command -v brew &>/dev/null; then
   print_info "Installing Homebrew..."
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-  if [[ -x "/opt/homebrew/bin/brew" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [[ -x "/usr/local/bin/brew" ]]; then
-    eval "$(/usr/local/bin/brew shellenv)"
-  elif [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  fi
+  load_brew_shellenv
   print_success "Homebrew installed"
 else
   print_success "Homebrew already installed"
@@ -482,6 +490,27 @@ EOF
     print_success "Keychain SSH config added"
   else
     print_success "Keychain SSH config already present"
+  fi
+elif [[ "${IS_MAC}" != true && -f "${HOME}/.ssh/id_ed25519" ]]; then
+  # Linux has no Keychain-backed agent. .zshrc starts one shared ssh-agent per
+  # login; this makes the first ssh use load the key into it, so the
+  # passphrase is asked once per session instead of on every signed commit.
+  SSH_CONFIG="${HOME}/.ssh/config"
+  AGENT_MARKER="# >>> dotfiles: load default identity into ssh-agent >>>"
+  if ! grep -qF "${AGENT_MARKER}" "${SSH_CONFIG}" 2>/dev/null; then
+    print_info "Adding ssh-agent SSH config block..."
+    cat >> "${SSH_CONFIG}" <<EOF
+
+${AGENT_MARKER}
+Host *
+    AddKeysToAgent yes
+    IdentityFile ~/.ssh/id_ed25519
+# <<< dotfiles: load default identity into ssh-agent <<<
+EOF
+    chmod 600 "${SSH_CONFIG}"
+    print_success "ssh-agent SSH config added"
+  else
+    print_success "ssh-agent SSH config already present"
   fi
 fi
 
