@@ -675,6 +675,36 @@ else
   exit 1
 fi
 
+# Skill sources clone over SSH, and commits are SSH-signed, so the local key
+# must be registered on GitHub as both an authentication and a signing key.
+# A fresh machine's key isn't, and the default gh token can't upload keys, so
+# check the public key lists first and only widen the token's scopes when
+# something actually needs adding.
+pubkey="${HOME}/.ssh/id_ed25519.pub"
+if [[ -f "${pubkey}" ]]; then
+  print_step "Registering SSH key with GitHub"
+  key_body="$(awk '{print $2}' "${pubkey}")"
+  gh_login="$(gh api user --jq .login)"
+  key_title="$(hostname)"
+  missing_types=()
+  gh api "users/${gh_login}/keys" --jq '.[].key' | grep -qF "${key_body}" \
+    || missing_types+=(authentication)
+  gh api "users/${gh_login}/ssh_signing_keys" --jq '.[].key' | grep -qF "${key_body}" \
+    || missing_types+=(signing)
+  if [[ ${#missing_types[@]} -eq 0 ]]; then
+    print_success "SSH key already registered with GitHub"
+  elif [[ -t 0 ]]; then
+    gh auth refresh --hostname github.com --scopes admin:public_key,admin:ssh_signing_key
+    for key_type in "${missing_types[@]}"; do
+      gh ssh-key add "${pubkey}" --title "${key_title}" --type "${key_type}"
+      print_success "SSH key added to GitHub as ${key_type} key"
+    done
+  else
+    print_error "SSH key isn't registered with GitHub (${missing_types[*]}). Add it at https://github.com/settings/keys"
+    exit 1
+  fi
+fi
+
 # --- Agent skills ---
 # Install skills from GitHub via the `skills` CLI, then symlink them into
 # each agent's global skills dir. The install-skills.sh script handles
