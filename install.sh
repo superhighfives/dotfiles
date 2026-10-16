@@ -420,6 +420,20 @@ print_step "Setting up SSH"
 mkdir -p "${HOME}/.ssh"
 chmod 700 "${HOME}/.ssh"
 
+# Later steps clone over SSH non-interactively (e.g. the skills installer),
+# and on a fresh machine github.com isn't in known_hosts yet, so ssh fails
+# with "Host key verification failed". Pin GitHub's published ed25519 key
+# (https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints)
+# rather than trusting whatever ssh-keyscan returns.
+GITHUB_HOST_KEY="github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+if ! ssh-keygen -F github.com -f "${HOME}/.ssh/known_hosts" >/dev/null 2>&1; then
+  echo "${GITHUB_HOST_KEY}" >> "${HOME}/.ssh/known_hosts"
+  chmod 600 "${HOME}/.ssh/known_hosts"
+  print_success "Added github.com to known_hosts"
+else
+  print_success "github.com already in known_hosts"
+fi
+
 if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   if [[ "${INTERACTIVE}" == true ]]; then
     print_info "Generating SSH key..."
