@@ -47,6 +47,7 @@ brew "unar"                          # universal archive extractor (rar, 7z, zip
 if OS.mac?
   brew "mas"                           # Mac App Store CLI
   brew "mint"                          # Swift package manager
+  brew "python@3.13"                    # Python for gcloud-cli (CLOUDSDK_PYTHON in .zshenv)
   cask "replicate/tap/cog"             # containers for machine learning (Replicate)
 
   # --- Casks (macOS Applications) ---
