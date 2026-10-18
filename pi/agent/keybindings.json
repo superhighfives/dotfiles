@@ -1,4 +1,6 @@
 {
+  "app.session.togglePath": [],
   "app.model.cycleForward": ["alt+p"],
-  "app.model.cycleBackward": ["alt+shift+p"]
+  "app.model.cycleBackward": ["alt+shift+p"],
+  "app.models.toggleProvider": ["alt+p"]
 }

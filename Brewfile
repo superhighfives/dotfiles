@@ -19,16 +19,17 @@ brew "htop"                          # interactive process viewer
 brew "neovim"                        # hyperextensible vim-based text editor
 brew "prettyping"                    # prettier ping output
 brew "ripgrep"                       # grep replacement, very fast
+brew "stow"                          # symlinks dotfiles into ~
 brew "tmux"                          # terminal multiplexer
 brew "zoxide"                        # smart cd replacement (z/zi)
 
 # --- Development ---
 brew "biome"                         # JavaScript/TypeScript formatter and linter
 brew "cloudflared"                   # Cloudflare Tunnel daemon
-cask "replicate/tap/cog"             # containers for machine learning (Replicate)
 brew "flyctl"                        # fly.io CLI for deploying apps
 brew "herdr"                         # AI snippet and window manager
 brew "gcc"                           # GNU compiler collection
+brew "jq"                            # JSON processor (used by scripts/sync-pi-config.sh)
 brew "openssl@3"                     # TLS/SSL toolkit
 brew "anomalyco/tap/opencode"         # AI coding assistant (tap version, stays current)
 brew "pi-coding-agent"               # pi.dev AI agent toolkit
@@ -39,27 +40,33 @@ brew "tesseract"                     # OCR engine
 brew "whisper-cpp"                   # speech-to-text
 
 # --- Other Tools ---
-brew "mas"                           # Mac App Store CLI
-brew "mint"                          # Swift package manager
 brew "unar"                          # universal archive extractor (rar, 7z, zip, etc.)
 
-# --- Casks (macOS Applications) ---
-cask "1password"                     # password manager
-cask "caffeine"                      # prevent mac from sleeping
-cask "discord"                       # chat and communities
-cask "figma"                         # design tool
-cask "gcloud-cli"                    # Google Cloud SDK CLI
-cask "ghostty"                       # terminal emulator
-cask "github"                        # GitHub Desktop
-cask "google-chrome"                 # web browser
-cask "handy"                         # speech-to-text (handy.computer)
-cask "meetingbar"                    # show upcoming meetings in the menu bar
-cask "obsidian"                      # markdown knowledge base
-cask "opencode-desktop"              # AI coding assistant
-cask "postman"                       # API testing
-cask "raycast"                       # launcher and productivity
-cask "zed"                           # fast editor with native AI agent panel
-cask "pika"                          # the little color picker I made
+# Everything below is macOS-only: casks, the App Store CLI, and Swift tooling.
+# On Windows, the native app equivalents are installed by windows/install.ps1.
+if OS.mac?
+  brew "mas"                           # Mac App Store CLI
+  brew "mint"                          # Swift package manager
+  cask "replicate/tap/cog"             # containers for machine learning (Replicate)
 
-# --- Fonts ---
-cask "font-geist-mono"               # buffer font used in Zed
+  # --- Casks (macOS Applications) ---
+  cask "1password"                     # password manager
+  cask "caffeine"                      # prevent mac from sleeping
+  cask "discord"                       # chat and communities
+  cask "figma"                         # design tool
+  cask "gcloud-cli"                    # Google Cloud SDK CLI
+  cask "ghostty"                       # terminal emulator
+  cask "github"                        # GitHub Desktop
+  cask "google-chrome"                 # web browser
+  cask "handy"                         # speech-to-text (handy.computer)
+  cask "meetingbar"                    # show upcoming meetings in the menu bar
+  cask "obsidian"                      # markdown knowledge base
+  cask "opencode-desktop"              # AI coding assistant
+  cask "postman"                       # API testing
+  cask "raycast"                       # launcher and productivity
+  cask "zed"                           # fast editor with native AI agent panel
+  cask "pika"                          # the little color picker I made
+
+  # --- Fonts ---
+  cask "font-geist-mono"               # buffer font used in Zed
+end

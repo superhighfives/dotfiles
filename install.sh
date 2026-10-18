@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
 # Dotfiles installer for Charlie Gleason (superhighfives)
-# Sets up a macOS development machine from scratch.
+# Sets up a macOS or Linux/WSL development machine from scratch.
 # Safe to run repeatedly (idempotent - checks before installing).
 #
+# On Windows, run this inside WSL as a regular (non-root) user, then run
+# windows/install.ps1 from PowerShell for the native Windows apps.
+#
 # Usage:
-#   sh install.sh [--skip-personal] 2>&1 | tee ~/install.log
+#   bash install.sh [--skip-personal] 2>&1 | tee ~/install.log
 #
 # Options:
 #   --skip-personal   Skip installing apps from Brewfile.personal
@@ -100,7 +103,7 @@ ${yellow}
 | | | | \\__ \\ || (_| | | |_\\__ \\ | | |
 |_|_| |_|___/\\__\\__,_|_|_(_)___/_| |_|
 ${reset}
-Sets up a macOS development machine.
+Sets up a macOS or Linux/WSL development machine.
 Safe to run repeatedly (idempotent).
 Repository: ${DOTFILES_REPO}
 EOF
@@ -112,10 +115,31 @@ if [[ -t 0 ]]; then
   INTERACTIVE=true
 fi
 
-print_info "OS: ${OS} | Interactive: ${INTERACTIVE} | Skip personal: ${SKIP_PERSONAL}"
+IS_MAC=false
+IS_WSL=false
+case "${OS}" in
+  Darwin) IS_MAC=true ;;
+  Linux)
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+      IS_WSL=true
+    fi
+    ;;
+  *)
+    print_error "Unsupported OS: ${OS}. This script supports macOS and Linux (including WSL)."
+    exit 1
+    ;;
+esac
 
-if [[ "${OS}" != "Darwin" ]]; then
-  print_error "This script is designed for macOS. Exiting."
+print_info "OS: ${OS} | WSL: ${IS_WSL} | Interactive: ${INTERACTIVE} | Skip personal: ${SKIP_PERSONAL}"
+
+# Homebrew refuses to run as root, and a fresh WSL distro can drop you into
+# root if no user was created on first launch. Fail early with the fix.
+if [[ "${IS_MAC}" == false && "${EUID}" -eq 0 ]]; then
+  print_error "Don't run this as root — Homebrew won't install, and everything would land in /root."
+  print_info "Create a user and make it the default, then re-run as that user:"
+  print_info "  adduser <name> && usermod -aG sudo <name>"
+  print_info "  On WSL, also add 'default=<name>' under a [user] section in /etc/wsl.conf,"
+  print_info "  then run 'wsl --shutdown' from Windows and reopen the terminal."
   exit 1
 fi
 
@@ -124,50 +148,93 @@ print_step "Requesting administrator access"
 if sudo -v; then
   print_success "Administrator access granted"
 else
-  print_error "This script requires administrator access (needed by Homebrew and Xcode CLT)."
+  print_error "This script requires administrator access (needed by Homebrew and system packages)."
   exit 1
 fi
 
 # A preinstalled Xcode can block developer tools until its license is accepted.
 # Call its binary directly because xcode-select may still point at the CLT.
 XCODEBUILD="/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild"
-if [[ -x "${XCODEBUILD}" ]] && ! "${XCODEBUILD}" -license check &>/dev/null; then
+if [[ "${IS_MAC}" == true && -x "${XCODEBUILD}" ]] && ! "${XCODEBUILD}" -license check &>/dev/null; then
   print_info "Accepting the Xcode license..."
   sudo "${XCODEBUILD}" -license accept
   print_success "Xcode license accepted"
 fi
 
 # --- Check connectivity ---
+# curl rather than ping: ping's flags differ between macOS and Linux (-t is a
+# timeout on macOS but TTL on Linux), and ICMP is sometimes blocked in WSL.
 print_step "Checking internet connectivity"
-if ! ping -q -t1 -c1 google.com &>/dev/null; then
+if ! curl -fsS --max-time 10 -o /dev/null https://github.com; then
   print_error "Cannot connect to the Internet"
   exit 1
 fi
 print_success "Internet reachable"
 
-# --- Xcode Command Line Tools ---
-print_step "Checking Xcode Command Line Tools"
-if ! xcode-select -p &>/dev/null; then
-  print_info "Installing Xcode Command Line Tools..."
-  xcode-select --install
-  print_info "Waiting for installation to complete..."
-  until xcode-select -p &>/dev/null; do sleep 5; done
-  print_success "Xcode Command Line Tools installed"
+if [[ "${IS_MAC}" == true ]]; then
+  # --- Xcode Command Line Tools ---
+  print_step "Checking Xcode Command Line Tools"
+  if ! xcode-select -p &>/dev/null; then
+    print_info "Installing Xcode Command Line Tools..."
+    xcode-select --install
+    print_info "Waiting for installation to complete..."
+    until xcode-select -p &>/dev/null; do sleep 5; done
+    print_success "Xcode Command Line Tools installed"
+  else
+    print_success "Xcode Command Line Tools already installed"
+  fi
 else
-  print_success "Xcode Command Line Tools already installed"
+  # --- System packages (Linux) ---
+  # Homebrew's Linux prerequisites, plus zsh (macOS ships it, Ubuntu doesn't).
+  print_step "Checking system packages"
+  APT_PACKAGES=(build-essential procps curl file git zsh unzip)
+  missing=()
+  for pkg in "${APT_PACKAGES[@]}"; do
+    dpkg -s "${pkg}" &>/dev/null || missing+=("${pkg}")
+  done
+  if (( ${#missing[@]} > 0 )); then
+    print_info "Installing: ${missing[*]}"
+    sudo apt-get update
+    sudo apt-get install -y "${missing[@]}"
+    print_success "System packages installed"
+  else
+    print_success "System packages already installed"
+  fi
+
+  # Let this user run Docker without sudo, if Docker is installed. Membership
+  # in the docker group is root-equivalent; fine on a personal dev machine.
+  me="$(id -un)"
+  if getent group docker &>/dev/null; then
+    if id -nG "${me}" | tr ' ' '\n' | grep -qx docker; then
+      print_success "${me} is already in the docker group"
+    else
+      sudo usermod -aG docker "${me}"
+      print_success "Added ${me} to the docker group (takes effect in a new login shell)"
+    fi
+  fi
 fi
 
 # --- Homebrew ---
 print_step "Setting up Homebrew"
+# Put an existing brew on PATH first. On Linux, shellenv only lives in .zshrc,
+# so when this script runs under bash `command -v brew` would miss it and
+# reinstall Homebrew on every run.
+load_brew_shellenv() {
+  local b
+  for b in /opt/homebrew/bin/brew /usr/local/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+    if [[ -x "${b}" ]]; then
+      eval "$("${b}" shellenv)"
+      return 0
+    fi
+  done
+  return 1
+}
+command -v brew &>/dev/null || load_brew_shellenv || true
+
 if ! command -v brew &>/dev/null; then
   print_info "Installing Homebrew..."
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-  if [[ -x "/opt/homebrew/bin/brew" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [[ -x "/usr/local/bin/brew" ]]; then
-    eval "$(/usr/local/bin/brew shellenv)"
-  fi
+  load_brew_shellenv
   print_success "Homebrew installed"
 else
   print_success "Homebrew already installed"
@@ -353,12 +420,30 @@ print_step "Setting up SSH"
 mkdir -p "${HOME}/.ssh"
 chmod 700 "${HOME}/.ssh"
 
+# Later steps clone over SSH non-interactively (e.g. the skills installer),
+# and on a fresh machine github.com isn't in known_hosts yet, so ssh fails
+# with "Host key verification failed". Pin GitHub's published ed25519 key
+# (https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints)
+# rather than trusting whatever ssh-keyscan returns.
+GITHUB_HOST_KEY="github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+if ! ssh-keygen -F github.com -f "${HOME}/.ssh/known_hosts" >/dev/null 2>&1; then
+  echo "${GITHUB_HOST_KEY}" >> "${HOME}/.ssh/known_hosts"
+  chmod 600 "${HOME}/.ssh/known_hosts"
+  print_success "Added github.com to known_hosts"
+else
+  print_success "github.com already in known_hosts"
+fi
+
 if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   if [[ "${INTERACTIVE}" == true ]]; then
     print_info "Generating SSH key..."
     ssh-keygen -t ed25519 -f "${HOME}/.ssh/id_ed25519" -C "${SSH_EMAIL}"
-    ssh-add --apple-use-keychain "${HOME}/.ssh/id_ed25519"
-    print_success "SSH key generated and added to Keychain"
+    if [[ "${IS_MAC}" == true ]]; then
+      ssh-add --apple-use-keychain "${HOME}/.ssh/id_ed25519"
+      print_success "SSH key generated and added to Keychain"
+    else
+      print_success "SSH key generated"
+    fi
     echo ""
     print_info "Add your public key to GitHub: https://github.com/settings/keys"
     cat "${HOME}/.ssh/id_ed25519.pub"
@@ -371,7 +456,7 @@ else
   # On a fresh machine the credential Apple's ssh-agent uses to auto-load the
   # key doesn't exist yet, so cache it once here. Silent no-op if it's already
   # stored (as it is once macOS has managed the key), so this is safe to re-run.
-  if [[ "${INTERACTIVE}" == true ]]; then
+  if [[ "${IS_MAC}" == true && "${INTERACTIVE}" == true ]]; then
     print_info "Ensuring SSH passphrase is cached in the Keychain..."
     ssh-add --apple-use-keychain "${HOME}/.ssh/id_ed25519" \
       || print_info "Skipped — add later with: ssh-add --apple-use-keychain ~/.ssh/id_ed25519"
@@ -386,8 +471,8 @@ fi
 # different laptops have different host/key setups — so we manage just this
 # block via a marker instead of shipping a whole config. Host-specific
 # IdentityAgent blocks elsewhere in the file still win for their hosts
-# (first-match-wins).
-if [[ -f "${HOME}/.ssh/id_ed25519" ]]; then
+# (first-match-wins). macOS only: Linux OpenSSH rejects the UseKeychain option.
+if [[ "${IS_MAC}" == true && -f "${HOME}/.ssh/id_ed25519" ]]; then
   SSH_CONFIG="${HOME}/.ssh/config"
   # Before .ssh/config became machine-local, stow linked it into the repo.
   # Machines set up back then still carry that symlink, now dangling — every
@@ -420,6 +505,27 @@ EOF
   else
     print_success "Keychain SSH config already present"
   fi
+elif [[ "${IS_MAC}" != true && -f "${HOME}/.ssh/id_ed25519" ]]; then
+  # Linux has no Keychain-backed agent. .zshrc starts one shared ssh-agent per
+  # login; this makes the first ssh use load the key into it, so the
+  # passphrase is asked once per session instead of on every signed commit.
+  SSH_CONFIG="${HOME}/.ssh/config"
+  AGENT_MARKER="# >>> dotfiles: load default identity into ssh-agent >>>"
+  if ! grep -qF "${AGENT_MARKER}" "${SSH_CONFIG}" 2>/dev/null; then
+    print_info "Adding ssh-agent SSH config block..."
+    cat >> "${SSH_CONFIG}" <<EOF
+
+${AGENT_MARKER}
+Host *
+    AddKeysToAgent yes
+    IdentityFile ~/.ssh/id_ed25519
+# <<< dotfiles: load default identity into ssh-agent <<<
+EOF
+    chmod 600 "${SSH_CONFIG}"
+    print_success "ssh-agent SSH config added"
+  else
+    print_success "ssh-agent SSH config already present"
+  fi
 fi
 
 # Set up allowed_signers for git commit signing
@@ -431,6 +537,31 @@ if [[ -f "${HOME}/.ssh/id_ed25519.pub" ]]; then
   else
     print_success "SSH signing already configured"
   fi
+fi
+
+# --- Linux git credential helper ---
+# The tracked .gitconfig uses osxkeychain, which only exists on macOS. On Linux,
+# ~/.gitconfig.linux.local (included last) clears it and uses gh instead.
+# Regenerated on every run; put personal overrides in ~/.gitconfig.local.
+if [[ "${IS_MAC}" != true ]]; then
+  print_step "Configuring git credential helper"
+  GIT_LINUX_CONFIG="${HOME}/.gitconfig.linux.local"
+  # gh is installed by the Brewfile and authenticated below; it serves as the
+  # credential helper for GitHub over HTTPS. Written here rather than via
+  # `gh auth setup-git`, which would edit the stowed (tracked) ~/.gitconfig.
+  cat > "${GIT_LINUX_CONFIG}" <<'EOF'
+# Generated by dotfiles install.sh (Linux) — edits are overwritten.
+[credential]
+	helper =
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential
+EOF
+  rm -f "${HOME}/.gitconfig.platform.local"  # replaced by .gitconfig.linux.local
+  print_success "Wrote ${GIT_LINUX_CONFIG}"
 fi
 
 # --- Link dotfiles with stow ---
@@ -491,10 +622,21 @@ print_info "Linking dotfiles with stow..."
 # We then restore the repo versions with git checkout, so the symlinked files
 # end up with the content we actually want. This avoids needing to manually
 # back up existing dotfiles before running the script.
-stow --adopt --dir="${DOTFILES_DIR}" --target="${HOME}" .
+# ~/Library is macOS-only; don't create it on Linux.
+STOW_EXTRA=()
+if [[ "${IS_MAC}" == false ]]; then
+  STOW_EXTRA+=(--ignore='^Library$')
+fi
+# (The ${arr[@]+...} form keeps macOS's bash 3.2 happy with an empty array under set -u.)
+stow --adopt ${STOW_EXTRA[@]+"${STOW_EXTRA[@]}"} --dir="${DOTFILES_DIR}" --target="${HOME}" .
 print_info "Restoring repo versions..."
 git -C "${DOTFILES_DIR}" checkout .
 print_success "Dotfiles linked"
+
+# OpenCode loads this after the tracked global instructions. Keep it as a real,
+# machine-local file so work-specific rules never enter the public repository.
+touch "${HOME}/INSTRUCTIONS.local.md"
+print_success "Local OpenCode instructions ready"
 
 # If ~/.npmrc.local exists, point ~/.npmrc at it. npm/pnpm/bun read ~/.npmrc
 # directly with no include mechanism, so we override the stow-managed symlink.
@@ -528,6 +670,38 @@ elif [[ -t 0 ]]; then
 else
   print_error "GitHub authentication is required before installing agent skills. Run: gh auth login"
   exit 1
+fi
+
+# Skill sources clone over SSH, and commits are SSH-signed, so the local key
+# must be registered on GitHub as both an authentication and a signing key.
+# A fresh machine's key isn't, and the default gh token can't upload keys, so
+# check the public key lists first and only widen the token's scopes when
+# something actually needs adding.
+pubkey="${HOME}/.ssh/id_ed25519.pub"
+if [[ -f "${pubkey}" ]]; then
+  print_step "Registering SSH key with GitHub"
+  key_body="$(awk '{print $2}' "${pubkey}")"
+  gh_login="$(gh api user --jq .login)"
+  key_title="$(hostname)"
+  missing_types=()
+  gh api "users/${gh_login}/keys" --jq '.[].key' | grep -qF "${key_body}" \
+    || missing_types+=(authentication)
+  gh api "users/${gh_login}/ssh_signing_keys" --jq '.[].key' | grep -qF "${key_body}" \
+    || missing_types+=(signing)
+  if [[ ${#missing_types[@]} -eq 0 ]]; then
+    print_success "SSH key already registered with GitHub"
+  elif [[ -t 0 ]]; then
+    # write:* is enough to add keys; admin:* would also let the stored token
+    # delete any key on the account.
+    gh auth refresh --hostname github.com --scopes write:public_key,write:ssh_signing_key
+    for key_type in "${missing_types[@]}"; do
+      gh ssh-key add "${pubkey}" --title "${key_title}" --type "${key_type}"
+      print_success "SSH key added to GitHub as ${key_type} key"
+    done
+  else
+    print_error "SSH key isn't registered with GitHub (${missing_types[*]}). Add it at https://github.com/settings/keys"
+    exit 1
+  fi
 fi
 
 # --- Agent skills ---
@@ -694,7 +868,9 @@ if [[ ! -f "${HOME}/.secrets" ]]; then
     printf "  Enter your NPM_TOKEN (or press Enter to skip): "
     read -r npm_token
     if [[ -n "${npm_token}" ]]; then
-      sed -i '' 's|# export NPM_TOKEN=""|export NPM_TOKEN="'"${npm_token}"'"|' "${HOME}/.secrets"
+      # -i.bak works with both BSD (macOS) and GNU sed; plain -i '' is BSD-only.
+      sed -i.bak 's|# export NPM_TOKEN=""|export NPM_TOKEN="'"${npm_token}"'"|' "${HOME}/.secrets"
+      rm -f "${HOME}/.secrets.bak"
       print_success "NPM_TOKEN saved to ~/.secrets"
     else
       print_info "Skipped — you can add it later in ~/.secrets"
@@ -710,21 +886,27 @@ fi
 # Zed reads .config/zed/settings.json and auto-installs the extensions listed
 # under `auto_install_extensions` on first launch - no install step needed.
 print_step "Editor extensions"
-if [[ -d "/Applications/Zed.app" ]]; then
+if [[ "${IS_WSL}" == true ]]; then
+  print_info "Zed runs on the Windows side — windows/install.ps1 installs it and copies its settings"
+elif [[ "${IS_MAC}" == false ]]; then
+  print_info "Skipping Zed check on Linux"
+elif [[ -d "/Applications/Zed.app" ]]; then
   print_success "Zed will auto-install extensions on first launch"
 else
   print_info "Zed is not installed yet - run \`brew bundle\` first"
 fi
 
 # --- Raycast settings ---
-print_step "Setting up Raycast"
-RAYCAST_CONFIG="${DOTFILES_DIR}/Raycast.rayconfig"
-if [[ -f "${RAYCAST_CONFIG}" ]]; then
-  print_info "Importing Raycast settings..."
-  open "${RAYCAST_CONFIG}"
-  print_success "Raycast settings import triggered"
-else
-  print_info "No Raycast.rayconfig found — export your settings via Raycast > Settings > Advanced > Export"
+if [[ "${IS_MAC}" == true ]]; then
+  print_step "Setting up Raycast"
+  RAYCAST_CONFIG="${DOTFILES_DIR}/Raycast.rayconfig"
+  if [[ -f "${RAYCAST_CONFIG}" ]]; then
+    print_info "Importing Raycast settings..."
+    open "${RAYCAST_CONFIG}"
+    print_success "Raycast settings import triggered"
+  else
+    print_info "No Raycast.rayconfig found — export your settings via Raycast > Settings > Advanced > Export"
+  fi
 fi
 
 # --- Config drift check ---
@@ -749,6 +931,21 @@ ${yellow}Manual steps remaining:${reset}
      # Restore ~/.config/rclone/rclone.conf from 1Password
      # Or run: rclone config
 
-  2. ${blue}Restart your terminal${reset} to apply all changes.
+  2. ${blue}control-room (optional):${reset}
+     # Restore ~/.config/control-room/app-private-key.pem from 1Password
+     # See ~/.config/control-room/README.md
+
+  3. ${blue}Restart your terminal${reset} to apply all changes.
 
 EOF
+
+if [[ "${IS_WSL}" == true ]]; then
+  win_script="$(wslpath -w "${DOTFILES_DIR}/windows/install.ps1" 2>/dev/null || echo "${DOTFILES_DIR}/windows/install.ps1")"
+  cat <<EOF
+${yellow}WSL:${reset} for the native Windows apps (1Password, Zed, browsers, …), run this
+from PowerShell on the Windows side:
+
+  powershell -ExecutionPolicy Bypass -File "${win_script}"
+
+EOF
+fi

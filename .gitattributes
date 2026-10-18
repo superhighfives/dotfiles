@@ -1,0 +1,5 @@
+# Keep LF line endings everywhere, even when cloned on Windows with
+# core.autocrlf=true. Shell scripts with CRLF fail with "\r: command not found".
+* text=auto eol=lf
+
+*.rayconfig binary
