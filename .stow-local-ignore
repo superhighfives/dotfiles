@@ -1,5 +1,6 @@
 \.git
 \.gitignore
+\.gitattributes
 \.stow-local-ignore
 LICENSE
 README\.md
@@ -12,5 +13,6 @@ Brewfile\.local
 Raycast\.rayconfig
 docs
 pi
+windows
 .+\.local$
 .+\.local\..+

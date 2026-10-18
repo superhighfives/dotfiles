@@ -4,28 +4,34 @@
 # --- Cloud storage sync ---
 brew "rclone"                          # cloud storage sync
 
-# --- Personal AI/LLM tools ---
-cask "chatgpt"                         # OpenAI chat client
-cask "claude"                          # Anthropic chat client
-cask "claude-code"                     # Anthropic CLI for Claude
-cask "ollama-app"                      # local LLM server (menu bar)
+# --- Personal AI/LLM tools (cross-platform) ---
+cask "claude-code"                       # Anthropic CLI for Claude (cask ships a Linux binary too)
 
-# --- Personal communication ---
-cask "whatsapp"                        # messaging
+# Other casks and Mac App Store apps are macOS-only. On Windows, the native
+# equivalents are installed by windows/install.ps1.
+if OS.mac?
+  # --- Personal AI/LLM tools ---
+  cask "chatgpt"                         # OpenAI chat client
+  cask "claude"                          # Anthropic chat client
+  cask "ollama-app"                      # local LLM server (menu bar)
 
-# --- Media ---
-cask "calibre"                         # ebook manager
-cask "plex"                            # media server client
-mas "Reeder", id: 6475002485           # RSS reader
+  # --- Personal communication ---
+  cask "whatsapp"                        # messaging
 
-# --- VPN ---
-cask "private-internet-access"         # VPN
+  # --- Media ---
+  cask "calibre"                         # ebook manager
+  cask "plex"                            # media server client
+  mas "Reeder", id: 6475002485           # RSS reader
 
-# --- Additional personal tools ---
-cask "conductor"                       # web server manager
-cask "fork"                            # git GUI client
-cask "tailscale-app"                   # mesh VPN
-cask "transmit"                        # file transfer (FTP/SFTP/S3)
-cask "daisydisk"                       # disk space analyzer
-cask "naps2"                           # document scanning
-cask "windows-app"                     # remote desktop (formerly Microsoft Remote Desktop)
+  # --- VPN ---
+  cask "private-internet-access"         # VPN
+
+  # --- Additional personal tools ---
+  cask "conductor"                       # web server manager
+  cask "fork"                            # git GUI client
+  cask "tailscale-app"                   # mesh VPN
+  cask "transmit"                        # file transfer (FTP/SFTP/S3)
+  cask "daisydisk"                       # disk space analyzer
+  cask "naps2"                           # document scanning
+  cask "windows-app"                     # remote desktop (formerly Microsoft Remote Desktop)
+end
