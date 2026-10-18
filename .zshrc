@@ -66,12 +66,17 @@ fi
 # Linux/WSL has no launchd agent, so start one shared agent per login on a
 # fixed socket (every shell reuses it). Still no ssh-add: ~/.ssh/config's
 # AddKeysToAgent loads the key on first use, set up by install.sh.
+# An inherited agent that answers (e.g. forwarded with ssh -A) is kept;
+# ssh-add -l exits 2 only when it can't reach an agent at all.
 if [[ "$OSTYPE" == linux* ]]; then
-  export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-$HOME/.ssh}/ssh-agent.sock"
   ssh-add -l &>/dev/null
   if [[ $? == 2 ]]; then
-    rm -f "$SSH_AUTH_SOCK"
-    eval "$(ssh-agent -a "$SSH_AUTH_SOCK")" >/dev/null
+    export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-$HOME/.ssh}/ssh-agent.sock"
+    ssh-add -l &>/dev/null
+    if [[ $? == 2 ]]; then
+      rm -f "$SSH_AUTH_SOCK"
+      eval "$(ssh-agent -a "$SSH_AUTH_SOCK")" >/dev/null
+    fi
   fi
 fi
 

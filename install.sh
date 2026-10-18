@@ -691,7 +691,9 @@ if [[ -f "${pubkey}" ]]; then
   if [[ ${#missing_types[@]} -eq 0 ]]; then
     print_success "SSH key already registered with GitHub"
   elif [[ -t 0 ]]; then
-    gh auth refresh --hostname github.com --scopes admin:public_key,admin:ssh_signing_key
+    # write:* is enough to add keys; admin:* would also let the stored token
+    # delete any key on the account.
+    gh auth refresh --hostname github.com --scopes write:public_key,write:ssh_signing_key
     for key_type in "${missing_types[@]}"; do
       gh ssh-key add "${pubkey}" --title "${key_title}" --type "${key_type}"
       print_success "SSH key added to GitHub as ${key_type} key"

@@ -174,8 +174,6 @@ All done.
 Manual steps remaining:
   1. Geist Mono (Zed's buffer font) isn't on winget - install it from
      https://github.com/vercel/geist-font/releases
-  2. 1Password > Settings > Developer: enable the SSH agent (and WSL
-     integration) to use your SSH key for git in WSL.
-  3. Set Windows Terminal's default profile to your WSL distro.
+  2. Set Windows Terminal's default profile to your WSL distro.
 
 "@
