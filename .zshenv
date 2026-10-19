@@ -26,6 +26,16 @@ if [[ -d "$HOME/.local/share/mise/shims" ]]; then
   export PATH="$HOME/.local/share/mise/shims:$PATH"
 fi
 
+# gcloud refuses to run on macOS's /usr/bin/python3 (3.9), which is what it
+# finds first once .zshrc re-runs brew shellenv. Point it at a supported one.
+if [[ -z "$CLOUDSDK_PYTHON" ]]; then
+  for _py in /opt/homebrew/opt/python@3.13/bin/python3.13 \
+             "$HOME/.local/share/mise/installs/python/3.13/bin/python3"; do
+    [[ -x "$_py" ]] && { export CLOUDSDK_PYTHON="$_py"; break; }
+  done
+  unset _py
+fi
+
 # Machine-local additions (Cloudflare WARP certs, cargo env, etc).
 # Anything that third-party installers want to drop into .zshenv should go here.
 [[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
