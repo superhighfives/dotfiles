@@ -67,6 +67,18 @@
       <Maximized>false</Maximized>
     </FormState>
     <FormState>
+      <Name>AboutForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>0</Width>
+        <Height>0</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
       <Name>AdvancedProfileForm</Name>
       <Location>
         <X>0</X>
@@ -93,24 +105,12 @@
     <FormState>
       <Name>BatchScanForm</Name>
       <Location>
-        <X>1086</X>
-        <Y>291</Y>
+        <X>703</X>
+        <Y>316</Y>
       </Location>
       <Size>
         <Width>392</Width>
         <Height>443</Height>
-      </Size>
-      <Maximized>false</Maximized>
-    </FormState>
-    <FormState>
-      <Name>AboutForm</Name>
-      <Location>
-        <X>0</X>
-        <Y>0</Y>
-      </Location>
-      <Size>
-        <Width>0</Width>
-        <Height>0</Height>
       </Size>
       <Maximized>false</Maximized>
     </FormState>

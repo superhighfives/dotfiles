@@ -24,7 +24,7 @@
     <CustomPageSizeName xsi:nil="true" />
     <CustomPageSize xsi:nil="true" />
     <Resolution>Dpi300</Resolution>
-    <PaperSource>Glass</PaperSource>
+    <PaperSource>Duplex</PaperSource>
     <EnableAutoSave>false</EnableAutoSave>
     <AutoSaveSettings>
       <FilePath>/Users/superhighfives/Documents/Scans/2026/Scan-$(YYYY)-$(MM)-$(DD)_$(hh)$(mm)$(ss).pdf</FilePath>
