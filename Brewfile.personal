@@ -1,9 +1,6 @@
 # Personal/non-work casks and formulae
 # These are skipped when running with --work flag
 
-# --- Cloud storage sync ---
-brew "rclone"                          # cloud storage sync
-
 # --- Personal AI/LLM tools (cross-platform) ---
 cask "claude-code"                       # Anthropic CLI for Claude (cask ships a Linux binary too)
 

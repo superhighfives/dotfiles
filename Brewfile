@@ -15,9 +15,11 @@ brew "fd"                            # find replacement, fast and user-friendly
 brew "fzf"                           # fuzzy finder for files, history, etc.
 brew "gh"                            # GitHub CLI
 brew "git"                           # version control
+brew "git-lfs"                       # large file storage (filter config lives in .gitconfig)
 brew "htop"                          # interactive process viewer
 brew "neovim"                        # hyperextensible vim-based text editor
 brew "prettyping"                    # prettier ping output
+brew "rclone"                        # cloud storage sync
 brew "ripgrep"                       # grep replacement, very fast
 brew "stow"                          # symlinks dotfiles into ~
 brew "tmux"                          # terminal multiplexer
