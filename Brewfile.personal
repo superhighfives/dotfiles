@@ -20,9 +20,6 @@ if OS.mac?
   cask "plex"                            # media server client
   mas "Reeder", id: 6475002485           # RSS reader
 
-  # --- VPN ---
-  cask "private-internet-access"         # VPN
-
   # --- Additional personal tools ---
   cask "conductor"                       # web server manager
   cask "fork"                            # git GUI client
