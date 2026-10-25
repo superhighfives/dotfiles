@@ -65,6 +65,7 @@ if OS.mac?
   cask "meetingbar"                    # show upcoming meetings in the menu bar
   cask "obsidian"                      # markdown knowledge base
   cask "opencode-desktop"              # AI coding assistant
+  cask "openlogi"                      # local-first alternative to Logitech Options+
   cask "postman"                       # API testing
   cask "raycast"                       # launcher and productivity
   cask "zed"                           # fast editor with native AI agent panel
