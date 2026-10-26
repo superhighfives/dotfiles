@@ -18,6 +18,7 @@
 #   pastor list | status <id> | logs <id> [-f] | restart <id>
 #   pastor stop <id> [--purge] | killall [--yes]
 #   pastor cleanup [--yes]       # dry-run sweep: merged/closed jobs + orphans
+#   pastor sweep [on|off|status] # hourly `cleanup --yes` agent (on by default)
 #   pastor inbox                 # decisions pastor deferred to you (unresolved)
 #   pastor token                 # write ~/.config/pastor/token (from env or prompt)
 #   pastor webhook               # write ~/.config/pastor/webhook (Discord, optional)
@@ -36,6 +37,12 @@ WEBHOOK_FILE="$HOME/.config/pastor/webhook"
 LA_DIR="$HOME/Library/LaunchAgents"
 LABEL_PREFIX="com.pastor"
 INTERVAL_DEFAULT=300
+# The sweep agent's label deliberately doesn't match "$LABEL_PREFIX.*", so
+# list/killall/cleanup never mistake it for a PR job.
+SWEEP_LABEL="com.pastor-sweep"
+SWEEP_PLIST="$LA_DIR/$SWEEP_LABEL.plist"
+SWEEP_LOG="$LOG_DIR/pastor-sweep.log"
+SWEEP_INTERVAL=3600
 
 die()  { printf 'pastor: %s\n' "$*" >&2; exit 1; }
 warn() { printf 'pastor: %s\n' "$*" >&2; }
@@ -130,6 +137,21 @@ parse_remote() {
   SLUG="$(printf '%s' "$path" | tr '/' '-')"
 }
 
+# PATH for a bare launchd environment: Homebrew (where gh lives), the
+# mise/asdf shims dir if present, then the system dirs.
+launchd_path() { # [fallback command to locate the Homebrew dir]
+  local homebrew_bin shims_dir="" d
+  homebrew_bin="$(dirname "$(command -v gh 2>/dev/null || command -v "${1:-jq}" 2>/dev/null || echo /opt/homebrew/bin/gh)")"
+  for d in "$HOME/.local/share/mise/shims" "$HOME/.asdf/shims"; do
+    [ -d "$d" ] && { shims_dir="$d"; break; }
+  done
+  if [ -n "$shims_dir" ]; then
+    printf '%s' "$homebrew_bin:$shims_dir:/usr/bin:/bin:/usr/sbin:/sbin"
+  else
+    printf '%s' "$homebrew_bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  fi
+}
+
 label_for() { printf '%s.%s-%s' "$LABEL_PREFIX" "$1" "$2"; } # slug id
 plist_for() { printf '%s/%s.plist' "$LA_DIR" "$(label_for "$1" "$2")"; }
 state_for() { printf '%s/%s-%s-%s.json' "$STATE_DIR" "$1" "$2" "$3"; } # platform slug id
@@ -190,18 +212,7 @@ cmd_install() {
   # credential pre-flight (claude runner): $CLAUDE_CODE_OAUTH_TOKEN -> token file -> error
   [ "$runner" = claude ] && ensure_credential
 
-  # environment pieces for the bare launchd PATH
-  local homebrew_bin shims_dir path_env
-  homebrew_bin="$(dirname "$(command -v gh 2>/dev/null || command -v "$runner")")"
-  shims_dir=""
-  for d in "$HOME/.local/share/mise/shims" "$HOME/.asdf/shims"; do
-    [ -d "$d" ] && { shims_dir="$d"; break; }
-  done
-  if [ -n "$shims_dir" ]; then
-    path_env="$homebrew_bin:$shims_dir:/usr/bin:/bin:/usr/sbin:/sbin"
-  else
-    path_env="$homebrew_bin:/usr/bin:/bin:/usr/sbin:/sbin"
-  fi
+  local path_env; path_env="$(launchd_path "$runner")"
 
   ensure_shim
   mkdir -p "$STATE_DIR" "$LOG_DIR" "$LA_DIR"
@@ -262,6 +273,7 @@ XML
 
   launchctl load "$plist" || die "launchctl load failed"
   info "installed $label -> $OWNER_REPO #$pr ($runner, every ${interval}s)"
+  ensure_sweep
 
   if [ "$start" -eq 1 ]; then
     launchctl kickstart -k "gui/$(id -u)/$label" 2>/dev/null || true
@@ -326,7 +338,7 @@ cmd_list() {
   done < <(each_job)
 
   # dangling: loaded com.pastor.* labels with no plist file (align with cols)
-  launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." '$3 ~ "^"pfx {print $3}' | while read -r label; do
+  launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." 'index($3, pfx) == 1 {print $3}' | while read -r label; do
     [ -f "$LA_DIR/$label.plist" ] || printf '%-46s %-8s %s\n' "${label#"$LABEL_PREFIX".}" "DANGLING" "loaded, no plist — run: pastor killall"
   done
 
@@ -402,7 +414,7 @@ cmd_killall() {
   require_macos
   local yes=0; [ "${1:-}" = "--yes" ] && yes=1
   local n=0; while read -r s i p; do [ -n "${s:-}" ] && n=$((n+1)); done < <(each_job)
-  local dangling; dangling="$(launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." '$3 ~ "^"pfx {print $3}')"
+  local dangling; dangling="$(launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." 'index($3, pfx) == 1 {print $3}')"
   if [ "$n" -eq 0 ] && [ -z "$dangling" ]; then info "no pastor jobs to remove"; return 0; fi
   if [ "$yes" -eq 0 ]; then
     printf 'Remove %s pastor job(s)%s? [y/N] ' "$n" "$([ -n "$dangling" ] && echo ' plus dangling registrations')"
@@ -433,7 +445,7 @@ cmd_cleanup() {
   local dry=1; [ "$yes" -eq 1 ] && dry=0
   local act; [ "$dry" -eq 1 ] && act="would remove" || act="removing"
   [ "$dry" -eq 1 ] && info "pastor cleanup (dry run — pass --yes to act):" \
-                   || info "pastor cleanup:"
+                   || info "pastor cleanup ($(date '+%Y-%m-%d %H:%M')):"
 
   local hits=0
 
@@ -468,6 +480,14 @@ cmd_cleanup() {
         info "  $act $slug-$id — $repo #$id is $st"
         [ "$dry" -eq 0 ] && stop_one "$plist" 1
         ;;
+      *)
+        # Still open, but launchd can't start a tick whose working directory
+        # is gone (exit 78) — typically a deleted worktree. Say so rather than
+        # let it go quiet; reinstalling from a live checkout fixes it.
+        local wd; wd="$(/usr/libexec/PlistBuddy -c 'Print :WorkingDirectory' "$plist" 2>/dev/null || true)"
+        [ -n "$wd" ] && [ ! -d "$wd" ] && \
+          warn "$slug-$id can't tick: working directory $wd is gone — reinstall with: pastor install $id -C <checkout>"
+        ;;
     esac
   done < <(each_job)
 
@@ -485,6 +505,7 @@ cmd_cleanup() {
   done
   for f in "$LOG_DIR"/pastor-*.log; do
     [ -e "$f" ] || continue
+    [ "$f" = "$SWEEP_LOG" ] && continue
     base="$(basename "$f" .log)"; rest="${base#pastor-}"
     [ -f "$LA_DIR/$LABEL_PREFIX.$rest.plist" ] && continue
     hits=$((hits+1))
@@ -494,7 +515,7 @@ cmd_cleanup() {
 
   # 3) dangling registrations (loaded com.pastor.* label, plist already gone)
   local dangling label
-  dangling="$(launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." '$3 ~ "^"pfx {print $3}')"
+  dangling="$(launchctl list 2>/dev/null | awk -v pfx="$LABEL_PREFIX." 'index($3, pfx) == 1 {print $3}')"
   for label in $dangling; do
     [ -n "$label" ] || continue
     [ -f "$LA_DIR/$label.plist" ] && continue
@@ -510,6 +531,81 @@ cmd_cleanup() {
   else
     info "cleaned up $hits item(s)"
   fi
+}
+
+# ---- sweep: hourly `cleanup --yes` -----------------------------------------
+# A tick removes its own job when it sees the PR/MR merged or closed, but only
+# if the tick runs. One whose working directory was deleted (a worktree cleaned
+# up after the merge) fails to start, so it never sees the merge and stays
+# loaded forever. The sweep is a separate launchd agent that runs from $HOME,
+# so it catches those. It needs no Claude credential — it only calls gh/glab.
+write_sweep_plist() {
+  mkdir -p "$LA_DIR" "$LOG_DIR"
+  cat > "$SWEEP_PLIST" <<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>$SWEEP_LABEL</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>$HOME/.local/bin/pastor</string>
+    <string>cleanup</string>
+    <string>--yes</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>$(launchd_path)</string>
+  </dict>
+  <key>WorkingDirectory</key>
+  <string>$HOME</string>
+  <key>StartInterval</key>
+  <integer>$SWEEP_INTERVAL</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>$SWEEP_LOG</string>
+  <key>StandardErrorPath</key>
+  <string>$SWEEP_LOG</string>
+</dict>
+</plist>
+XML
+  plutil -lint "$SWEEP_PLIST" >/dev/null || die "generated an invalid plist: $SWEEP_PLIST"
+}
+
+# install the sweep if it isn't loaded yet; quiet when it already is
+ensure_sweep() {
+  [ "${PASTOR_NO_SWEEP:-}" = 1 ] && return 0
+  is_loaded "$SWEEP_LABEL" && [ -f "$SWEEP_PLIST" ] && return 0
+  write_sweep_plist
+  launchctl load "$SWEEP_PLIST" 2>/dev/null || { warn "couldn't load $SWEEP_LABEL"; return 0; }
+  info "installed $SWEEP_LABEL (pastor cleanup --yes every $((SWEEP_INTERVAL / 60))m; log: $SWEEP_LOG)"
+}
+
+cmd_sweep() {
+  require_macos
+  case "${1:-status}" in
+    on|install)
+      launchctl unload "$SWEEP_PLIST" 2>/dev/null || true
+      write_sweep_plist
+      launchctl load "$SWEEP_PLIST" || die "launchctl load failed"
+      info "sweep on: pastor cleanup --yes every $((SWEEP_INTERVAL / 60))m (log: $SWEEP_LOG)"
+      ;;
+    off|uninstall)
+      launchctl unload "$SWEEP_PLIST" 2>/dev/null || true
+      launchctl bootout "gui/$(id -u)/$SWEEP_LABEL" 2>/dev/null || true
+      rm -f "$SWEEP_PLIST"
+      info "sweep off (pastor install turns it back on; set PASTOR_NO_SWEEP=1 to stop that)"
+      ;;
+    status)
+      if is_loaded "$SWEEP_LABEL"; then info "sweep: on (every $((SWEEP_INTERVAL / 60))m)"; else info "sweep: off"; fi
+      if [ -f "$SWEEP_LOG" ]; then info "last runs ($SWEEP_LOG):"; tail -15 "$SWEEP_LOG"; fi
+      ;;
+    *) die "usage: pastor sweep [on|off|status]" ;;
+  esac
 }
 
 # ---- restart ---------------------------------------------------------------
@@ -634,6 +730,7 @@ cmd_setup() {
   link_self
   ensure_shim
   mkdir -p "$STATE_DIR" "$LOG_DIR"
+  [ "$(os)" = macos ] && ensure_sweep
   info "setup complete"
   cmd_doctor
 }
@@ -651,7 +748,7 @@ cmd_selfupdate() {
   info "self-update done ($(sha1sum "$self" 2>/dev/null | cut -c1-8 || shasum "$self" | cut -c1-8))"
 }
 
-usage() { sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; }
 
 main() {
   [ $# -ge 1 ] || { usage; exit 1; }
@@ -664,6 +761,7 @@ main() {
     stop|rm)      cmd_stop "$@" ;;
     killall)      cmd_killall "$@" ;;
     cleanup)      cmd_cleanup "$@" ;;
+    sweep)        cmd_sweep "$@" ;;
     restart)      cmd_restart "$@" ;;
     inbox)        cmd_inbox "$@" ;;
     token)        cmd_token "$@" ;;
