@@ -24,6 +24,7 @@ Default posture: be skeptical, verify important claims, and favor the smallest c
 
 ## Execution
 
+- Never email people through any tool or integration.
 - Work autonomously by default. Ask only when requirements are materially ambiguous, a decision is consequential, or an action requires explicit approval under this agreement.
 - Prefer y/n questions when a binary decision is enough. State what `y` and `n` mean.
 - Surface incidental bugs, stale documentation, broken links, and misconfiguration without silently expanding scope. Offer a concrete y/n fix when useful.
