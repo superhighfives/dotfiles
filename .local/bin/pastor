@@ -16,6 +16,7 @@
 #
 #   pastor install [PR] [-C dir] [--runner claude|opencode] [--interval sec] [--model m] [--no-start]
 #   pastor tick <state.json> -- <runner cmd...>   # what a job runs: gate, then runner
+#   pastor reinstall <id>|--all [--interval sec] [--model m]  # rewrite with current defaults
 #   pastor list | status <id> | logs <id> [-f] | restart <id>
 #   pastor stop <id> [--purge] | killall [--yes]
 #   pastor cleanup [--yes]       # dry-run sweep: merged/closed jobs + orphans
@@ -706,6 +707,55 @@ cmd_sweep() {
   esac
 }
 
+# ---- reinstall: rewrite jobs with the current unit format + defaults --------
+# Plists bake in the command, interval and model at install time, so updating
+# pastor doesn't change running jobs. This re-runs install for each one from
+# the working directory and runner it already has. Interval and model reset to
+# the current defaults unless passed. --no-start: nothing ticks immediately.
+job_is_stale() { # plist — true if it predates `pastor tick`
+  [ "$(/usr/libexec/PlistBuddy -c 'Print :ProgramArguments:2' "$1" 2>/dev/null)" != tick ]
+}
+
+cmd_reinstall() {
+  require_macos
+  local all=0 q="" extra=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --all)               all=1; shift ;;
+      --interval|--model)  extra+=("$1" "$2"); shift 2 ;;
+      -*)                  die "reinstall: unknown flag $1" ;;
+      *)                   q="$1"; shift ;;
+    esac
+  done
+  [ "$all" -eq 1 ] || [ -n "$q" ] || die "usage: pastor reinstall <id>|--all [--interval sec] [--model m]"
+  local plists=() slug id plist
+  if [ "$all" -eq 1 ]; then
+    while read -r slug id plist; do [ -n "${plist:-}" ] && plists+=("$plist"); done < <(each_job)
+  else
+    plists+=("$(resolve_plist "$q")") || die "no job matching '$q' (try: pastor list)"
+  fi
+  [ "${#plists[@]}" -gt 0 ] || { info "no pastor jobs to reinstall"; return 0; }
+  local wd runner state failed=0
+  for plist in "${plists[@]}"; do
+    set -- $(job_fields_from_plist "$(basename "$plist" .plist)"); slug="$1"; id="$2"
+    wd="$(/usr/libexec/PlistBuddy -c 'Print :WorkingDirectory' "$plist" 2>/dev/null || true)"
+    if [ -z "$wd" ] || [ ! -d "$wd" ]; then
+      warn "skip $slug-$id: working directory ${wd:-?} is gone — reinstall with: pastor install $id -C <checkout>"
+      failed=1; continue
+    fi
+    runner=""
+    for state in "$STATE_DIR"/*-"$slug"-"$id".json; do
+      [ -e "$state" ] && command -v jq >/dev/null 2>&1 && runner="$(jq -r '.runner // ""' "$state")"
+      break
+    done
+    # subshell: install's die/globals stay scoped to one job
+    ( PASTOR_NO_SWEEP=1 cmd_install "$id" -C "$wd" --no-start ${runner:+--runner "$runner"} ${extra[@]+"${extra[@]}"} ) \
+      | grep -v '^loaded (not started)' || failed=1
+  done
+  ensure_sweep
+  return "$failed"
+}
+
 # ---- restart ---------------------------------------------------------------
 cmd_restart() {
   require_macos
@@ -843,16 +893,22 @@ cmd_selfupdate() {
     warn "$self is not in a git repo; nothing to pull"
   fi
   link_self; ensure_shim
+  if [ "$(os)" = macos ]; then
+    local stale=0 s i p
+    while read -r s i p; do [ -n "${p:-}" ] && job_is_stale "$p" && stale=$((stale+1)); done < <(each_job)
+    [ "$stale" -gt 0 ] && warn "$stale job(s) use an older unit format — run: pastor reinstall --all"
+  fi
   info "self-update done ($(sha1sum "$self" 2>/dev/null | cut -c1-8 || shasum "$self" | cut -c1-8))"
 }
 
-usage() { sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'; }
 
 main() {
   [ $# -ge 1 ] || { usage; exit 1; }
   local cmd="$1"; shift
   case "$cmd" in
     install)      cmd_install "$@" ;;
+    reinstall)    cmd_reinstall "$@" ;;
     tick)         cmd_tick "$@" ;;
     list|ls)      cmd_list "$@" ;;
     status)       cmd_status "$@" ;;
