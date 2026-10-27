@@ -38,9 +38,11 @@ SHIM="$HOME/.config/pastor/exec.sh"
 WEBHOOK_FILE="$HOME/.config/pastor/webhook"
 LA_DIR="$HOME/Library/LaunchAgents"
 LABEL_PREFIX="com.pastor"
-INTERVAL_DEFAULT=1800
+# Cheap: an unchanged PR/MR costs one gh/glab call per interval, no runner
+# (see cmd_tick).
+INTERVAL_DEFAULT=300
 # Model for the claude runner. Ticks only reach the runner when something on
-# the PR/MR changed (see cmd_tick), and that work doesn't need the top model.
+# the PR/MR changed, and that work doesn't need the top model.
 MODEL_DEFAULT=sonnet
 # The sweep agent's label deliberately doesn't match "$LABEL_PREFIX.*", so
 # list/killall/cleanup never mistake it for a PR job.
@@ -304,6 +306,25 @@ XML
 # change the PR, so the next interval runs it once more (a no-op tick) before
 # it settles. That's deliberate: hashing after the run could swallow a comment
 # that landed while the runner was working.
+#
+# Mergeability goes UNKNOWN (GitHub) / checking (GitLab) while the host
+# recomputes it after the target branch moves, sometimes for many minutes.
+# Hashing that would wake the runner twice per PR for every merge to main, and
+# skipping the tick would make the PR deaf meanwhile. So mergeability is kept
+# out of the main hash and carried forward from the last saved value while it
+# reads transient; a real change shows up once the host settles. The .fp file
+# holds the hash on line 1 and that mergeability on line 2.
+TRANSIENT_MERGE_RE='UNKNOWN|"(checking|unchecked|preparing|approvals_syncing)"'
+merge_of() { # raw fingerprint (stdin) -> mergeability fields as compact JSON
+  jq -cs '.[0] | (.data.repository.pullRequest // .)
+    | [.mergeable, .mergeStateStatus, .detailed_merge_status, .has_conflicts]'
+}
+without_merge() { # raw fingerprint (stdin) -> same, mergeability removed
+  jq -c 'if type == "object" then del(
+    .data.repository.pullRequest.mergeable, .data.repository.pullRequest.mergeStateStatus,
+    .detailed_merge_status, .has_conflicts) else . end'
+}
+
 pr_fingerprint() { # platform repo id
   local platform="$1" repo="$2" id="$3"
   if [ "$platform" = github ]; then
@@ -360,12 +381,20 @@ cmd_tick() {
     info "pastor tick ($now): no platform/repo/id in state — running runner"
     exec "$@"
   fi
-  if ! fp="$(pr_fingerprint "$platform" "$repo" "$id" | shasum -a 256 | cut -c1-16)" \
-     || [ "$fp" = "$(printf '' | shasum -a 256 | cut -c1-16)" ]; then
+  local raw merge saved_fp="" saved_merge=""
+  if ! raw="$(pr_fingerprint "$platform" "$repo" "$id")" || [ -z "$raw" ] \
+     || ! merge="$(printf '%s' "$raw" | merge_of)"; then
     info "pastor tick ($now): couldn't fetch $repo #$id (network/auth?) — skipping"
     return 0
   fi
-  if [ -f "$fp_file" ] && [ "$(cat "$fp_file")" = "$fp" ]; then
+  if [ -f "$fp_file" ]; then
+    saved_fp="$(sed -n 1p "$fp_file")"; saved_merge="$(sed -n 2p "$fp_file")"
+  fi
+  if printf '%s' "$merge" | grep -Eq "$TRANSIENT_MERGE_RE" && [ -n "$saved_merge" ]; then
+    merge="$saved_merge"
+  fi
+  fp="$( { printf '%s' "$raw" | without_merge; printf '%s\n' "$merge"; } | shasum -a 256 | cut -c1-16)"
+  if [ "$saved_fp" = "$fp" ]; then
     info "pastor tick ($now): no change"
     return 0
   fi
@@ -375,7 +404,7 @@ cmd_tick() {
   if [ "$rc" -eq 0 ]; then
     # the runner may have removed the job (merged/closed) — don't leave an
     # orphan fingerprint behind
-    [ -f "$TICK_STATE" ] && printf '%s\n' "$fp" > "$fp_file"
+    [ -f "$TICK_STATE" ] && printf '%s\n%s\n' "$fp" "$merge" > "$fp_file"
   else
     info "pastor tick ($now): runner exited $rc — will retry next interval"
   fi
