@@ -14,7 +14,8 @@
 # to push a one-way alert when it defers a decision to you. Set with `pastor
 # webhook`; review the deferred queue with `pastor inbox`.
 #
-#   pastor install [PR] [-C dir] [--runner claude|opencode] [--interval sec] [--no-start]
+#   pastor install [PR] [-C dir] [--runner claude|opencode] [--interval sec] [--model m] [--no-start]
+#   pastor tick <state.json> -- <runner cmd...>   # what a job runs: gate, then runner
 #   pastor list | status <id> | logs <id> [-f] | restart <id>
 #   pastor stop <id> [--purge] | killall [--yes]
 #   pastor cleanup [--yes]       # dry-run sweep: merged/closed jobs + orphans
@@ -36,7 +37,10 @@ SHIM="$HOME/.config/pastor/exec.sh"
 WEBHOOK_FILE="$HOME/.config/pastor/webhook"
 LA_DIR="$HOME/Library/LaunchAgents"
 LABEL_PREFIX="com.pastor"
-INTERVAL_DEFAULT=300
+INTERVAL_DEFAULT=1800
+# Model for the claude runner. Ticks only reach the runner when something on
+# the PR/MR changed (see cmd_tick), and that work doesn't need the top model.
+MODEL_DEFAULT=sonnet
 # The sweep agent's label deliberately doesn't match "$LABEL_PREFIX.*", so
 # list/killall/cleanup never mistake it for a PR job.
 SWEEP_LABEL="com.pastor-sweep"
@@ -155,6 +159,7 @@ launchd_path() { # [fallback command to locate the Homebrew dir]
 label_for() { printf '%s.%s-%s' "$LABEL_PREFIX" "$1" "$2"; } # slug id
 plist_for() { printf '%s/%s.plist' "$LA_DIR" "$(label_for "$1" "$2")"; }
 state_for() { printf '%s/%s-%s-%s.json' "$STATE_DIR" "$1" "$2" "$3"; } # platform slug id
+fp_for()    { printf '%s.fp' "${1%.json}"; }                              # state path
 log_for()   { printf '%s/pastor-%s-%s.log' "$LOG_DIR" "$1" "$2"; }   # slug id
 
 is_loaded() { launchctl list 2>/dev/null | awk -v l="$1" '$3==l {found=1} END{exit !found}'; }
@@ -172,12 +177,13 @@ job_fields_from_plist() {
 cmd_install() {
   require_macos
   need git
-  local pr="" dir="$PWD" runner="" interval="$INTERVAL_DEFAULT" start=1
+  local pr="" dir="$PWD" runner="" interval="$INTERVAL_DEFAULT" model="$MODEL_DEFAULT" start=1
   while [ $# -gt 0 ]; do
     case "$1" in
       -C|--dir)     dir="$2"; shift 2 ;;
       --runner)     runner="$2"; shift 2 ;;
       --interval)   interval="$2"; shift 2 ;;
+      --model)      model="$2"; shift 2 ;;
       --no-start)   start=0; shift ;;
       -*)           die "install: unknown flag $1" ;;
       *)            pr="$1"; shift ;;
@@ -224,12 +230,14 @@ cmd_install() {
   log="$(log_for "$SLUG" "$pr")"
   prompt="Use the pastor skill for one tick: $PLATFORM $OWNER_REPO #$pr. Load state from $state, diff live state, act on changes, update state, then exit. Do not re-install the schedule."
 
-  # runner-specific argument block
+  # runner-specific argument block, behind `pastor tick` so the runner only
+  # starts when the PR/MR actually changed
   local args_block
+  args_block=$(printf '    <string>%s</string>\n    <string>tick</string>\n    <string>%s</string>\n    <string>--</string>\n' "$HOME/.local/bin/pastor" "$state")
   if [ "$runner" = claude ]; then
-    args_block=$(printf '    <string>%s</string>\n    <string>-p</string>\n    <string>%s</string>\n    <string>--permission-mode</string>\n    <string>bypassPermissions</string>' "$runner_bin" "$prompt")
+    args_block+=$(printf '    <string>%s</string>\n    <string>-p</string>\n    <string>%s</string>\n    <string>--permission-mode</string>\n    <string>bypassPermissions</string>\n    <string>--model</string>\n    <string>%s</string>' "$runner_bin" "$prompt" "$model")
   else
-    args_block=$(printf '    <string>%s</string>\n    <string>run</string>\n    <string>%s</string>\n    <string>--title</string>\n    <string>pastor-%s</string>' "$runner_bin" "$prompt" "$pr")
+    args_block+=$(printf '    <string>%s</string>\n    <string>run</string>\n    <string>%s</string>\n    <string>--title</string>\n    <string>pastor-%s</string>' "$runner_bin" "$prompt" "$pr")
   fi
 
   # if a job is already loaded for this id, unload before rewriting
@@ -272,7 +280,7 @@ XML
     "$PLATFORM" "$OWNER_REPO" "$pr" "$runner" > "$state"
 
   launchctl load "$plist" || die "launchctl load failed"
-  info "installed $label -> $OWNER_REPO #$pr ($runner, every ${interval}s)"
+  info "installed $label -> $OWNER_REPO #$pr ($runner$([ "$runner" = claude ] && echo " $model"), checks every ${interval}s)"
   ensure_sweep
 
   if [ "$start" -eq 1 ]; then
@@ -281,6 +289,96 @@ XML
   else
     info "loaded (not started); first tick fires within ${interval}s"
   fi
+}
+
+# ---- tick: only start the runner when the PR/MR changed --------------------
+# What every job runs. Fetches a cheap fingerprint of the PR/MR (state, draft,
+# head sha, mergeability, CI checks, comment/review/thread ids + edit times,
+# reactions, labels) with gh/glab and compares it to the one saved after the
+# last successful runner tick. Unchanged → log one line and exit, no runner.
+# Changed (or no fingerprint yet) → run the runner; save the fingerprint only
+# if it exits 0, so a failed tick is retried next interval.
+#
+# The saved fingerprint is the PRE-run one. The runner's own replies/pushes
+# change the PR, so the next interval runs it once more (a no-op tick) before
+# it settles. That's deliberate: hashing after the run could swallow a comment
+# that landed while the runner was working.
+pr_fingerprint() { # platform repo id
+  local platform="$1" repo="$2" id="$3"
+  if [ "$platform" = github ]; then
+    command -v gh >/dev/null 2>&1 || return 1
+    # shellcheck disable=SC2016
+    gh api graphql -F owner="${repo%%/*}" -F name="${repo#*/}" -F n="$id" -f query='
+      query($owner: String!, $name: String!, $n: Int!) {
+        repository(owner: $owner, name: $name) { pullRequest(number: $n) {
+          state isDraft mergeable mergeStateStatus headRefOid
+          labels(first: 50) { nodes { name } }
+          commits(last: 1) { nodes { commit { statusCheckRollup { state
+            contexts(first: 100) { nodes {
+              ... on CheckRun { name status conclusion }
+              ... on StatusContext { context state } } } } } } }
+          comments(last: 100) { totalCount nodes { id updatedAt
+            reactionGroups { content reactors { totalCount } } } }
+          reviews(last: 100) { totalCount nodes { id state updatedAt } }
+          reviewThreads(last: 100) { totalCount nodes { isResolved
+            comments(last: 50) { totalCount nodes { id updatedAt
+              reactionGroups { content reactors { totalCount } } } } } }
+        } } }' 2>/dev/null
+  else
+    command -v glab >/dev/null 2>&1 || return 1
+    local enc mr notes cid
+    enc="$(jq -rn --arg r "$repo" '$r|@uri')"
+    mr="$(glab api "projects/$enc/merge_requests/$id" 2>/dev/null \
+      | jq -c '{state, draft, sha, detailed_merge_status, has_conflicts, labels,
+                pipeline: .head_pipeline.status}')" || return 1
+    notes="$(glab api --paginate "projects/$enc/merge_requests/$id/notes?per_page=100" 2>/dev/null \
+      | jq -c '[.[] | {id, updated_at, resolved}]')" || return 1
+    printf '%s\n%s\n' "$mr" "$notes"
+    # The notes API omits award emoji; fetch them for open decision comments
+    # so a 👍 on one wakes the tick.
+    for cid in $(jq -r '.pending_decisions[]? | select(.resolved != true) | .comment_id // empty' "$TICK_STATE"); do
+      glab api "projects/$enc/merge_requests/$id/notes/$cid/award_emoji" 2>/dev/null \
+        | jq -c --arg c "$cid" '{($c): [.[] | .name + ":" + .user.username] | sort}' || return 1
+    done
+  fi
+}
+
+cmd_tick() {
+  [ $# -ge 3 ] && [ "$2" = "--" ] || die "usage: pastor tick <state.json> -- <runner cmd...>"
+  TICK_STATE="$1"; shift 2
+  local fp_file now platform repo id fp
+  fp_file="$(fp_for "$TICK_STATE")"
+  now="$(date '+%Y-%m-%d %H:%M')"
+  if [ -f "$TICK_STATE" ] && command -v jq >/dev/null 2>&1; then
+    platform="$(jq -r '.platform // ""' "$TICK_STATE")"
+    repo="$(jq -r '.repo // ""' "$TICK_STATE")"
+    id="$(jq -r '.id // ""' "$TICK_STATE")"
+  fi
+  if [ -z "${platform:-}" ] || [ -z "${repo:-}" ] || [ -z "${id:-}" ]; then
+    # can't fingerprint without platform/repo/id — let the runner sort it out
+    info "pastor tick ($now): no platform/repo/id in state — running runner"
+    exec "$@"
+  fi
+  if ! fp="$(pr_fingerprint "$platform" "$repo" "$id" | shasum -a 256 | cut -c1-16)" \
+     || [ "$fp" = "$(printf '' | shasum -a 256 | cut -c1-16)" ]; then
+    info "pastor tick ($now): couldn't fetch $repo #$id (network/auth?) — skipping"
+    return 0
+  fi
+  if [ -f "$fp_file" ] && [ "$(cat "$fp_file")" = "$fp" ]; then
+    info "pastor tick ($now): no change"
+    return 0
+  fi
+  info "pastor tick ($now): change detected ($fp) — running runner"
+  local rc=0
+  "$@" || rc=$?
+  if [ "$rc" -eq 0 ]; then
+    # the runner may have removed the job (merged/closed) — don't leave an
+    # orphan fingerprint behind
+    [ -f "$TICK_STATE" ] && printf '%s\n' "$fp" > "$fp_file"
+  else
+    info "pastor tick ($now): runner exited $rc — will retry next interval"
+  fi
+  return "$rc"
 }
 
 # ---- discovery helpers -----------------------------------------------------
@@ -395,7 +493,7 @@ stop_one() { # plist purge
   rm -f "$plist"
   info "stopped $label"
   if [ "$purge" -eq 1 ]; then
-    rm -f "$STATE_DIR"/*-"$slug"-"$id".json "$(log_for "$slug" "$id")"
+    rm -f "$STATE_DIR"/*-"$slug"-"$id".json "$STATE_DIR"/*-"$slug"-"$id".fp "$(log_for "$slug" "$id")"
     info "purged state + log for $slug-$id"
   fi
 }
@@ -495,9 +593,9 @@ cmd_cleanup() {
   #    that wasn't --purge. State basename is {platform}-{slug}-{id}; strip the
   #    platform prefix to get the {slug}-{id} the plist is keyed on.
   local f base rest
-  for f in "$STATE_DIR"/*.json; do
+  for f in "$STATE_DIR"/*.json "$STATE_DIR"/*.fp; do
     [ -e "$f" ] || continue
-    base="$(basename "$f" .json)"; rest="${base#*-}"
+    base="$(basename "$f")"; base="${base%.*}"; rest="${base#*-}"
     [ -f "$LA_DIR/$LABEL_PREFIX.$rest.plist" ] && continue
     hits=$((hits+1))
     info "  $act orphaned state $f (no plist)"
@@ -748,13 +846,14 @@ cmd_selfupdate() {
   info "self-update done ($(sha1sum "$self" 2>/dev/null | cut -c1-8 || shasum "$self" | cut -c1-8))"
 }
 
-usage() { sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; }
 
 main() {
   [ $# -ge 1 ] || { usage; exit 1; }
   local cmd="$1"; shift
   case "$cmd" in
     install)      cmd_install "$@" ;;
+    tick)         cmd_tick "$@" ;;
     list|ls)      cmd_list "$@" ;;
     status)       cmd_status "$@" ;;
     logs|log)     cmd_logs "$@" ;;
