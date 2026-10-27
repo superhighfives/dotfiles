@@ -26,6 +26,7 @@
 #   pastor webhook               # write ~/.config/pastor/webhook (Discord, optional)
 #   pastor doctor                # verify shim, dirs, credential, PATH, runner
 #   pastor setup | self-update   # (re)link the binary + shim; pull latest
+#   pastor reboot                # self-update + update skills + reinstall --all
 #
 # Implements macOS/launchd; on Linux it points you at the skill's systemd
 # section rather than shipping an untested code path.
@@ -283,7 +284,7 @@ XML
     "$PLATFORM" "$OWNER_REPO" "$pr" "$runner" > "$state"
 
   launchctl load "$plist" || die "launchctl load failed"
-  info "installed $label -> $OWNER_REPO #$pr ($runner$([ "$runner" = claude ] && echo " $model"), checks every ${interval}s)"
+  info "installed $label -> $OWNER_REPO #$pr (runner: $runner$([ "$runner" = claude ] && echo ", model: $model"), checks every ${interval}s)"
   ensure_sweep
 
   if [ "$start" -eq 1 ]; then
@@ -930,7 +931,29 @@ cmd_selfupdate() {
   info "self-update done ($(sha1sum "$self" 2>/dev/null | cut -c1-8 || shasum "$self" | cut -c1-8))"
 }
 
-usage() { sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'; }
+# ---- reboot: bring this machine fully up to date --------------------------
+# self-update rewrites this script while bash is still reading it, so the rest
+# runs in the freshly pulled copy (exec) rather than continuing in this one.
+cmd_reboot() {
+  if [ "${1:-}" != --after-update ]; then
+    cmd_selfupdate
+    exec "$(resolve_self)" reboot --after-update
+  fi
+  if command -v npx >/dev/null 2>&1; then
+    info "updating skills (npx skills update -g) ..."
+    npx -y skills update -g </dev/null || warn "skills update failed — run: npx skills update -g"
+  else
+    warn "npx not found — skipping skills update"
+  fi
+  if [ "$(os)" = macos ]; then
+    cmd_reinstall --all
+  else
+    info "not macOS — no launchd jobs to reinstall"
+  fi
+  info "reboot done"
+}
+
+usage() { sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'; }
 
 main() {
   [ $# -ge 1 ] || { usage; exit 1; }
@@ -953,9 +976,12 @@ main() {
     doctor)       cmd_doctor "$@" ;;
     setup)        cmd_setup "$@" ;;
     self-update|update) cmd_selfupdate "$@" ;;
+    reboot)       cmd_reboot "$@" ;;
     -h|--help|help) usage ;;
     *) die "unknown command: $cmd (try: pastor help)" ;;
   esac
 }
 
-main "$@"
+# exit on the same line: self-update can rewrite this file mid-run, and bash
+# would otherwise read on into whatever the new file has past this offset
+main "$@"; exit
