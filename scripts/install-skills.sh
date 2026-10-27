@@ -38,11 +38,13 @@ install_skill() {
   local names=("$@")
   [[ ${#names[@]} -eq 0 ]] && names=('*')
   echo ">> installing ${names[*]} from $src for: ${agents[*]}"
-  npx -y skills add "$src" \
+  # from $HOME: inside a project whose package.json is named "skills" (like
+  # the skills repo itself), npx resolves to that package and finds no bin
+  (cd "$HOME" && npx -y skills@latest add "$src" \
     --global \
     --agent "${agents[@]}" \
     --skill "${names[@]}" \
-    --yes </dev/null
+    --yes </dev/null)
 }
 
 # read_skills_file <path> [env-prefix]

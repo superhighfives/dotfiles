@@ -941,7 +941,10 @@ cmd_reboot() {
   fi
   if command -v npx >/dev/null 2>&1; then
     info "updating skills (npx skills update -g) ..."
-    npx -y skills update -g </dev/null || warn "skills update failed — run: npx skills update -g"
+    # from $HOME: inside a project whose package.json is named "skills" (like
+    # the skills repo itself), npx resolves to that package and finds no bin
+    ( cd "$HOME" && npx -y skills@latest update -g </dev/null ) \
+      || warn "skills update failed — run: npx skills update -g"
   else
     warn "npx not found — skipping skills update"
   fi
