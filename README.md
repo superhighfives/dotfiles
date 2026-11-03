@@ -127,7 +127,7 @@ The install script handles everything in order:
 
 ### Casks (macOS Apps)
 
-**Always installed:** 1Password, Figma, Ghostty, GitHub Desktop, Google Chrome, Handy, Obsidian, OpenCode Desktop, Postman, Raycast
+**Always installed:** 1Password, Figma, Ghostty, GitHub Desktop, Google Chrome, Hex, Obsidian, OpenCode Desktop, Postman, Raycast
 
 **Personal-only:** ChatGPT, Claude, Conductor, Discord, LM Studio, Ollama, Plex, Private Internet Access, Transmit, WhatsApp, Windows App
 

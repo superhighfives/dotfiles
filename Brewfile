@@ -61,7 +61,7 @@ if OS.mac?
   cask "ghostty"                       # terminal emulator
   cask "github"                        # GitHub Desktop
   cask "google-chrome"                 # web browser
-  cask "handy"                         # speech-to-text (handy.computer)
+  cask "anomalyco/tap/hex"              # local voice dictation
   cask "meetingbar"                    # show upcoming meetings in the menu bar
   cask "obsidian"                      # markdown knowledge base
   cask "opencode-desktop"              # AI coding assistant
