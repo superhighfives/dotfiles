@@ -62,6 +62,7 @@ if OS.mac?
   cask "github"                        # GitHub Desktop
   cask "google-chrome"                 # web browser
   cask "anomalyco/tap/hex"              # local voice dictation
+  cask "keycastr"                      # keystroke visualizer
   cask "meetingbar"                    # show upcoming meetings in the menu bar
   cask "obsidian"                      # markdown knowledge base
   cask "opencode-desktop"              # AI coding assistant
