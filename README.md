@@ -105,6 +105,7 @@ The install script handles everything in order:
 | `.config/git/ignore` | Per-user git ignore patterns |
 | `.config/gh/config.yml` | GitHub CLI settings |
 | `.config/ghostty/config` | Ghostty terminal settings |
+| `.config/rex/init.lua` | Rex terminal keybindings (Rex is in private beta, so it isn't in the Brewfile) |
 | `.config/opencode/opencode.json` | OpenCode AI assistant config |
 | `INSTRUCTIONS.md` | Global OpenCode rules, stowed to `~/INSTRUCTIONS.md` and referenced by OpenCode |
 | `.config/opencode/agents/` | Read-only specialist subagents (reviewer, oracle, planner, security, …) |
@@ -280,7 +281,7 @@ export NPM_TOKEN="your-token-here"
 
 ## What I Use
 
-- **Terminal**: [Ghostty](https://ghostty.org/)
+- **Terminal**: Rex (private beta), with [Ghostty](https://ghostty.org/) as a fallback
 - **Shell**: zsh + [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) + [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
 - **Editor**: [Zed](https://zed.dev) (fast editor with native AI agent panel)
 - **Version manager**: [mise](https://mise.jdx.dev/)

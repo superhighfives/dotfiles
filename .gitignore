@@ -48,6 +48,7 @@ pi/package-lock.json
 !.config/ghostty/
 !.config/git/
 !.config/pnpm/
+!.config/rex/
 !.config/uv/
 
 # control-room - track the README, but never the GitHub App private key
