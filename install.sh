@@ -609,6 +609,16 @@ for f in settings.json keymap.json; do
   fi
 done
 
+# Same for Hex: make its folder real so stow links only settings.json, not
+# the whole folder (which would put its models and history in this repo).
+if [[ "$(uname)" == "Darwin" ]]; then
+  HEX_DIR="${HOME}/Library/Application Support/hex"
+  if [[ -L "${HEX_DIR}" ]]; then
+    rm "${HEX_DIR}"
+  fi
+  mkdir -p "${HEX_DIR}"
+fi
+
 ATUIN_DIR="${HOME}/.config/atuin"
 if [[ -d "${ATUIN_DIR}" && ! -L "${ATUIN_DIR}" ]]; then
   if [[ -f "${ATUIN_DIR}/config.toml" && ! -L "${ATUIN_DIR}/config.toml" ]]; then

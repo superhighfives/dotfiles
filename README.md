@@ -110,7 +110,7 @@ The install script handles everything in order:
 | `INSTRUCTIONS.md` | Global OpenCode rules, stowed to `~/INSTRUCTIONS.md` and referenced by OpenCode |
 | `.config/opencode/agents/` | Read-only specialist subagents (reviewer, oracle, planner, security, …) |
 
-| `Library/Application Support/com.pais.handy/settings_store.json` | Handy speech-to-text settings |
+| `Library/Application Support/hex/settings.json` | Hex voice dictation settings |
 | `.local/bin/mount-encrypted-storage` | rclone NFS mount helper script |
 
 ### CLI Tools (via Brewfile)
