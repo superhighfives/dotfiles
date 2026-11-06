@@ -18,9 +18,9 @@
     <AfterScanScale>OneToOne</AfterScanScale>
     <Brightness>0</Brightness>
     <Contrast>0</Contrast>
-    <BitDepth>C24Bit</BitDepth>
+    <BitDepth>Grayscale</BitDepth>
     <PageAlign>Right</PageAlign>
-    <PageSize>A4</PageSize>
+    <PageSize>Letter</PageSize>
     <CustomPageSizeName xsi:nil="true" />
     <CustomPageSize xsi:nil="true" />
     <Resolution>Dpi300</Resolution>
