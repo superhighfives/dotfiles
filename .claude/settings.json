@@ -204,11 +204,7 @@
       "Bash(nmap *)",
       "Bash(rm *)"
     ],
-    "additionalDirectories": [
-      "~/repos/**",
-      "/tmp/**",
-      "/private/tmp/**"
-    ]
+    "additionalDirectories": ["~/repos/**", "/tmp/**", "/private/tmp/**"]
   },
   "spinnerVerbs": {
     "mode": "append",

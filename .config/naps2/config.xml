@@ -19,18 +19,6 @@
       <Maximized>false</Maximized>
     </FormState>
     <FormState>
-      <Name>MacPreviewForm</Name>
-      <Location>
-        <X>0</X>
-        <Y>0</Y>
-      </Location>
-      <Size>
-        <Width>0</Width>
-        <Height>0</Height>
-      </Size>
-      <Maximized>false</Maximized>
-    </FormState>
-    <FormState>
       <Name>ProfilesForm</Name>
       <Location>
         <X>0</X>
@@ -99,6 +87,54 @@
       <Size>
         <Width>346</Width>
         <Height>408</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
+      <Name>RotateForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>0</Width>
+        <Height>0</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
+      <Name>CropForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>0</Width>
+        <Height>0</Height>
+      </Size>
+      <Maximized>false</Maximized>
+    </FormState>
+    <FormState>
+      <Name>MacPreviewForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>33</Y>
+      </Location>
+      <Size>
+        <Width>1135</Width>
+        <Height>811</Height>
+      </Size>
+      <Maximized>true</Maximized>
+    </FormState>
+    <FormState>
+      <Name>PageSizeForm</Name>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>0</Width>
+        <Height>0</Height>
       </Size>
       <Maximized>false</Maximized>
     </FormState>
