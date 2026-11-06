@@ -34,7 +34,6 @@ $CoreApps = @(
   'GitHub.GitHubDesktop|winget'
   'Google.Chrome|winget'
   'Google.CloudSDK|winget'
-  'cjpais.Handy|winget'
   'Microsoft.PowerToys|winget'          # launcher (Command Palette), window tools
   'Microsoft.WindowsTerminal|winget'    # terminal (Ghostty has no Windows build)
   'Obsidian.Obsidian|winget'
@@ -73,6 +72,28 @@ function Install-App($entry) {
   else { Write-Fail "$id failed (exit $LASTEXITCODE) - skipping" }
 }
 
+# Hex (voice dictation) isn't on winget, so use Anomaly's own installer. It
+# installs per-user into %APPDATA%\hex and updates itself after that.
+function Install-Hex {
+  $support = Join-Path $env:APPDATA 'hex'
+  if (Test-Path (Join-Path $support 'current-version')) {
+    Write-Ok 'Hex already installed'
+    return
+  }
+  Write-Info 'Installing Hex...'
+  $script = Join-Path ([System.IO.Path]::GetTempPath()) 'install-hex.ps1'
+  try {
+    Invoke-WebRequest 'https://anoma.ly/hex/install-windows.ps1' -OutFile $script -UseBasicParsing
+    & powershell -ExecutionPolicy Bypass -File $script
+    if ($LASTEXITCODE -eq 0) { Write-Ok 'Hex installed' }
+    else { Write-Fail "Hex failed (exit $LASTEXITCODE) - skipping" }
+  } catch {
+    Write-Fail "Hex failed ($($_.Exception.Message)) - skipping"
+  } finally {
+    Remove-Item $script -ErrorAction SilentlyContinue
+  }
+}
+
 # --- Apps ---
 Write-Step 'Installing apps with winget'
 if ($SkipApps) {
@@ -82,6 +103,7 @@ if ($SkipApps) {
   exit 1
 } else {
   $CoreApps | ForEach-Object { Install-App $_ }
+  Install-Hex
 
   if ($SkipPersonal) {
     Write-Info 'Skipping personal apps (-SkipPersonal)'

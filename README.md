@@ -14,7 +14,7 @@ The script is idempotent — safe to run multiple times. It will skip anything a
 
 ### Windows (WSL)
 
-On Windows the dev environment lives in WSL, and native apps are installed separately with winget.
+On Windows the dev environment lives in WSL, and native apps are installed separately with winget (plus Hex, from its own installer).
 
 1. **Install WSL** from PowerShell: `wsl --install -d Ubuntu-24.04`, then reboot. On first launch, create a regular user when prompted. `install.sh` refuses to run as root (Homebrew won't install as root). If the distro already logs in as root (e.g. it was installed over SSH and never launched), `windows/install.ps1 -SkipApps` offers to create the user (`-WslUser`, default `superhighfives`), add it to sudo, and set it as the default in `/etc/wsl.conf`. It appends to that file, so existing sections like `[boot] systemd=true` are kept. It then tells you to run `wsl --shutdown` and reopen Ubuntu, but never runs it itself: that stops everything running in WSL. By hand:
    ```sh
