@@ -1,5 +1,8 @@
 {
-  "restore_on_startup": "last_workspace",
+  "restore_on_startup": "last_session",
+  "session": {
+    "restore_unsaved_buffers": true,
+  },
   "code_lens": "off",
   "vim_mode": false,
   "terminal": {
