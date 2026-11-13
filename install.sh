@@ -643,10 +643,40 @@ print_info "Restoring repo versions..."
 git -C "${DOTFILES_DIR}" checkout .
 print_success "Dotfiles linked"
 
-# OpenCode loads this after the tracked global instructions. Keep it as a real,
-# machine-local file so work-specific rules never enter the public repository.
+# OpenCode and Claude Code load this after the tracked global instructions.
+# Keep it as a real, machine-local file so work-specific rules never enter the
+# public repository.
 touch "${HOME}/INSTRUCTIONS.local.md"
-print_success "Local OpenCode instructions ready"
+print_success "Local agent instructions ready"
+
+# OpenCode reads both instruction files through `instructions` in
+# opencode.jsonc. Claude Code reads only ~/.claude/CLAUDE.md, which stow
+# ignores, so write a stub that imports both files. Do not overwrite a file
+# that already exists; warn when it does not import the shared rules.
+claude_md="${HOME}/.claude/CLAUDE.md"
+mkdir -p "${HOME}/.claude"
+if [[ ! -e "${claude_md}" ]]; then
+  printf '@~/INSTRUCTIONS.md\n@~/INSTRUCTIONS.local.md\n' > "${claude_md}"
+  print_success "Created ~/.claude/CLAUDE.md importing ~/INSTRUCTIONS.md"
+elif ! grep -qF '@~/INSTRUCTIONS.md' "${claude_md}"; then
+  print_info "~/.claude/CLAUDE.md exists but does not import ~/INSTRUCTIONS.md - add '@~/INSTRUCTIONS.md' to it"
+fi
+
+# Stow ignores .claude, so link Claude Code's user settings to the tracked
+# file directly. Claude Code then writes setting changes into the repo, where
+# they show up in `git diff`. Back up a real file before replacing it, so no
+# local settings are lost; merge anything useful from the backup by hand.
+claude_settings="${HOME}/.claude/settings.json"
+claude_settings_target="${DOTFILES_DIR}/.claude/settings.json"
+if [[ ! -L "${claude_settings}" || "$(readlink "${claude_settings}")" != "${claude_settings_target}" ]]; then
+  if [[ -e "${claude_settings}" && ! -L "${claude_settings}" ]]; then
+    backup="${claude_settings}.backup.$(date +%Y%m%d%H%M%S)"
+    mv "${claude_settings}" "${backup}"
+    print_info "Moved existing ~/.claude/settings.json to ${backup}"
+  fi
+  ln -sfn "${claude_settings_target}" "${claude_settings}"
+  print_success "Linked ~/.claude/settings.json -> ${claude_settings_target}"
+fi
 
 # If ~/.npmrc.local exists, point ~/.npmrc at it. npm/pnpm/bun read ~/.npmrc
 # directly with no include mechanism, so we override the stow-managed symlink.
