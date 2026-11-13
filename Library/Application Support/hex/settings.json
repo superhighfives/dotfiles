@@ -14,7 +14,19 @@
   "dictation_hotkey": {
     "keys": [
       {
+        "modifier": "control",
+        "side": "any"
+      },
+      {
         "modifier": "option",
+        "side": "any"
+      },
+      {
+        "modifier": "shift",
+        "side": "any"
+      },
+      {
+        "modifier": "command",
         "side": "any"
       }
     ]
