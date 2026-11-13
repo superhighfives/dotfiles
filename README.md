@@ -96,7 +96,7 @@ The install script handles everything in order:
 | `.zprofile` | Shell profile (login shell setup) |
 | `.gitconfig` | Git settings — delta diffs, SSH signing, color, aliases. Includes `~/.gitconfig.local` if present. |
 | `.gitignore_global` | Global git ignores (macOS artifacts) |
-| `.npmrc` | Public npm registry config (uses `${NPM_TOKEN}`); also sets `min-release-age=7` |
+| `.npmrc` | Public npm registry config (uses `${NPM_TOKEN}`); also sets `min-release-age=1` |
 | `.bunfig.toml` | Bun global config; sets `minimumReleaseAge = 604800` (7 days) |
 | `.config/pnpm/config.yaml` | pnpm global config; sets `minimumReleaseAge: 10080` (7 days) |
 | `.config/uv/uv.toml` | uv global config; sets `exclude-newer = "7d"` |
@@ -273,7 +273,7 @@ Leave the rest unchecked - they're either machine-specific (AI Chats, MCP Server
 The install script creates `~/.secrets` from `.secrets.example` and prompts for your npm token interactively. If you skip the prompt (or run non-interactively), you can fill it in later:
 
 ```sh
-# ~/.secrets — sourced by .zshrc, never committed
+# ~/.secrets — sourced by .zshenv, never committed
 export NPM_TOKEN="your-token-here"
 ```
 

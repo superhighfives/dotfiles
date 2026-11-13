@@ -36,6 +36,11 @@ if [[ -z "$CLOUDSDK_PYTHON" ]]; then
   unset _py
 fi
 
+# Secrets (NPM_TOKEN etc). Here rather than .zshrc so non-interactive
+# contexts — scripts, hooks, editor tasks — can see them too; .npmrc reads
+# ${NPM_TOKEN} at runtime.
+[[ -f "$HOME/.secrets" ]] && source "$HOME/.secrets"
+
 # Machine-local additions (Cloudflare WARP certs, cargo env, etc).
 # Anything that third-party installers want to drop into .zshenv should go here.
 [[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
