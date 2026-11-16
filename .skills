@@ -38,3 +38,6 @@ git@github.com:markphelps/skills.git whiteboard
 
 # Modern CSS techniques from good-css.com
 git@github.com:vojtaholik/good-css.git good-css
+
+# Design system skills from design.how (design-system-boss runs the others)
+git@github.com:arla6ka/design.how.git
