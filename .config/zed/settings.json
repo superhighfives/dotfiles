@@ -61,9 +61,13 @@
   },
 
   "lsp": {
-    "tsgo": {
-      "settings": {
-        "package_version": "7.0.0-dev.20251201.1",
+    // TypeScript 7's language server, run through Effect's patched build
+    // so Effect diagnostics show in projects whose tsconfig lists the
+    // @effect/language-service plugin. Elsewhere it's plain TypeScript 7.
+    "typescript-ls": {
+      "binary": {
+        "path": "bunx",
+        "arguments": ["@effect/tsgo", "tsc@latest", "--lsp", "--stdio"],
       },
     },
     "vtsls": {
@@ -84,7 +88,7 @@
 
   "languages": {
     "JavaScript": {
-      "language_servers": ["vtsls", "eslint", "biome"],
+      "language_servers": ["typescript-ls", "!vtsls", "eslint", "biome"],
       "formatter": { "language_server": { "name": "biome" } },
       "code_actions_on_format": { "source.organizeImports.biome": true },
     },
@@ -93,12 +97,12 @@
       "inlay_hints": {
         "enabled": true,
       },
-      "language_servers": ["vtsls", "eslint", "biome"],
+      "language_servers": ["typescript-ls", "!vtsls", "eslint", "biome"],
       "formatter": { "language_server": { "name": "biome" } },
       "code_actions_on_format": { "source.organizeImports.biome": true },
     },
     "TSX": {
-      "language_servers": ["vtsls", "eslint", "biome"],
+      "language_servers": ["typescript-ls", "!vtsls", "eslint", "biome"],
       "formatter": { "language_server": { "name": "biome" } },
       "code_actions_on_format": { "source.organizeImports.biome": true },
     },
@@ -143,6 +147,10 @@
   },
 
   "diagnostics": {
+    // TypeScript 7's server only sends diagnostics when asked for them.
+    "lsp_pull_diagnostics": {
+      "enabled": true,
+    },
     "inline": {
       "enabled": true,
       "max_severity": null,
