@@ -1,3 +1,30 @@
+# --- tmux in Zed, Ghostty and Terminal ---
+# Terminals in these apps (and Zed's Terminal Threads) open inside tmux, so
+# shells and running programs survive an app restart. Each one takes a detached
+# session for its project if one exists (where you left off), otherwise a new one.
+# Rex is left out: it is a multiplexer itself (TERM_PROGRAM=rex).
+# Runs only for local, interactive shells on a TTY. `zsh -c` shells (Zed's
+# environment load, agent tool calls), SSH logins (Ghostty forwards
+# TERM_PROGRAM) and shells already in tmux are skipped.
+# Set NO_TMUX=1 to skip it for one terminal.
+if [[ $TERM_PROGRAM == (zed|ghostty|Apple_Terminal) && -z $TMUX && -z $NO_TMUX ]] \
+    && [[ -z $SSH_CONNECTION && -z $ZSH_EXECUTION_STRING ]] \
+    && [[ -o interactive && -t 0 && -t 1 ]] && (( $+commands[tmux] )); then
+  () {
+    local root=${$(git rev-parse --show-toplevel 2>/dev/null):-$PWD}
+    local base=${${root:t}//[.:]/_} name line n=1
+    for line in ${(f)"$(tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null)"}; do
+      [[ ${line%% *} == 0 && ${line#* } == ($base|$base-<->) ]] && { name=${line#* }; break }
+    done
+    if [[ -z $name ]]; then
+      name=$base
+      while tmux has-session -t "=$name" 2>/dev/null; do name=$base-$(( ++n )); done
+    fi
+    tmux new-session -A -s "$name" -c "$PWD"
+  } && exit
+  # If tmux fails to start, fall through to a normal shell.
+fi
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.

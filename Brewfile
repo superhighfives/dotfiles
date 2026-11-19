@@ -29,7 +29,6 @@ brew "zoxide"                        # smart cd replacement (z/zi)
 brew "biome"                         # JavaScript/TypeScript formatter and linter
 brew "cloudflared"                   # Cloudflare Tunnel daemon
 brew "flyctl"                        # fly.io CLI for deploying apps
-brew "herdr"                         # AI snippet and window manager
 brew "gcc"                           # GNU compiler collection
 brew "jq"                            # JSON processor (used by scripts/sync-pi-config.sh)
 brew "openssl@3"                     # TLS/SSL toolkit
