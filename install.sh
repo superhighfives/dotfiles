@@ -633,6 +633,16 @@ if [[ -d "${ATUIN_DIR}" && ! -L "${ATUIN_DIR}" ]]; then
   rmdir "${ATUIN_DIR}" 2>/dev/null || true
 fi
 
+# Older versions of `operator install` replaced stow's relative links with
+# absolute ones, which stow then refuses as "not owned by stow". Drop links
+# that already point at the repo copy so stow can recreate them.
+for f in operator pastor; do
+  path="${HOME}/.local/bin/${f}"
+  if [[ -L "${path}" && "${path}" -ef "${DOTFILES_DIR}/.local/bin/${f}" ]]; then
+    rm "${path}"
+  fi
+done
+
 print_info "Linking dotfiles with stow..."
 # --adopt moves existing files into the repo and replaces them with symlinks.
 # We then restore the repo versions with git checkout, so the symlinked files

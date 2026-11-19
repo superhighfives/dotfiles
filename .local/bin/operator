@@ -143,10 +143,13 @@ resolve_self() {
 link_self() { # ensure ~/.local/bin/operator -> this script, and the pastor alias
   local self; self="$(resolve_self)"
   mkdir -p "$HOME/.local/bin"
-  ln -sf "$self" "$HOME/.local/bin/operator"
+  # -ef: leave a link that already resolves here (e.g. stow's relative one) alone,
+  # since replacing it with an absolute link makes the next stow run conflict
+  [ "$HOME/.local/bin/operator" -ef "$self" ] || ln -sf "$self" "$HOME/.local/bin/operator"
   info "linked ~/.local/bin/operator -> $self"
-  if [ -f "$(dirname "$self")/pastor" ]; then
-    ln -sf "$(dirname "$self")/pastor" "$HOME/.local/bin/pastor"
+  local alias; alias="$(dirname "$self")/pastor"
+  if [ -f "$alias" ] && ! [ "$HOME/.local/bin/pastor" -ef "$alias" ]; then
+    ln -sf "$alias" "$HOME/.local/bin/pastor"
   fi
 }
 
