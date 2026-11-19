@@ -38,7 +38,7 @@ brew "pi-coding-agent"               # pi.dev AI agent toolkit
 # --- Media ---
 brew "homebrew-ffmpeg/ffmpeg/ffmpeg" # full ffmpeg (tap version, skip chromaprint to avoid circular dep)
 brew "tesseract"                     # OCR engine
-brew "whisper-cpp"                   # speech-to-text
+brew "whisper.cpp"                   # speech-to-text
 
 # --- Other Tools ---
 brew "unar"                          # universal archive extractor (rar, 7z, zip, etc.)

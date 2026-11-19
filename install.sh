@@ -738,7 +738,13 @@ if [[ -f "${pubkey}" ]]; then
   print_step "Registering SSH key with GitHub"
   key_body="$(awk '{print $2}' "${pubkey}")"
   gh_login="$(gh api user --jq .login)"
-  key_title="$(hostname)"
+  # `hostname` can return a Tailscale FQDN (e.g. air.tail1234.ts.net), so
+  # prefer the macOS LocalHostName and fall back to the short hostname.
+  if [[ "${IS_MAC}" == true ]]; then
+    key_title="$(scutil --get LocalHostName)"
+  else
+    key_title="$(hostname -s)"
+  fi
   missing_types=()
   gh api "users/${gh_login}/keys" --jq '.[].key' | grep -qF "${key_body}" \
     || missing_types+=(authentication)
