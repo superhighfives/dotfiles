@@ -262,11 +262,17 @@ fi
 # On a fresh machine these are near-instant. On a re-run they pull the latest
 # package index, upgrade installed formulae/casks, and prune old versions so
 # deprecation warnings (and security fixes) surface here rather than later.
+# A single broken package (e.g. a cask whose files went missing) makes
+# `brew upgrade` exit non-zero, so report it rather than abort the install.
 print_step "Refreshing Homebrew"
 brew update
-brew upgrade
-brew cleanup
-print_success "Homebrew refreshed"
+if brew upgrade; then
+  brew cleanup
+  print_success "Homebrew refreshed"
+else
+  brew cleanup
+  print_error "Some packages failed to upgrade; see the errors above"
+fi
 
 # --- Install packages from Brewfile ---
 print_step "Installing Homebrew packages"
