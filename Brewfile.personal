@@ -8,7 +8,6 @@ cask "claude-code"                       # Anthropic CLI for Claude (cask ships 
 # equivalents are installed by windows/install.ps1.
 if OS.mac?
   # --- Personal AI/LLM tools ---
-  cask "chatgpt"                         # OpenAI chat client
   cask "claude"                          # Anthropic chat client
   cask "ollama-app"                      # local LLM server (menu bar)
 
