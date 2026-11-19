@@ -73,6 +73,7 @@ Wrangler is only for projects that already use it – a `wrangler.jsonc`, `wrang
 - Treat review feedback as all reviewer-authored content: summary comments, general notes, inline threads, and description edits.
 - Disposition each review finding as fix, clarify, or decline. Do not apply reviewer suggestions blindly.
 - Preview proposed fixes or replies before addressing review feedback when they change product behavior, architecture, or agreed scope.
+- Write MR/PR descriptions from a file with a tool that verifies the stored text. Never build them with inline shell substitution or placeholder values.
 - Re-read a PR/MR after every remote write. A successful API response proves the request succeeded, not that all intended side effects landed.
 - Resolve AI-authored threads after the fix is on the remote branch or after posting a sourced disagreement. Do not resolve human-authored threads.
 - Descriptions explain the problem, why the change exists, and material behavior. Do not list changed files or narrate review history.
