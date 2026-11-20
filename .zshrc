@@ -12,15 +12,27 @@ if [[ $TERM_PROGRAM == (zed|ghostty|Apple_Terminal) && -z $TMUX && -z $NO_TMUX ]
     && [[ -o interactive && -t 0 && -t 1 ]] && (( $+commands[tmux] )); then
   () {
     local root=${$(git rev-parse --show-toplevel 2>/dev/null):-$PWD}
-    local base=${${root:t}//[.:]/_} name line n=1
-    for line in ${(f)"$(tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null)"}; do
-      [[ ${line%% *} == 0 && ${line#* } == ($base|$base-<->) ]] && { name=${line#* }; break }
+    local base=${${root:t}//[.:]/_} name line attached claimed fd n=1
+    local lock=${TMPDIR:-/tmp}/zsh-tmux-pick.lock
+    # Zed starts the Terminal Thread and the terminal panel at the same time.
+    # Without a lock, both shells see the same free session and attach to it.
+    # The lock makes the pick atomic, and @claimed hides a picked session from
+    # other shells for a few seconds, until its client attaches.
+    zmodload zsh/system zsh/datetime
+    : >> $lock && zsystem flock -t 5 -f fd $lock || return
+    for line in ${(f)"$(tmux list-sessions -F '#{session_attached} #{?@claimed,#{@claimed},0} #{session_name}' 2>/dev/null)"}; do
+      attached=${line%% *}; line=${line#* }; claimed=${line%% *}; line=${line#* }
+      [[ $attached == 0 ]] && (( EPOCHSECONDS - claimed > 5 )) && [[ $line == ($base|$base-<->) ]] \
+        && { name=$line; break }
     done
     if [[ -z $name ]]; then
       name=$base
       while tmux has-session -t "=$name" 2>/dev/null; do name=$base-$(( ++n )); done
+      tmux new-session -d -s "$name" -c "$PWD" || { zsystem flock -u $fd; return 1 }
     fi
-    tmux new-session -A -s "$name" -c "$PWD"
+    tmux set-option -t "=$name:" @claimed $EPOCHSECONDS
+    zsystem flock -u $fd
+    tmux attach-session -t "=$name"
   } && exit
   # If tmux fails to start, fall through to a normal shell.
 fi
